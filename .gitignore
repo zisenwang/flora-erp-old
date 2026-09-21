@@ -1,9 +1,9 @@
 # Root files and folders to ignore
 docs/
 new/
-index.js
-package.json
-package-lock.json
+/index.js
+/package.json
+/package-lock.json
 .idea/
 .claude/
 .gstack

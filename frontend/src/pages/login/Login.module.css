@@ -1,0 +1,120 @@
+.page {
+  min-height: 100vh;
+  background: #c8dfc8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 宋体, SimSun, 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 12px;
+}
+
+.titleBar {
+  background: #1a7500;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 8px 40px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+  letter-spacing: 2px;
+}
+
+.box {
+  background: #fff;
+  border: 2px solid #1a7500;
+  padding: 0;
+  width: 320px;
+}
+
+.boxTitle {
+  background: #1a7500;
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 5px 10px;
+  letter-spacing: 1px;
+}
+
+.form {
+  padding: 16px 20px 20px;
+}
+
+.formTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.formTable tr td {
+  padding: 6px 4px;
+}
+
+.label {
+  color: #333;
+  white-space: nowrap;
+  text-align: right;
+  width: 80px;
+}
+
+.input {
+  border: 1px solid #999;
+  padding: 3px 5px;
+  font-size: 12px;
+  width: 160px;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #1a7500;
+}
+
+.error {
+  color: #cc0000;
+  font-size: 12px;
+  margin: 4px 0 8px;
+  text-align: center;
+}
+
+.btnRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn {
+  background: #1a7500;
+  color: #fff;
+  border: 1px solid #115000;
+  padding: 4px 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 2px;
+}
+
+.btn:hover {
+  background: #236600;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btnCancel {
+  background: #e0e0e0;
+  color: #333;
+  border: 1px solid #aaa;
+  padding: 4px 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 2px;
+}
+
+.btnCancel:hover {
+  background: #d0d0d0;
+}

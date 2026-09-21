@@ -1,0 +1,157 @@
+/* ─── Root ─────────────────────────────────────────────── */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 宋体, SimSun, 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 12px;
+  color: #000;
+}
+
+/* ─── Top green nav bar ─────────────────────────────────── */
+.navbar {
+  height: 28px;
+  min-height: 28px;
+  background: #1a7500;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 200;
+}
+
+.navLeft {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+}
+
+.navItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.navLink {
+  color: #fff;
+  padding: 0 7px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  line-height: 28px;
+  display: inline-block;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.18);
+  text-decoration: none;
+}
+
+.pipe {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  padding: 0 1px;
+  user-select: none;
+  align-self: center;
+}
+
+.switchBtn {
+  color: #ffff88;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  margin: 3px 6px;
+  border-radius: 2px;
+}
+
+.switchBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: #fff;
+  border: 1px solid #888;
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.35);
+  min-width: 110px;
+  z-index: 500;
+}
+
+.dropdownItem {
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #000;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: #c8e6a0;
+  color: #1a7500;
+}
+
+/* Right side */
+.navRight {
+  display: flex;
+  align-items: center;
+  padding-right: 6px;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.version {
+  color: #ffff88;
+  font-size: 11px;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
+.navUser {
+  color: #fff;
+  font-size: 12px;
+  padding: 0 5px;
+  white-space: nowrap;
+}
+
+/* ─── Sub-nav / breadcrumb ──────────────────────────────── */
+.subbar {
+  height: 22px;
+  min-height: 22px;
+  background: #e0e0e0;
+  border-bottom: 1px solid #aaa;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.subArrow {
+  color: #1a7500;
+  font-size: 11px;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
+.subLabel {
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ─── Content ───────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow: auto;
+  background: #f0f0f0;
+}
