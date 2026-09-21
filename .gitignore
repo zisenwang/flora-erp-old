@@ -1,0 +1,20 @@
+# Root files and folders to ignore
+docs/
+new/
+index.js
+package.json
+package-lock.json
+.idea/
+.claude/
+.gstack
+/docs
+
+# Build artifacts and dependencies inside project folders
+frontend/node_modules/
+frontend/dist/
+backend/node_modules/
+backend/dist/
+
+# Misc
+*.log
+.DS_Store
