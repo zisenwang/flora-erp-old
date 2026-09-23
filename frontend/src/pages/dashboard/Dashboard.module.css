@@ -11,7 +11,7 @@
 .page em {
   font-style: normal;
   font-weight: bold;
-  color: #cc0000;
+  color: #ff69b4;
 }
 
 .loading {
@@ -31,7 +31,7 @@
   padding: 2px 4px;
   font-size: 13px;
   font-weight: bold;
-  color: #cc0000;
+  color: #ff69b4;
 }
 
 /* ─── Outer layout: main-left | daily-right ─────────────── */
@@ -84,7 +84,7 @@
 }
 
 .hi {
-  color: #cc0000;
+  color: #ff69b4;
   font-weight: bold;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .lnk:hover {
-  color: #cc0000;
+  color: #ff69b4;
 }
 
 .btnInline {
