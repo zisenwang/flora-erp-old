@@ -1,0 +1,286 @@
+/* ─── Page wrapper ─────────────────────────────────────── */
+.page {
+  height: 100%;
+  overflow: auto;
+  background: #f0f0f0;
+  font-size: 13px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+}
+
+/* All em tags: bold red, no italic */
+.page em {
+  font-style: normal;
+  font-weight: bold;
+  color: #cc0000;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ─── Alert bar (未提交销售单) ─────────────────────────── */
+.alertOuter {
+  border: 2px solid #FF0000;
+  margin: 2px 3px;
+}
+
+.alertInner {
+  background: #99FF00;
+  padding: 2px 4px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #cc0000;
+}
+
+/* ─── Outer layout: main-left | daily-right ─────────────── */
+.layout {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 3px;
+}
+
+/* Left column: stacks of rows */
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* ─── Row of panels ──────────────────────────────────────── */
+.row1 {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+}
+
+/* ─── Individual panel (fixed 400×160px, all 6 same size) ── */
+.panel {
+  width: 400px;
+  min-height: 160px;
+  background: #fff;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.panelBody {
+  padding: 6px 8px;
+}
+
+.sRow {
+  padding: 2px 0;
+  line-height: 2;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.dot {
+  color: #ff6600;
+  margin-right: 2px;
+}
+
+.hi {
+  color: #cc0000;
+  font-weight: bold;
+}
+
+.lnk {
+  color: #0000cc;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.lnk:hover {
+  color: #cc0000;
+}
+
+.btnInline {
+  display: inline-block;
+  margin-left: 4px;
+  background: #1a7500;
+  color: #fff;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 5px;
+  cursor: pointer;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.btnInline:hover {
+  background: #236600;
+}
+
+.btnRow {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  background: #e0e0e0;
+  border: 1px solid #aaa;
+  font-size: 12px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-family: 宋体, SimSun, sans-serif;
+  border-radius: 2px;
+}
+
+.tabBtn:hover {
+  background: #c8dfc8;
+  border-color: #1a7500;
+}
+
+/* ─── Section labels (style7: plain bold, NOT a green bar) ─ */
+.sectionLabel {
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+  padding: 3px 2px 1px;
+}
+
+/* ─── Rows of side-by-side tables ─────────────────────────── */
+.tableRow {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+/* ─── Supplier / Product rank tables ────────────────────────  */
+.rankTable {
+  border-collapse: collapse;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.rankTable th {
+  background: #00CC66;
+  border-bottom: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  padding: 3px 6px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  white-space: nowrap;
+  color: #000;
+}
+
+.rankTable td {
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
+  padding: 3px 5px;
+  white-space: nowrap;
+}
+
+.rankTable tbody tr:hover td {
+  background: #FFFF66 !important;
+}
+
+/* ─── Yearly chart table ────────────────────────────────── */
+.yearTable {
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+  flex-shrink: 0;
+  vertical-align: top;
+}
+
+.yearHead {
+  background: #FF0000;
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+.yearMonth {
+  text-align: right;
+  white-space: nowrap;
+  padding: 1px 0;
+  color: #333;
+}
+
+.bar {
+  background: #FF3300;
+  height: 14px;
+}
+
+.yearAmt {
+  padding: 2px 6px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.yearTotal {
+  padding: 3px 4px;
+  font-weight: bold;
+  white-space: nowrap;
+  border-top: 1px solid #ccc;
+}
+
+/* Shared helpers */
+.tc { text-align: center !important; }
+.tr { text-align: right !important; }
+
+.divider {
+  background: #FFCC00;
+  height: 2px;
+  padding: 0;
+}
+
+.totalRow td {
+  padding: 2px 3px;
+  background: #fff;
+  font-weight: normal;
+}
+
+.summaryRow td {
+  background: #00CC66;
+  padding: 2px 3px;
+  font-weight: normal;
+  color: #000;
+}
+
+/* ─── Right: daily sales table (fixed width) ──────────────── */
+.dailySide {
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  align-self: flex-start;
+}
+
+.dailyTable {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dailyTable th {
+  background: #00CC66;
+  border-bottom: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  padding: 3px 5px;
+  text-align: center;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #000;
+}
+
+.dailyTable td {
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+.dailyTable tbody tr:hover td {
+  background: #FFFF66 !important;
+}
