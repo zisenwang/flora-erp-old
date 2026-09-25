@@ -1,0 +1,507 @@
+/* ─── Page root ─────────────────────────────────────────────── */
+.page {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  font-size: 13px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #f0f0f0;
+}
+
+/* All em tags inside page: pink bold, no italic */
+.page em {
+  font-style: normal;
+  font-weight: bold;
+  color: #ff69b4;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ─── LEFT SIDEBAR ──────────────────────────────────────────── */
+.sidebar {
+  width: 112px;
+  flex-shrink: 0;
+  /* red border outer wrapper */
+  border: 2px solid #FF0000;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarInner {
+  background: #FFFF99;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar header row: bg #00CCFF */
+.sidebarHeader {
+  background: #00CCFF;
+  padding: 2px 2px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.catSearchInput {
+  font-size: 11px;
+  font-family: 宋体, SimSun, sans-serif;
+  width: 42px;
+  padding: 1px 2px;
+  border: 1px solid #999;
+  margin: 0 1px;
+}
+
+.catSearchBtn {
+  font-size: 11px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 3px;
+  cursor: pointer;
+  border: 1px solid #888;
+  background: #e8e8e8;
+}
+
+.catSearchBtn:hover {
+  background: #d0d0d0;
+}
+
+/* Category items list: bg #00FF00 */
+.catList {
+  background: #00FF00;
+  overflow-y: auto;
+  padding: 2px 0;
+  flex-shrink: 0;
+}
+
+.catItem {
+  padding: 1px 2px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.6;
+  color: #000;
+}
+
+.catItem:hover {
+  background: #FFFF00;
+}
+
+.catActive {
+  background: #FFCC00 !important;
+  font-weight: bold;
+}
+
+.catArrow {
+  color: #006600;
+  margin-right: 2px;
+  font-size: 10px;
+}
+
+/* Supplier codes section */
+.suppHeader {
+  background: #00CCFF;
+  padding: 2px 2px;
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-top: 1px solid #aaa;
+  border-bottom: 1px solid #ccc;
+}
+
+.suppList {
+  background: #FFFFCC;
+  overflow-y: auto;
+  flex: 1;
+  padding: 2px 1px;
+}
+
+.suppGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.suppItem {
+  font-size: 11px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000033;
+  line-height: 1.6;
+}
+
+.suppItem:hover {
+  background: #FFFF00;
+}
+
+.suppActive {
+  background: #FFCC00 !important;
+  font-weight: bold;
+}
+
+/* ─── MAIN AREA ─────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Sub-toolbar (22px height) ── */
+.subbar {
+  height: 22px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #ccc;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.subbarLabel {
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.subbarControls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.searchSelect {
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 0 2px;
+  border: 1px solid #aaa;
+  height: 18px;
+}
+
+.searchInput {
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 3px;
+  border: 1px solid #aaa;
+  height: 16px;
+  width: 120px;
+}
+
+/* Inline green button (matches dashboard .btnInline) */
+.btnInline {
+  display: inline-block;
+  background: #1a7500;
+  color: #fff;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 5px;
+  cursor: pointer;
+  border-radius: 2px;
+  border: none;
+  vertical-align: middle;
+}
+
+.btnInline:hover {
+  background: #236600;
+}
+
+.btnInlineGrey {
+  display: inline-block;
+  background: #999;
+  color: #ccc;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 5px;
+  cursor: default;
+  border-radius: 2px;
+  border: none;
+  vertical-align: middle;
+}
+
+/* ── Table area (scrollable) ── */
+.tableArea {
+  flex: 1;
+  overflow: auto;
+  background: #f0f0f0;
+}
+
+/* Product table — cellspacing=1 effect via border-collapse + bg=#CCCCCC */
+.prodTable {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 13px;
+  min-width: 1000px;
+}
+
+/* Header */
+.thead th {
+  background: #3B79B5;
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 2px 4px;
+  text-align: center;
+  white-space: nowrap;
+  border: none;
+}
+
+/* Body rows */
+.trow {
+  background: #fff;
+}
+
+.trow:hover td {
+  background: #FFFF00 !important;
+}
+
+.trow td {
+  padding: 2px 4px;
+  font-size: 13px;
+  background: #fff;
+  white-space: nowrap;
+  border: none;
+}
+
+.tc {
+  text-align: center;
+}
+
+.tnowrap {
+  white-space: nowrap;
+}
+
+/* 编码 cell: bold colored */
+.codeCell {
+  font-style: normal;
+  font-weight: bold;
+  color: #0000cc;
+}
+
+/* 操作 cell: center */
+.tcOps {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Inline op buttons */
+.opBtn {
+  display: inline-block;
+  font-size: 11px;
+  padding: 0 4px;
+  cursor: pointer;
+  border: 1px solid #888;
+  border-radius: 2px;
+  margin: 0 1px;
+  background: #d4f0d4;
+  color: #006600;
+  vertical-align: middle;
+  font-family: 宋体, SimSun, sans-serif;
+}
+
+.opBtn:hover {
+  background: #b0ddb0;
+}
+
+.opEdit {
+  background: #fff3d4;
+  color: #884400;
+  border-color: #cc8800;
+}
+
+.opEdit:hover {
+  background: #ffe0a0;
+}
+
+.opDel {
+  background: #ffd4d4;
+  color: #cc0000;
+  border-color: #cc0000;
+}
+
+.opDel:hover {
+  background: #ffaaaa;
+}
+
+/* 进货价 / 销售价 cells */
+.priceCell {
+  color: #ff69b4 !important;
+  font-weight: bold;
+  text-align: right !important;
+}
+
+/* ── Footer count row ── */
+.footer {
+  background: #00CC66;
+  padding: 2px 6px;
+  font-size: 13px;
+  color: #000;
+  flex-shrink: 0;
+  border-top: 1px solid #aaa;
+}
+
+.pgBtn {
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 0 5px;
+  border: 1px solid #888;
+  background: #e8e8e8;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.pgBtn:hover:not(:disabled) {
+  background: #d0d0d0;
+}
+
+.pgBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ─── ADD / EDIT MODAL ──────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalBox {
+  background: #fff;
+  border: 2px solid #336699;
+  padding: 0;
+  min-width: 480px;
+  max-width: 90vw;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+}
+
+.modalTitle {
+  background: #3B79B5;
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #2a5c99;
+}
+
+.formTable {
+  border-collapse: collapse;
+  width: 100%;
+  padding: 8px;
+  font-size: 13px;
+}
+
+.formTable td {
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+
+.flabel {
+  text-align: right;
+  white-space: nowrap;
+  color: #333;
+  font-size: 13px;
+  width: 90px;
+}
+
+.freq {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.finput {
+  font-size: 13px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 2px 4px;
+  border: 1px solid #aaa;
+  width: 140px;
+  box-sizing: border-box;
+}
+
+.fselect {
+  font-size: 13px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 1px 3px;
+  border: 1px solid #aaa;
+  width: 144px;
+}
+
+.modalFooter {
+  padding: 8px 10px 10px;
+  text-align: center;
+  border-top: 1px solid #ddd;
+  background: #f5f5f5;
+}
+
+.btnSave {
+  background: #1a7500;
+  color: #fff;
+  font-size: 13px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 3px 18px;
+  cursor: pointer;
+  border: 1px solid #155c00;
+  border-radius: 2px;
+}
+
+.btnSave:hover:not(:disabled) {
+  background: #236600;
+}
+
+.btnSave:disabled {
+  background: #888;
+  cursor: default;
+}
+
+.btnCancel {
+  background: #e0e0e0;
+  color: #333;
+  font-size: 13px;
+  font-family: 宋体, SimSun, sans-serif;
+  padding: 3px 14px;
+  cursor: pointer;
+  border: 1px solid #aaa;
+  border-radius: 2px;
+}
+
+.btnCancel:hover:not(:disabled) {
+  background: #cccccc;
+}
+
+.btnCancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

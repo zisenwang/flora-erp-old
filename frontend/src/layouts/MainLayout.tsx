@@ -157,7 +157,7 @@ export default function MainLayout() {
 
           <span className={styles.pipe}>│</span>
           <div className={styles.switchBtn} onClick={() => navigate('/payment')}>
-            ⊡ 切换到收支管理
+            切换到收支管理
           </div>
         </div>
 

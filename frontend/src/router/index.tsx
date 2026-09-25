@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MainLayout from '@/layouts/MainLayout'
 import Login from '@/pages/login/Login'
 import Dashboard from '@/pages/dashboard/Dashboard'
+import Products from '@/pages/master/Products'
 
 const isLoggedIn = () => !!localStorage.getItem('token')
 
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
     element: <RequireAuth><MainLayout /></RequireAuth>,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'master/products', element: <Products /> },
     ],
   },
 ])
