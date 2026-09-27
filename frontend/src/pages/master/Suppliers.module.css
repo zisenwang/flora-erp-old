@@ -1,0 +1,275 @@
+/* ─── Page root ─────────────────────────────────────────────── */
+.page {
+  min-height: 100%;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ── Sub-toolbar (same bar as 产品资料) ── */
+.subbar {
+  height: 24px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-bottom: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.searchIcon {
+  vertical-align: middle;
+}
+
+.searchInput {
+  width: 167px;
+}
+
+/* xzgys.gif — 87x20 green "新增供应商资料" */
+.btnAddSupp {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 87px;
+  height: 20px;
+  line-height: 16px;
+  margin-left: 4px;
+  text-align: center;
+  vertical-align: middle;
+  color: #fff;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  background: #6CC64B;
+  border: 1px solid #0C9C20;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 #90D673, 1px 1px 0 #b3b3b3;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Body ── */
+.body {
+  padding-top: 8px;
+}
+
+/* Old list table: cellspacing=1 bgcolor=#C7FD9F */
+.grid {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #C7FD9F;
+  font-size: 12px;
+}
+
+/* btbj.gif header gradient */
+.grid th {
+  height: 20px;
+  padding: 0;
+  font-weight: normal;
+  font-size: 12px;
+  color: #fff;
+  text-align: left;
+  white-space: nowrap;
+  background: linear-gradient(
+    to bottom,
+    #5EAE25 0, #5EAE25 1px,
+    #CCF6AD 1px, #63C71B 19px,
+    #5EAE25 19px, #5EAE25 20px
+  );
+}
+
+.grid th.center {
+  text-align: center;
+}
+
+/* class=plk header sort link */
+.plk {
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.plk:hover {
+  text-decoration: underline;
+}
+
+.grid td {
+  height: 24px;
+  padding: 0;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.grid tbody tr:hover td {
+  background: #FFFF00;
+}
+
+.grid td.center {
+  text-align: center;
+}
+
+.grid td.wrap {
+  white-space: normal;
+}
+
+/* <em> 编码 — pink bold */
+.code {
+  font-style: normal;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  color: #FF0099;
+}
+
+/* ── Operation images (22x20 / 50x20 gifs with right/bottom bevel) ── */
+.opImg {
+  display: inline-block;
+  box-sizing: border-box;
+  height: 20px;
+  vertical-align: middle;
+  background: #fff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.opText {
+  line-height: 18px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #1004FD;
+  text-align: center;
+}
+
+.legend .opImg {
+  cursor: default;
+}
+
+/* ── Legend line under table ── */
+.legend {
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Pager ── */
+.pager {
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.pager td {
+  padding: 0;
+  white-space: nowrap;
+}
+
+.pagerTotal {
+  background: #FF99FF;
+}
+
+/* class=style8 */
+.num {
+  color: #FF0000;
+  font-weight: bold;
+}
+
+.pageLink {
+  color: #000;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pageActive {
+  background: #FFFF00;
+}
+
+/* ─── Add / edit page (gys_.asp) ────────────────────────────── */
+.editLayout {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+.formCol {
+  flex: 0 0 57.3%;
+  padding: 17px 0 0 10px;
+}
+
+.listCol {
+  flex: 0 0 auto;
+}
+
+.formTable {
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.formTable td {
+  height: 32px;
+  padding: 0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.flabel {
+  width: 60px;
+  text-align: right;
+  padding-right: 3px !important;
+}
+
+.flabelTop {
+  vertical-align: middle;
+}
+
+.finput {
+  box-sizing: border-box;
+  height: 20px;
+  padding: 1px 2px;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  border: 1px solid #70BF0A;
+  outline: none;
+  vertical-align: middle;
+}
+
+.ftextarea {
+  box-sizing: border-box;
+  width: 261px;
+  height: 62px;
+  padding: 1px 2px;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  border: 1px solid #70BF0A;
+  outline: none;
+  vertical-align: middle;
+}
+
+.freq {
+  color: #FF0000;
+}
+
+.btnSubmit {
+  box-sizing: border-box;
+  width: 85px;
+  height: 31px;
+  color: #fff;
+  font-size: 14px;
+  font-family: 宋体, SimSun, sans-serif;
+  letter-spacing: 1px;
+  background: linear-gradient(to bottom, #8ED673 0, #8ED673 1px, #6BC64F 1px, #2DA029 29px, #51B84B 29px, #51B84B 30px);
+  border: 1px solid #0B9E20;
+  border-bottom-color: #00821A;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btnSubmit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

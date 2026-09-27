@@ -72,6 +72,8 @@ const ROUTE_LABELS: Record<string, string> = {
   '/master/products': '产品资料',
   '/master/price-adjust': '产品调价',
   '/master/customers': '客户资料',
+  '/master/suppliers/new': '新增供应商',
+  '/master/suppliers/edit': '修改供应商',
   '/master/suppliers': '供应商资料',
   '/settings/password': '修改密码',
   '/purchase/orders/new': '采购入库',

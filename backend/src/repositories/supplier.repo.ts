@@ -4,7 +4,7 @@ import type { Supplier, CreateSupplierDto, UpdateSupplierDto } from '@/dto/suppl
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { AppError } from '@/services/supplier.service'
 
-const SELECT = `SELECT id, code, name, phone, address, status FROM suppliers`
+const SELECT = `SELECT id, code, name, phone, address, notes, status FROM suppliers`
 
 export async function findAll(search?: string): Promise<Supplier[]> {
   let sql = SELECT
@@ -26,8 +26,8 @@ export async function findById(id: number): Promise<Supplier | null> {
 export async function create(dto: CreateSupplierDto): Promise<Supplier> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO suppliers (code, name, phone, address) VALUES (?, ?, ?, ?)',
-      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null],
+      'INSERT INTO suppliers (code, name, phone, address, notes) VALUES (?, ?, ?, ?, ?)',
+      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null],
     )
     return findById(result.insertId) as Promise<Supplier>
   } catch (err: any) {
@@ -39,8 +39,8 @@ export async function create(dto: CreateSupplierDto): Promise<Supplier> {
 export async function update(id: number, dto: UpdateSupplierDto): Promise<Supplier | null> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      'UPDATE suppliers SET code=?, name=?, phone=?, address=?, status=? WHERE id=?',
-      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.status ?? 1, id],
+      'UPDATE suppliers SET code=?, name=?, phone=?, address=?, notes=?, status=? WHERE id=?',
+      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null, dto.status ?? 1, id],
     )
     if (result.affectedRows === 0) return null
     return findById(id)

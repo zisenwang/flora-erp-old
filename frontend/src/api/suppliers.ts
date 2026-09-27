@@ -6,6 +6,7 @@ export interface Supplier {
   name: string
   phone: string
   address: string
+  notes: string
   status: number
 }
 
@@ -13,6 +14,11 @@ export type SupplierPayload = Omit<Supplier, 'id'>
 
 export const getSuppliers = async (search?: string): Promise<Supplier[]> => {
   const res = await client.get<{ data: Supplier[] }>('/suppliers', { params: { search } })
+  return res.data.data
+}
+
+export const getSupplier = async (id: number): Promise<Supplier> => {
+  const res = await client.get<{ data: Supplier }>(`/suppliers/${id}`)
   return res.data.data
 }
 

@@ -4,6 +4,7 @@ export interface Supplier {
   name: string
   phone: string | null
   address: string | null
+  notes: string | null
   status: number
 }
 
@@ -12,6 +13,7 @@ export interface CreateSupplierDto {
   name: string
   phone?: string
   address?: string
+  notes?: string
 }
 
 export interface UpdateSupplierDto extends Partial<CreateSupplierDto> {
