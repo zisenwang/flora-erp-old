@@ -1,5 +1,6 @@
 import pool from '@/db/pool'
 import { rowToCamel, rowsToCamel } from '@/utils/camel'
+import { suggestNextCode } from '@/utils/nextCode'
 import type { Supplier, CreateSupplierDto, UpdateSupplierDto } from '@/dto/supplier.dto'
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { AppError } from '@/services/supplier.service'
@@ -52,13 +53,9 @@ export async function update(id: number, dto: UpdateSupplierDto): Promise<Suppli
 
 export async function getNextCode(): Promise<string> {
   const [allRows] = await pool.query<RowDataPacket[]>(
-    'SELECT code FROM suppliers ORDER BY updated_at DESC',
+    'SELECT code FROM suppliers ORDER BY updated_at DESC, id DESC',
   )
-  const lastCode = Number(allRows[0]?.code ?? 0)
-  const occupied = new Set(allRows.map((r: RowDataPacket) => String(r.code)))
-  let candidate = lastCode + 1
-  while (occupied.has(String(candidate))) candidate++
-  return String(candidate)
+  return suggestNextCode(allRows.map((r: RowDataPacket) => String(r.code)), 3)
 }
 
 export async function remove(id: number): Promise<boolean> {

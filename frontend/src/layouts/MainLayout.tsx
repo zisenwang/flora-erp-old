@@ -69,6 +69,8 @@ const NAV_ITEMS: NavItem[] = [
 const ROUTE_LABELS: Record<string, string> = {
   '/': '进销存系统首页',
   '/master/categories': '产品分类',
+  '/master/products/new': '新增供应商产品',
+  '/master/products/edit': '修改产品资料',
   '/master/products': '产品资料',
   '/master/price-adjust': '产品调价',
   '/master/customers': '客户资料',

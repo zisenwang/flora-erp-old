@@ -1,5 +1,6 @@
 import pool from '@/db/pool'
 import { rowToCamel, rowsToCamel } from '@/utils/camel'
+import { suggestNextCode } from '@/utils/nextCode'
 import type { Product, CreateProductDto, UpdateProductDto } from '@/dto/product.dto'
 import type { RowDataPacket, ResultSetHeader, PoolConnection } from 'mysql2/promise'
 import { AppError } from '@/services/supplier.service'
@@ -92,15 +93,10 @@ export async function update(id: number, dto: UpdateProductDto): Promise<Product
 
 export async function getNextCode(supplierId: number): Promise<string> {
   const [allRows] = await pool.query<RowDataPacket[]>(
-    'SELECT code FROM products WHERE supplier_id = ? ORDER BY updated_at DESC',
+    'SELECT code FROM products WHERE supplier_id = ? ORDER BY updated_at DESC, id DESC',
     [supplierId],
   )
-  const lastSeq = allRows[0]?.code ? Number(allRows[0].code) || 0 : 0
-  const occupied = new Set(allRows.map((r: RowDataPacket) => String(r.code)))
-
-  let candidate = lastSeq + 1
-  while (occupied.has(String(candidate))) candidate++
-  return String(candidate)
+  return suggestNextCode(allRows.map((r: RowDataPacket) => String(r.code)), 2)
 }
 
 export async function updateCostPrice(

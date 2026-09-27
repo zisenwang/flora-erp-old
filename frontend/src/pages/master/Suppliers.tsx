@@ -131,7 +131,7 @@ export default function Suppliers() {
                 <td className={styles.center}>
                   <EditIcon onClick={() => navigate(`/master/suppliers/edit/${s.id}`)} />
                   <DeleteIcon onClick={() => handleDelete(s)} />
-                  <AddProductIcon onClick={() => navigate(`/master/products?supplierId=${s.id}`)} />
+                  <AddProductIcon onClick={() => navigate(`/master/products/new?supplierId=${s.id}`)} />
                 </td>
               </tr>
             ))}

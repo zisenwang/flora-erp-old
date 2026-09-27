@@ -37,6 +37,11 @@ export const getProducts = async (params?: { supplierId?: number; search?: strin
   return res.data.data
 }
 
+export const getProduct = async (id: number): Promise<Product> => {
+  const res = await client.get<{ data: Product }>(`/products/${id}`)
+  return res.data.data
+}
+
 export const createProduct = async (payload: ProductPayload): Promise<Product> => {
   const res = await client.post<{ data: Product }>('/products', payload)
   return res.data.data

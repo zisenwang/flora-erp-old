@@ -121,7 +121,7 @@
 .code {
   font-style: normal;
   font-weight: bold;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 宋体, SimSun, sans-serif;
   font-size: 13px;
   color: #FF0099;
 }
@@ -175,7 +175,6 @@
 
 /* class=style8 */
 .num {
-  color: #FF0000;
   font-weight: bold;
 }
 
@@ -232,7 +231,7 @@
   height: 20px;
   padding: 1px 2px;
   font-size: 12px;
-  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  font-family: 宋体, SimSun, sans-serif;
   border: 1px solid #70BF0A;
   outline: none;
   vertical-align: middle;

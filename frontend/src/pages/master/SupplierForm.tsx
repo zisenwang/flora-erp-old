@@ -62,7 +62,7 @@ export default function SupplierForm() {
       setForm(EMPTY_FORM)
       setStatus(1)
       getNextSupplierCode()
-        .then(code => setForm(f => ({ ...f, code: code.padStart(3, '0') })))
+        .then(code => setForm(f => ({ ...f, code })))
         .catch(() => {})
     }
   }, [editingId])

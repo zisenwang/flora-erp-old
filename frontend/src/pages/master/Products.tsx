@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   getProducts,
   getProductCategories,
@@ -39,6 +40,8 @@ const EMPTY_FORM: FormState = {
 }
 
 export default function Products() {
+  const navigate = useNavigate()
+
   // ── Data state ───────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -109,12 +112,6 @@ export default function Products() {
   useEffect(() => { setPage(1) }, [catFilter, supplierFilter, appliedSearch])
 
   // ── Modal helpers ────────────────────────────────────────────
-  function openAdd() {
-    setEditingId(null)
-    setForm({ ...EMPTY_FORM })
-    setModalOpen(true)
-  }
-
   function openEdit(p: Product) {
     setEditingId(p.id)
     setForm({
@@ -287,7 +284,7 @@ export default function Products() {
             />
             <button className={styles.btnInline} onClick={handleSearch}>查找</button>
             &nbsp;
-            <button className={styles.btnInline} onClick={openAdd}>新增产品资料</button>
+            <button className={styles.btnInline} onClick={() => navigate('/master/suppliers')}>新增产品资料</button>
             &nbsp;
             <button className={styles.btnInlineGrey} disabled>导出EXCEL</button>
           </span>

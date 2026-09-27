@@ -1,0 +1,196 @@
+/* 新增供应商产品 — replicates old gys_prods_add.asp
+   Shared table / input / button styles come from Suppliers.module.css */
+
+.page {
+  min-height: 100%;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+}
+
+.page a {
+  color: #006600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page a:hover {
+  text-decoration: underline;
+}
+
+/* ── Sub-toolbar: magenta hint (class=style5) ── */
+.subbar {
+  height: 24px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-bottom: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.hint {
+  color: #FF00FF;
+}
+
+/* ── Three-column layout: sidebar | form (500) | product list ── */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+/* ── LEFT SIDEBAR: table cellspacing=3 bgcolor=#FF0000 ── */
+.sidebar {
+  flex-shrink: 0;
+  width: 175px;
+  margin-left: 2px;
+  border: 3px solid #FF0000;
+  background: #FFFF99;
+}
+
+.sidebarHeader {
+  background: #00CCFF;
+  color: #fff;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.sideSearch {
+  width: 95px;
+  min-width: 0;
+}
+
+.suppCols {
+  column-count: 3;
+  column-gap: 0;
+  padding: 4px 0;
+}
+
+.suppItem {
+  display: block;
+  white-space: nowrap;
+  line-height: 15px;
+  padding-left: 3px;
+}
+
+.suppActive {
+  background: #FFCC00;
+  font-weight: bold;
+}
+
+.gap6 {
+  flex: 0 0 6px;
+}
+
+/* ── FORM (td width=500) ── */
+.formCol {
+  flex: 0 0 500px;
+}
+
+.formTable {
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.formTable td {
+  height: 28px;
+  padding: 0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.flabel {
+  text-align: right;
+}
+
+/* 编码 row: bgcolor=#FFFF00, height=40 */
+.codeRow td {
+  background: #FFFF00;
+  height: 40px;
+}
+
+.codeInner {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.codeInner td {
+  height: auto !important;
+  background: #FFFF00;
+}
+
+/* class=wbk — readonly code box, red text */
+.codeInput {
+  color: #FF0000;
+  width: 72px !important;
+}
+
+.recentLine {
+  line-height: 17px;
+}
+
+.radio {
+  margin: 0 1px 0 5px;
+  vertical-align: middle;
+}
+
+.checkbox {
+  vertical-align: middle;
+  margin: 3px 3px 3px 4px;
+}
+
+.gap10 {
+  flex: 0 0 10px;
+}
+
+/* ── RIGHT: product list ── */
+.listCol {
+  flex: 0 0 auto;
+}
+
+/* class=style8 */
+.searchLabel {
+  font-weight: bold;
+}
+
+.searchLine {
+  display: flex;
+  align-items: flex-end;
+}
+
+.searchInput {
+  width: 177px;
+}
+
+/* header row here is 18px with black text */
+table.list th {
+  height: 18px;
+  color: #000;
+  background: linear-gradient(to bottom, #5EAE25 0, #5EAE25 1px, #CCF6AD 1px, #63C71B 18px);
+}
+
+table.list td {
+  height: 18px;
+}
+
+/* class=style5 */
+.codeSpan {
+  color: #FF00FF;
+  font-family: 宋体, SimSun, sans-serif;
+}
+
+/* new.gif — 24x11 */
+.newTag {
+  display: inline-block;
+  width: 24px;
+  height: 11px;
+  line-height: 11px;
+  font-size: 9px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  color: #FF0000;
+  vertical-align: middle;
+}
