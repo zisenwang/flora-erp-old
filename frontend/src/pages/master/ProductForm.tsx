@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
 import {
   getProducts,
   getProduct,
@@ -44,6 +44,7 @@ const UNITS = ['盆', '箱', '个', '根', '包', '瓶', '把', '盒', '对', '�
 // 新增 / 修改供应商产品 — replicates old gys_prods_add.asp
 export default function ProductForm() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams()
   const editingId = id ? Number(id) : null
   const [searchParams, setSearchParams] = useSearchParams()
@@ -172,7 +173,9 @@ export default function ProductForm() {
       if (editingId != null) {
         await updateProduct(editingId, { ...payload, status: editStatus })
         alert('修改成功')
-        navigate(`/master/products/new?supplierId=${supplierId}`)
+        // back to wherever edit was opened from (产品资料 list or 新增供应商产品)
+        if (location.key !== 'default') navigate(-1)
+        else navigate(`/master/products/new?supplierId=${supplierId}`)
       } else {
         await createProduct(payload)
         alert('添加成功')

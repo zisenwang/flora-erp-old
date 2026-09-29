@@ -1,0 +1,76 @@
+/* 查看产品 — replicates old prods_info.asp */
+
+.page {
+  min-height: 100%;
+  padding: 26px 10px 0;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* 供 应 商:xxx — red title with edit icon */
+.title {
+  height: 24px;
+  display: flex;
+  align-items: flex-end;
+  color: #FF0000;
+  font-size: 18px;
+  font-family: 宋体, SimSun, serif;
+  white-space: pre;
+}
+
+.title > span:last-child {
+  margin-left: 8px;
+}
+
+/* info table: 1px #00CC33 grid */
+.info {
+  border-collapse: collapse;
+  font-family: 宋体, SimSun, sans-serif;
+}
+
+.info th,
+.info td {
+  border: 1px solid #00CC33;
+  padding: 0 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.info th {
+  height: 21px;
+  min-width: 56px;
+  font-size: 14px;
+  font-weight: normal;
+  color: #006600;
+}
+
+.info td {
+  height: 19px;
+  font-size: 12px;
+  color: #FF00FF;
+}
+
+/* rowspan=2 green block */
+.info th.block {
+  width: 110px;
+  background: #00CC33;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.dotted {
+  margin: 16px 0 17px;
+  border-top: 1px dotted #15AE05;
+}
+
+.back {
+  font-weight: bold;
+}

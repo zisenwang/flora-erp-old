@@ -3,41 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import {
   getProducts,
   getProductCategories,
-  createProduct,
-  updateProduct,
   deleteProduct,
   type Product,
-  type ProductPayload,
 } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import styles from './Products.module.css'
-
-// ─── Modal form state ────────────────────────────────────────
-interface FormState {
-  code: string
-  name: string
-  supplierId: string
-  category: string
-  spec: string
-  grade: string
-  unit: string
-  unitsPerPiece: string
-  costPrice: string
-  price: string
-}
-
-const EMPTY_FORM: FormState = {
-  code: '',
-  name: '',
-  supplierId: '',
-  category: '',
-  spec: '',
-  grade: '',
-  unit: '盆',
-  unitsPerPiece: '',
-  costPrice: '',
-  price: '',
-}
 
 export default function Products() {
   const navigate = useNavigate()
@@ -56,12 +26,6 @@ export default function Products() {
   const [searchText, setSearchText] = useState('')        // search text input
   const [appliedSearch, setAppliedSearch] = useState('')  // committed search value
   const [page, setPage] = useState(1)
-
-  // ── Modal state ──────────────────────────────────────────────
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [form, setForm] = useState<FormState>(EMPTY_FORM)
-  const [saving, setSaving] = useState(false)
 
   // ── Load data ────────────────────────────────────────────────
   const loadAll = useCallback(() => {
@@ -110,68 +74,6 @@ export default function Products() {
 
   // Reset to page 1 whenever filters change
   useEffect(() => { setPage(1) }, [catFilter, supplierFilter, appliedSearch])
-
-  // ── Modal helpers ────────────────────────────────────────────
-  function openEdit(p: Product) {
-    setEditingId(p.id)
-    setForm({
-      code: p.code ?? '',
-      name: p.name ?? '',
-      supplierId: String(p.supplierId ?? ''),
-      category: p.category ?? '',
-      spec: p.spec ?? '',
-      grade: p.grade ?? '',
-      unit: p.unit ?? '盆',
-      unitsPerPiece: p.unitsPerPiece != null ? String(p.unitsPerPiece) : '',
-      costPrice: p.costPrice != null ? String(p.costPrice) : '',
-      price: p.price != null ? String(p.price) : '',
-    })
-    setModalOpen(true)
-  }
-
-  function closeModal() {
-    setModalOpen(false)
-    setEditingId(null)
-    setForm(EMPTY_FORM)
-  }
-
-  function setField(key: keyof FormState, value: string) {
-    setForm(f => ({ ...f, [key]: value }))
-  }
-
-  async function handleSave() {
-    if (!form.name.trim()) { alert('请输入品名'); return }
-    const suppId = parseInt(form.supplierId)
-    if (isNaN(suppId) || suppId <= 0) { alert('请选择供应商'); return }
-
-    const payload: ProductPayload = {
-      code: form.code.trim(),
-      name: form.name.trim(),
-      supplierId: suppId,
-      category: form.category.trim() || undefined,
-      spec: form.spec.trim() || undefined,
-      grade: form.grade.trim() || undefined,
-      unit: form.unit.trim() || '盆',
-      unitsPerPiece: form.unitsPerPiece !== '' ? parseFloat(form.unitsPerPiece) : undefined,
-      costPrice: form.costPrice !== '' ? parseFloat(form.costPrice) : undefined,
-      price: form.price !== '' ? parseFloat(form.price) : undefined,
-    }
-
-    setSaving(true)
-    try {
-      if (editingId != null) {
-        await updateProduct(editingId, payload)
-      } else {
-        await createProduct(payload)
-      }
-      closeModal()
-      loadAll()
-    } catch (e: unknown) {
-      alert('保存失败: ' + (e instanceof Error ? e.message : String(e)))
-    } finally {
-      setSaving(false)
-    }
-  }
 
   async function handleDelete(p: Product) {
     if (!window.confirm(`此操作将直接把产品资料删除掉，并且不可恢复，真的要进行吗？\n${p.code} ${p.name}`)) return
@@ -324,8 +226,8 @@ export default function Products() {
                   <td className={styles.tc}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                   <td className={styles.tc}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                   <td className={styles.tcOps}>
-                    <span className={styles.opBtn} onClick={() => openEdit(p)}>查看</span>
-                    <span className={`${styles.opBtn} ${styles.opEdit}`} onClick={() => openEdit(p)}>编辑</span>
+                    <span className={styles.opBtn} onClick={() => navigate(`/master/products/view/${p.id}`)}>查看</span>
+                    <span className={`${styles.opBtn} ${styles.opEdit}`} onClick={() => navigate(`/master/products/edit/${p.id}`)}>编辑</span>
                     <span className={`${styles.opBtn} ${styles.opDel}`} onClick={() => handleDelete(p)}>删除</span>
                   </td>
                   <td className={`${styles.tc} ${styles.priceCell}`}>
@@ -353,143 +255,6 @@ export default function Products() {
         </div>
 
       </div>
-
-      {/* ══ ADD / EDIT MODAL ══════════════════════════════════════ */}
-      {modalOpen && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalTitle}>
-              {editingId != null ? '编辑产品资料' : '新增产品资料'}
-            </div>
-            <table className={styles.formTable}>
-              <tbody>
-                <tr>
-                  <td className={styles.flabel}>编码</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.code}
-                      onChange={e => setField('code', e.target.value)}
-                    />
-                  </td>
-                  <td className={styles.flabel}>品名&nbsp;<span className={styles.freq}>*</span></td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.name}
-                      onChange={e => setField('name', e.target.value)}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className={styles.flabel}>供应商&nbsp;<span className={styles.freq}>*</span></td>
-                  <td>
-                    <select
-                      className={styles.fselect}
-                      value={form.supplierId}
-                      onChange={e => setField('supplierId', e.target.value)}
-                    >
-                      <option value="">-- 请选择 --</option>
-                      {suppliers.map(s => (
-                        <option key={s.id} value={String(s.id)}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className={styles.flabel}>分类</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.category}
-                      onChange={e => setField('category', e.target.value)}
-                      list="cat-datalist"
-                    />
-                    <datalist id="cat-datalist">
-                      {categories.map(c => <option key={c} value={c} />)}
-                    </datalist>
-                  </td>
-                </tr>
-                <tr>
-                  <td className={styles.flabel}>规格</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.spec}
-                      onChange={e => setField('spec', e.target.value)}
-                    />
-                  </td>
-                  <td className={styles.flabel}>等级</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.grade}
-                      onChange={e => setField('grade', e.target.value)}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className={styles.flabel}>单位</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="text"
-                      value={form.unit}
-                      onChange={e => setField('unit', e.target.value)}
-                    />
-                  </td>
-                  <td className={styles.flabel}>包装/每件数量</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="number"
-                      min="0"
-                      value={form.unitsPerPiece}
-                      onChange={e => setField('unitsPerPiece', e.target.value)}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className={styles.flabel}>进货价</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={form.costPrice}
-                      onChange={e => setField('costPrice', e.target.value)}
-                    />
-                  </td>
-                  <td className={styles.flabel}>销售价</td>
-                  <td>
-                    <input
-                      className={styles.finput}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={form.price}
-                      onChange={e => setField('price', e.target.value)}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div className={styles.modalFooter}>
-              <button className={styles.btnSave} onClick={handleSave} disabled={saving}>
-                {saving ? '保存中...' : '保存'}
-              </button>
-              &nbsp;&nbsp;
-              <button className={styles.btnCancel} onClick={closeModal} disabled={saving}>取消</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
