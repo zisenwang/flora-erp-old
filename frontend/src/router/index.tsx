@@ -7,6 +7,8 @@ import ProductForm from '@/pages/master/ProductForm'
 import ProductView from '@/pages/master/ProductView'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
+import Customers from '@/pages/master/Customers'
+import CustomerForm from '@/pages/master/CustomerForm'
 
 const isLoggedIn = () => !!localStorage.getItem('token')
 
@@ -28,6 +30,9 @@ const router = createBrowserRouter([
       { path: 'master/suppliers', element: <Suppliers /> },
       { path: 'master/suppliers/new', element: <SupplierForm /> },
       { path: 'master/suppliers/edit/:id', element: <SupplierForm /> },
+      { path: 'master/customers', element: <Customers /> },
+      { path: 'master/customers/new', element: <CustomerForm /> },
+      { path: 'master/customers/edit/:id', element: <CustomerForm /> },
     ],
   },
 ])

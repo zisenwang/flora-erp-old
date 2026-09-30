@@ -23,6 +23,22 @@ export function EditIcon({ onClick, title }: OpProps) {
   )
 }
 
+// look.gif — 22x20 dark goggles
+export function LookIcon({ onClick, title }: OpProps) {
+  return (
+    <span className={styles.opImg} style={{ width: 22 }} onClick={onClick} title={title}>
+      <svg width="20" height="18" viewBox="0 0 20 18">
+        <rect x="2" y="6" width="16" height="3" rx="1" fill="#808080" />
+        <ellipse cx="6" cy="10.5" rx="3.6" ry="3" fill="#202020" stroke="#606060" />
+        <ellipse cx="14" cy="10.5" rx="3.6" ry="3" fill="#202020" stroke="#606060" />
+        <rect x="9.2" y="9" width="1.6" height="2" fill="#404040" />
+        <line x1="4" y1="9.5" x2="6" y2="9.5" stroke="#9A9A9A" />
+        <line x1="12" y1="9.5" x2="14" y2="9.5" stroke="#9A9A9A" />
+      </svg>
+    </span>
+  )
+}
+
 // delete1.gif — 22x20 black X
 export function DeleteIcon({ onClick, title }: OpProps) {
   return (

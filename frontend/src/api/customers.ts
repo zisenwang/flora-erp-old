@@ -41,3 +41,8 @@ export const getNextCustomerCode = async (): Promise<string> => {
   const res = await client.get<{ data: string }>('/customers/next-code')
   return res.data.data
 }
+
+export const getCustomer = async (id: number): Promise<Customer> => {
+  const res = await client.get<{ data: Customer }>(`/customers/${id}`)
+  return res.data.data
+}

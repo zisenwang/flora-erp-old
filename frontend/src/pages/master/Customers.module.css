@@ -1,0 +1,52 @@
+/* 客户资料(会员) — replicates old members.asp
+   Toolbar / op images / legend / pager styles come from Suppliers.module.css */
+
+/* table cellspacing=1 bgcolor=#CCCCCC, header bgcolor=#3B79B5 */
+.grid {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 12px;
+}
+
+.grid th {
+  height: 20px;
+  padding: 0;
+  background: #3B79B5;
+  color: #fff;
+  font-size: 12px;
+  font-weight: normal;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.grid th.center {
+  text-align: center;
+}
+
+.grid td {
+  height: 24px;
+  padding: 0;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.grid tbody tr:hover td {
+  background: #C7FD9F;
+}
+
+.grid td.center {
+  text-align: center;
+}
+
+/* class=style3 <strong> code */
+.code {
+  color: #006600;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* class=style5 */
+.pink {
+  color: #FF00FF;
+}
