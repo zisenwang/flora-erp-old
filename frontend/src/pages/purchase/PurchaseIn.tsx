@@ -6,6 +6,8 @@ import { createPurchaseOrder, getPurchaseOrdersDetail, type PurchaseOrder } from
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
+import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import SupplierPicker from './SupplierPicker'
 import styles from './PurchaseIn.module.css'
 
 // ─── Unsaved 进货单 kept in localStorage (old system kept it server-side) ──
@@ -46,7 +48,7 @@ const newDraft = (supplier: DraftSupplier | null = null): Draft => ({
   supplier,
   lines: [],
   discountRate: '100',
-  orderDate: dayjs().format('YYYY/M/D'),
+  orderDate: toSlashDate(),
   notes: '',
 })
 
@@ -75,14 +77,6 @@ const lineFinal = (l: DraftLine) => (lineAmount(l) * l.discount) / 100
 // 件数 = ceil(数量 / 包装), same as new system; 0 when product has no 包装
 const calcPieces = (qty: string, unitsPerPiece: number | null) =>
   unitsPerPiece && num(qty) > 0 ? String(Math.ceil(num(qty) / unitsPerPiece)) : '0'
-
-// "2026/10/1" or "2026-10-01" → "2026-10-01"
-function parseOrderDate(text: string): string | null {
-  const m = text.trim().match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/)
-  if (!m) return null
-  const d = dayjs(`${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`)
-  return d.isValid() ? d.format('YYYY-MM-DD') : null
-}
 
 const DAY_OPTIONS = [
   { days: 1, label: '今天' },
@@ -127,9 +121,6 @@ export default function PurchaseIn() {
 
   // ── 选择供应商 overlay ───────────────────────────────────────
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [pickerSearch, setPickerSearch] = useState('')
-  const [pickerApplied, setPickerApplied] = useState('')
-  const [pickerSort, setPickerSort] = useState<'code' | 'name'>('code')
 
   const supplier = draft.supplier
 
@@ -193,13 +184,6 @@ export default function PurchaseIn() {
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
   const windowEnd = Math.min(windowStart + PAGE_WINDOW - 1, totalPages)
-
-  const pickerSuppliers = suppliers
-    .filter(s =>
-      pickerApplied === '' ||
-      s.code.toLowerCase().includes(pickerApplied.toLowerCase()) ||
-      s.name.toLowerCase().includes(pickerApplied.toLowerCase()))
-    .sort((a, b) => a[pickerSort].localeCompare(b[pickerSort], 'zh-CN'))
 
   const totalQty = draft.lines.reduce((s, l) => s + num(l.qty), 0)
   const totalAmount = draft.lines.reduce((s, l) => s + lineAmount(l), 0)
@@ -277,7 +261,7 @@ export default function PurchaseIn() {
     if (draft.lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入进货单价'); return }
     const rate = Number(draft.discountRate)
     if (draft.discountRate === '' || isNaN(rate) || rate < 0 || rate > 100) { alert('请输入0-100之间的折扣率'); return }
-    const orderDate = parseOrderDate(draft.orderDate)
+    const orderDate = parseSlashDate(draft.orderDate)
     if (!orderDate) { alert('开单日期格式不正确，例如 2026/10/1'); return }
 
     setSaving(true)
@@ -582,38 +566,7 @@ export default function PurchaseIn() {
 
       {/* ══ 请选择供应商 overlay ══════════════════════════════════ */}
       {pickerOpen && (
-        <div className={styles.overlay}>
-          <div className={styles.overlayTitle}>
-            请选择供应商
-            <span className={styles.overlayClose} onClick={() => setPickerOpen(false)}>✕</span>
-          </div>
-          <div className={styles.overlayBar}>
-            查找供应商
-            <input
-              className={styles.overlaySearch}
-              type="text"
-              value={pickerSearch}
-              onChange={e => setPickerSearch(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && setPickerApplied(pickerSearch.trim())}
-            />
-            <select value={pickerSort} onChange={e => setPickerSort(e.target.value as 'code' | 'name')}>
-              <option value="code">按编码排序</option>
-              <option value="name">按名称排序</option>
-            </select>
-            <input type="button" value="查找" onClick={() => setPickerApplied(pickerSearch.trim())} />
-          </div>
-          <div className={styles.overlayList}>
-            {pickerSuppliers.map(s => (
-              <span
-                key={s.id}
-                className={styles.overlayItem}
-                onClick={() => { selectSupplier(s); setPickerOpen(false) }}
-              >
-                <span className={styles.overlayCode}>{s.code}</span>&nbsp;{s.name}
-              </span>
-            ))}
-          </div>
-        </div>
+        <SupplierPicker suppliers={suppliers} onSelect={selectSupplier} onClose={() => setPickerOpen(false)} />
       )}
     </div>
   )

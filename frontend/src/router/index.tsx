@@ -6,6 +6,9 @@ import Products from '@/pages/master/Products'
 import ProductForm from '@/pages/master/ProductForm'
 import ProductView from '@/pages/master/ProductView'
 import PurchaseIn from '@/pages/purchase/PurchaseIn'
+import PurchaseList from '@/pages/purchase/PurchaseList'
+import PurchaseView from '@/pages/purchase/PurchaseView'
+import PurchaseEdit from '@/pages/purchase/PurchaseEdit'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -37,6 +40,11 @@ const router = createBrowserRouter([
       { path: 'master/customers/new', element: <CustomerForm /> },
       { path: 'master/customers/edit/:id', element: <CustomerForm /> },
       { path: 'purchase/orders/new', element: <PurchaseIn /> },
+      { path: 'purchase/orders', element: <PurchaseList mode="summary" /> },
+      { path: 'purchase/orders/detail', element: <PurchaseList mode="detail" /> },
+      { path: 'purchase/orders/:id', element: <PurchaseView kind="order" /> },
+      { path: 'purchase/orders/:id/edit', element: <PurchaseEdit /> },
+      { path: 'purchase/returns/:id', element: <PurchaseView kind="return" /> },
     ],
   },
 ])

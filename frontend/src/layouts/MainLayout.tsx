@@ -66,6 +66,12 @@ const NAV_ITEMS: NavItem[] = [
   { label: '销售订单', path: '/sales/orders' },
 ]
 
+// Detail pages with ids in the path, checked before the prefix labels below
+const ROUTE_PATTERNS: [RegExp, string][] = [
+  [/^\/purchase\/orders\/\d+\/edit$/, '修改采购单'],
+  [/^\/purchase\/(orders|returns)\/\d+$/, '单据明细'],
+]
+
 const ROUTE_LABELS: Record<string, string> = {
   '/': '进销存系统首页',
   '/master/categories': '产品分类',
@@ -83,7 +89,8 @@ const ROUTE_LABELS: Record<string, string> = {
   '/settings/password': '修改密码',
   '/purchase/orders/new': '进货单录入',
   '/purchase/returns/new': '采购退货',
-  '/purchase/orders': '采购单据',
+  '/purchase/orders/detail': '进货单据明细',
+  '/purchase/orders': '进货单据汇总',
   '/sales/orders/new': '销售出库',
   '/sales/returns/new': '销售退货',
   '/sales/orders': '销售单据',
@@ -122,6 +129,9 @@ export default function MainLayout() {
   const getBreadcrumb = () => {
     const path = location.pathname
     if (ROUTE_LABELS[path]) return ROUTE_LABELS[path]
+    for (const [pattern, label] of ROUTE_PATTERNS) {
+      if (pattern.test(path)) return label
+    }
     for (const [key, label] of Object.entries(ROUTE_LABELS)) {
       if (key !== '/' && path.startsWith(key)) return label
     }

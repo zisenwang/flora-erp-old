@@ -1,0 +1,403 @@
+/* 进货单据汇总 / 明细 (buy_djhz_list.asp, buy_djmx_list.asp),
+   单据明细 (main_all_djmx_info.asp), 修改采购单 (edit_buy.asp) */
+
+.page {
+  min-height: 100%;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+}
+
+.page a {
+  color: #006600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page a:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ── Sub-toolbar ── */
+.subbar {
+  height: 24px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-bottom: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dateInput {
+  width: 104px;
+}
+
+.kwInput {
+  width: 104px;
+}
+
+.body {
+  padding: 8px 6px 0;
+}
+
+/* ── List tables: cellspacing=1 bgcolor=#CCCCCC, header #3B79B5 ── */
+.grid {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 12px;
+}
+
+.grid th {
+  height: 16px;
+  padding: 0;
+  background: #3B79B5;
+  color: #fff;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.grid td {
+  height: 20px;
+  padding: 0;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.grid tbody tr.row:hover td {
+  background: #FFFF00;
+}
+
+.c {
+  text-align: center;
+}
+
+.r {
+  text-align: right;
+}
+
+.dateCell {
+  background: #FFFF99 !important;
+}
+
+/* <em> 数量 — pink bold */
+.qty {
+  font-style: normal;
+  font-weight: bold;
+  font-family: 宋体, SimSun, sans-serif;
+  font-size: 13px;
+  color: #FF0099;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+/* class=style5 */
+.magenta {
+  color: #FF00FF;
+}
+
+/* class=style7 */
+.teal {
+  color: #009BBC;
+}
+
+/* discounted line highlight in 明细表 */
+.discounted {
+  background: #FFCCFF !important;
+}
+
+/* <em> spec */
+.spec {
+  font-style: normal;
+  font-weight: bold;
+  font-family: 宋体, SimSun, sans-serif;
+  font-size: 13px;
+  color: #FF0099;
+}
+
+/* bjx.gif hatched subtotal cells */
+.hatch {
+  background: repeating-linear-gradient(135deg, #fff 0, #fff 3px, #EEEEEE 3px, #EEEEEE 4px) !important;
+}
+
+/* dyx.gif — 30x20 red "打印" */
+.printImg {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 30px;
+  height: 20px;
+  line-height: 18px;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #FC1004;
+  background: #fff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  cursor: pointer;
+}
+
+.legend {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  color: #FF00FF;
+  font-size: 14px;
+}
+
+.legend .printImg {
+  cursor: default;
+}
+
+/* ── Pager: wide pink box + yellow box with big numbers ── */
+.pager {
+  border-collapse: collapse;
+}
+
+.pager td {
+  padding: 0;
+  height: 26px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.pagerTotal {
+  width: 337px;
+  background: #FF99FF;
+  font-weight: bold;
+}
+
+.pagerGap {
+  width: 14px;
+}
+
+.pagerPages {
+  min-width: 170px;
+  background: #FFFF00;
+  padding: 0 12px !important;
+}
+
+.pageNum {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  color: #006600;
+  margin-right: 14px;
+}
+
+.pageSmall {
+  font-size: 12px;
+  margin-right: 10px;
+}
+
+/* ── Red document tables (单据明细 / 修改采购单) ── */
+.doc {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 12px;
+}
+
+.doc th {
+  height: 22px;
+  padding: 0 4px;
+  background: #FF0000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.doc td {
+  height: 22px;
+  padding: 0 3px;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.docSumYellow td {
+  background: #FFFF00;
+}
+
+.docSumGray td {
+  background: #CCCCCC;
+}
+
+.backBtn {
+  margin-top: 6px;
+}
+
+/* 客户\供应商\部门信息 box */
+.infoBox {
+  width: 220px;
+  margin-top: 6px;
+  border: 1px solid #0000FF;
+}
+
+.infoTitle {
+  background: #0000FF;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 1px 2px;
+}
+
+.infoBody {
+  height: 56px;
+  background: #FF9900;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 6px 0 0 36px;
+  white-space: pre;
+}
+
+/* ── 修改采购单 ── */
+/* main_zjcp.gif / main_fhsy.gif — blue pill buttons */
+.blueBtn {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 4px;
+  margin-right: 6px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #fff;
+  background: #0024FF;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* GH_GYS.gif green / GH_CP.gif red "更换" badges */
+.badgeGreen,
+.badgeRed {
+  display: inline-block;
+  height: 12px;
+  line-height: 12px;
+  padding: 0 1px;
+  font-size: 11px;
+  font-family: 宋体, SimSun, sans-serif;
+  vertical-align: middle;
+  cursor: pointer;
+  margin-right: 3px;
+}
+
+.badgeGreen {
+  background: #02C630;
+  color: #CCF701;
+}
+
+.badgeRed {
+  background: #FF031B;
+  color: #fff;
+}
+
+.lineInput {
+  width: 78px;
+  box-sizing: border-box;
+}
+
+.lineNotes {
+  width: 120px;
+  box-sizing: border-box;
+}
+
+.notesArea {
+  display: block;
+  width: 100%;
+  height: 92px;
+  box-sizing: border-box;
+  margin-top: 1px;
+}
+
+.editFoot {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+}
+
+.rateInput {
+  width: 64px;
+}
+
+/* ── 请选择产品 overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  border: 2px solid #FF0000;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+}
+
+.overlayTitle {
+  height: 18px;
+  flex-shrink: 0;
+  background: #FF0000;
+  color: #fff;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.overlayClose {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+}
+
+.overlayBody {
+  flex: 1;
+  overflow: auto;
+  padding: 2px 6px;
+}
+
+.pickSearch {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.pickInput {
+  width: 175px;
+}
+
+.pickPrice {
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 13px;
+  color: #FF0099;
+  text-align: right;
+}
+
+/* red "用此更换" button */
+.useBtn {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 3px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #fff;
+  background: #FA0101;
+  border-radius: 3px;
+  cursor: pointer;
+}
