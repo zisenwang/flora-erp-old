@@ -20,9 +20,10 @@ interface FormState {
   name: string
   address: string
   phone: string
+  notes: string
 }
 
-const EMPTY_FORM: FormState = { code: '', name: '', address: '', phone: '' }
+const EMPTY_FORM: FormState = { code: '', name: '', address: '', phone: '', notes: '' }
 
 const RECENT_COUNT = 20
 
@@ -53,6 +54,7 @@ export default function CustomerForm() {
             name: s.name ?? '',
             address: s.address ?? '',
             phone: s.phone ?? '',
+            notes: s.notes ?? '',
           })
           setStatus(s.status ?? 1)
         })
@@ -82,6 +84,7 @@ export default function CustomerForm() {
       name: form.name.trim(),
       address: form.address.trim(),
       phone: form.phone.trim(),
+      notes: form.notes.trim(),
       status,
     }
 
@@ -160,6 +163,16 @@ export default function CustomerForm() {
                     type="text"
                     value={form.phone}
                     onChange={e => setField('phone', e.target.value)}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className={styles.flabel} style={{ height: 66 }}>备注</td>
+                <td>
+                  <textarea
+                    className={styles.ftextarea}
+                    value={form.notes}
+                    onChange={e => setField('notes', e.target.value)}
                   />
                 </td>
               </tr>

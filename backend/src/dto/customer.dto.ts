@@ -4,6 +4,7 @@ export interface Customer {
   name: string
   phone: string | null
   address: string | null
+  notes: string | null
   status: number
 }
 
@@ -12,6 +13,7 @@ export interface CreateCustomerDto {
   name: string
   phone?: string
   address?: string
+  notes?: string
 }
 
 export interface UpdateCustomerDto extends Partial<CreateCustomerDto> {

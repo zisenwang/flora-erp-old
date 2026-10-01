@@ -6,6 +6,7 @@ export interface Customer {
   name: string;
   phone: string;
   address: string;
+  notes: string;
   status: number;
 }
 
