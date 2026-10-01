@@ -81,7 +81,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/master/suppliers/edit': '修改供应商',
   '/master/suppliers': '供应商资料',
   '/settings/password': '修改密码',
-  '/purchase/orders/new': '采购入库',
+  '/purchase/orders/new': '进货单录入',
   '/purchase/returns/new': '采购退货',
   '/purchase/orders': '采购单据',
   '/sales/orders/new': '销售出库',

@@ -23,6 +23,7 @@ export interface PurchaseOrder {
   supplierId: number
   supplierName: string
   supplierCode: string
+  supplierPhone?: string | null
   orderDate: string
   totalQty: number
   totalAmount: number
@@ -44,6 +45,7 @@ export interface PurchaseOrderPayload {
   items: {
     productId: number
     qty: number
+    pieces?: number
     unitPrice: number
     discount?: number
     notes?: string

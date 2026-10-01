@@ -5,6 +5,8 @@ import Dashboard from '@/pages/dashboard/Dashboard'
 import Products from '@/pages/master/Products'
 import ProductForm from '@/pages/master/ProductForm'
 import ProductView from '@/pages/master/ProductView'
+import PurchaseIn from '@/pages/purchase/PurchaseIn'
+import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
 import Customers from '@/pages/master/Customers'
@@ -18,6 +20,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
+  { path: '/print/purchase/:id', element: <RequireAuth><PurchasePrint /></RequireAuth> },
   {
     path: '/',
     element: <RequireAuth><MainLayout /></RequireAuth>,
@@ -33,6 +36,7 @@ const router = createBrowserRouter([
       { path: 'master/customers', element: <Customers /> },
       { path: 'master/customers/new', element: <CustomerForm /> },
       { path: 'master/customers/edit/:id', element: <CustomerForm /> },
+      { path: 'purchase/orders/new', element: <PurchaseIn /> },
     ],
   },
 ])

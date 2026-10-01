@@ -1,0 +1,510 @@
+/* 进货单录入 — replicates old buy_in.asp (+ buy_list.asp iframe, buy_xzkh_list.asp overlay) */
+
+.page {
+  min-height: 100%;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+}
+
+.page a {
+  color: #006600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page a:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* ── Sub-toolbar ── */
+.subbar {
+  height: 24px;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  border-bottom: 1px solid #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.searchInput {
+  width: 120px;
+}
+
+/* main_xzgys.gif — 80x20 "选择供应商" */
+.btnPickSupp {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  height: 20px;
+  padding: 0 3px;
+  margin: 0 8px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #000;
+  background: #fff;
+  border: 1px solid #767676;
+  cursor: pointer;
+  user-select: none;
+}
+
+.listIcon {
+  color: #0259F9;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.dayCheck {
+  margin: 0 1px 0 3px;
+  vertical-align: middle;
+}
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+/* ── LEFT SIDEBAR: cellspacing=2 bgcolor=#FF0000 ── */
+.sidebar {
+  flex-shrink: 0;
+  width: 172px;
+  border: 2px solid #FF0000;
+  background: #FFFF99;
+}
+
+.sidebarHeader {
+  background: #00CCFF;
+  color: #fff;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.sideSearch {
+  width: 92px;
+  min-width: 0;
+}
+
+.catList {
+  background: #00FF00;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px 0 4px;
+}
+
+.catItem {
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 21px;
+  padding-left: 2px;
+}
+
+.catArrow {
+  color: #0259F9;
+  font-size: 10px;
+  margin-right: 1px;
+}
+
+.suppCols {
+  column-count: 2;
+  column-gap: 0;
+  padding: 4px 0;
+}
+
+.suppItem {
+  display: block;
+  white-space: nowrap;
+  line-height: 15px;
+  padding-left: 3px;
+}
+
+.active {
+  background: #FFCC00;
+  font-weight: bold;
+}
+
+/* ── MIDDLE: product table ── */
+.mainCol {
+  flex: 0 0 auto;
+  margin-left: 1px;
+}
+
+.prodTable {
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #C7FD9F;
+  font-size: 12px;
+}
+
+.prodTable th {
+  height: 16px;
+  padding: 0;
+  background: #70BF0A;
+  color: #fff;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.prodTable td {
+  height: 24px;
+  padding: 0;
+  background: #fff;
+  white-space: nowrap;
+}
+
+.prodTable tbody tr:hover td {
+  background: #FFFF00;
+}
+
+.emptyRow td {
+  height: 30px;
+  text-align: center;
+  color: #666;
+}
+
+/* <em> spec — pink bold */
+.spec {
+  font-style: normal;
+  font-weight: bold;
+  font-family: 宋体, SimSun, sans-serif;
+  font-size: 13px;
+  color: #FF0099;
+}
+
+/* class=style8 */
+.stock {
+  font-weight: bold;
+  text-align: center;
+}
+
+.qtyInput,
+.priceInput {
+  width: 78px;
+  box-sizing: border-box;
+}
+
+.noteInput {
+  width: 92px;
+  box-sizing: border-box;
+}
+
+/* ── Pager: big page numbers ── */
+.pager {
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.pager td {
+  padding: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.pagerTotal {
+  background: #FF99FF;
+  font-weight: bold;
+  height: 28px;
+}
+
+.pageNum {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 0 8px !important;
+  height: 28px;
+}
+
+.pageActive {
+  background: #FFFF00;
+}
+
+/* « icon column */
+.gapCol {
+  flex: 0 0 12px;
+  color: #339900;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+}
+
+/* ── RIGHT: 进货单 (old buy_list.asp iframe) ── */
+.orderCol {
+  flex: 0 0 auto;
+  min-width: 440px;
+}
+
+.orderTitle {
+  height: 18px;
+  background: #660099;
+  color: #fff;
+  white-space: pre;
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+}
+
+.orderTitleBig {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.orderTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.orderTable th {
+  height: 18px;
+  padding: 0 2px;
+  font-weight: normal;
+  font-size: 12px;
+  color: #000;
+  white-space: nowrap;
+  background: linear-gradient(to bottom, #AAF755 0, #A2F559 35%, #8AEA48 100%);
+}
+
+.orderTable td {
+  padding: 1px 2px;
+  white-space: nowrap;
+}
+
+.orderTable td.wrapName {
+  white-space: normal;
+  max-width: 120px;
+  line-height: 14px;
+}
+
+.delAll {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  line-height: 9px;
+  font-size: 10px;
+  text-align: center;
+  color: #FF0000;
+  border: 1px solid #FF0000;
+  background: #fff;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.noRecord td {
+  text-align: center;
+  background: #FCF7F8;
+  height: 20px;
+}
+
+.lineQty,
+.linePrice {
+  width: 78px;
+  box-sizing: border-box;
+}
+
+.linePieces {
+  width: 64px;
+  box-sizing: border-box;
+}
+
+.lineNotes {
+  width: 106px;
+  box-sizing: border-box;
+}
+
+.num {
+  text-align: center;
+}
+
+.sumRow td {
+  background: #FCF7F8;
+  height: 22px;
+  border-bottom: 1px solid #ddd;
+}
+
+.pinkNum {
+  color: #FF00FF;
+  text-align: center;
+}
+
+.discountRow {
+  background: #FCF7F8;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rateInput {
+  width: 64px;
+  box-sizing: border-box;
+}
+
+/* green »» image buttons with red text (修改单据 / 保存单据) */
+.imgBtn {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 18px;
+  padding: 0 4px 0 2px;
+  margin-left: 10px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #F90101;
+  background: linear-gradient(to bottom, #F2F9F3 0, #F2F9F3 2px, #4FC65F 3px, #4FC65F 100%);
+  border: 1px solid #4FC65F;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.imgBtn::before {
+  content: '»»';
+  color: #FFFD6C;
+  font-weight: bold;
+  margin-right: 1px;
+}
+
+.imgBtn[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pinkArea {
+  background: #FF99FF;
+}
+
+.pinkRow {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+}
+
+.dateInput {
+  width: 104px;
+  box-sizing: border-box;
+}
+
+.operatorInput {
+  width: 92px;
+  box-sizing: border-box;
+}
+
+.notesArea {
+  display: block;
+  width: 100%;
+  height: 66px;
+  box-sizing: border-box;
+}
+
+.saveRow {
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.saveRow .imgBtn {
+  margin-left: 2px;
+}
+
+/* after save — "进货单据已经成功保存!是否打印进货单?" */
+.success {
+  padding-top: 2px;
+}
+
+.successMsg {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.printLink {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #660099 !important;
+  text-decoration: underline !important;
+}
+
+/* ─── 请选择供应商 overlay (buy_xzkh_list.asp) ─── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  border: 2px solid #FF0000;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+}
+
+.overlayTitle {
+  height: 20px;
+  flex-shrink: 0;
+  background: #FF0000;
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.overlayClose {
+  position: absolute;
+  right: 30px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.overlayBar {
+  height: 24px;
+  flex-shrink: 0;
+  background: #FFFF00;
+  display: flex;
+  align-items: center;
+}
+
+.overlaySearch {
+  width: 175px;
+}
+
+.overlayList {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 6px;
+  column-count: 7;
+  column-gap: 0;
+}
+
+.overlayItem {
+  display: block;
+  line-height: 20px;
+  padding-left: 2px;
+  white-space: nowrap;
+  color: #006600;
+  cursor: pointer;
+  break-inside: avoid;
+}
+
+.overlayItem:hover {
+  background: #FFFF00;
+}
+
+.overlayCode {
+  color: #FF00FF;
+}
