@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import { getProducts, getProductCategories, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
-import { createPurchaseOrder, getPurchaseOrdersDetail, type PurchaseOrder } from '@/api/purchase'
+import { createPurchaseOrder, createPurchaseReturn, getPurchaseOrdersDetail } from '@/api/purchase'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
@@ -10,7 +10,7 @@ import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import SupplierPicker from './SupplierPicker'
 import styles from './PurchaseIn.module.css'
 
-// ─── Unsaved 进货单 kept in localStorage (old system kept it server-side) ──
+// ─── Unsaved 进货单 / 退货单 kept in localStorage (old system kept it server-side) ──
 interface DraftSupplier {
   id: number
   code: string
@@ -42,7 +42,29 @@ interface Draft {
   notes: string
 }
 
-const DRAFT_KEY = 'flora.purchaseDraft'
+type Kind = 'order' | 'return'
+
+// 进货单录入 (buy_in.asp) vs 进货退回 (buy_out.asp) — same page, different wording/columns
+const TEXT = {
+  order: {
+    doc: '进货单',
+    qtyHead: '进货数量',
+    dateLabel: '开单日期',
+    operatorLabel: '经办人',
+    success: '进货单据已经成功保存!是否打印进货单?',
+    printPath: '/print/purchase/',
+    draftKey: 'flora.purchaseDraft',
+  },
+  return: {
+    doc: '退货单',
+    qtyHead: '数量',
+    dateLabel: '日期:',
+    operatorLabel: '经办人:',
+    success: '退货单据已经成功保存!是否打印退货单?',
+    printPath: '/print/purchase-return/',
+    draftKey: 'flora.purchaseReturnDraft',
+  },
+} as const
 
 const newDraft = (supplier: DraftSupplier | null = null): Draft => ({
   supplier,
@@ -52,16 +74,16 @@ const newDraft = (supplier: DraftSupplier | null = null): Draft => ({
   notes: '',
 })
 
-function loadDraft(): Draft {
+function loadDraft(key: string): Draft {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY)
+    const raw = localStorage.getItem(key)
     if (raw) return { ...newDraft(), ...JSON.parse(raw) }
   } catch { /* storage unavailable — start empty */ }
   return newDraft()
 }
 
-function saveDraft(draft: Draft) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)) } catch { /* ignore */ }
+function saveDraft(key: string, draft: Draft) {
+  try { localStorage.setItem(key, JSON.stringify(draft)) } catch { /* ignore */ }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -95,9 +117,15 @@ interface RowInput {
   notes: string
 }
 
-// 进货单录入 — replicates old buy_in.asp
-export default function PurchaseIn() {
+interface Props {
+  kind?: Kind
+}
+
+// 进货单录入 / 进货退回 — replicates old buy_in.asp and buy_out.asp
+export default function PurchaseIn({ kind = 'order' }: Props) {
   const { user } = useAuth()
+  const isReturn = kind === 'return'
+  const T = TEXT[kind]
 
   // ── Data state ───────────────────────────────────────────────
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -106,8 +134,8 @@ export default function PurchaseIn() {
   const [recentCodes, setRecentCodes] = useState<Set<string> | null>(null)  // null = 全部
 
   // ── Draft (right panel) ──────────────────────────────────────
-  const [draft, setDraftState] = useState<Draft>(loadDraft)
-  const [saved, setSaved] = useState<PurchaseOrder | null>(null)
+  const [draft, setDraftState] = useState<Draft>(() => loadDraft(T.draftKey))
+  const [saved, setSaved] = useState<{ id: number; no: string } | null>(null)
   const [saving, setSaving] = useState(false)
 
   // ── Filter state ─────────────────────────────────────────────
@@ -127,7 +155,7 @@ export default function PurchaseIn() {
   function setDraft(update: (d: Draft) => Draft) {
     setDraftState(d => {
       const next = update(d)
-      saveDraft(next)
+      saveDraft(T.draftKey, next)
       return next
     })
   }
@@ -150,7 +178,7 @@ export default function PurchaseIn() {
   // 今天 / 7天 / 15天 / 30天: products of this supplier purchased within the period
   const supplierCode = supplier?.code ?? null
   useEffect(() => {
-    if (supplierCode == null || days === 0) { setRecentCodes(null); return }
+    if (isReturn || supplierCode == null || days === 0) { setRecentCodes(null); return }
     getPurchaseOrdersDetail({
       startDate: dayjs().subtract(days - 1, 'day').format('YYYY-MM-DD'),
       search: supplierCode,
@@ -160,7 +188,7 @@ export default function PurchaseIn() {
         rows.filter(r => r.rowType === 'order' && r.supplierCode === supplierCode).map(r => r.productCode),
       )))
       .catch(err => alert(getErrorMessage(err)))
-  }, [supplierCode, days])
+  }, [isReturn, supplierCode, days])
 
   // Reset to page 1 whenever filters change
   useEffect(() => { setPage(1) }, [supplierId, catFilter, appliedSearch, days])
@@ -194,7 +222,7 @@ export default function PurchaseIn() {
   function selectSupplier(s: Supplier) {
     if (draft.supplier?.id === s.id) return
     if (draft.lines.length > 0 &&
-        !window.confirm(`进货单中已有 ${draft.supplier?.code ?? ''} 的产品，切换供应商将清空当前进货单，确定吗？`)) return
+        !window.confirm(`${T.doc}中已有 ${draft.supplier?.code ?? ''} 的产品，切换供应商将清空当前${T.doc}，确定吗？`)) return
     setDraft(() => newDraft({ id: s.id, code: s.code, name: s.name }))
     setSaved(null)
     setRowInputs({})
@@ -212,7 +240,7 @@ export default function PurchaseIn() {
 
   function handleAdd(p: Product) {
     const input = rowInput(p)
-    if (num(input.qty) <= 0) { alert('请输入进货数量'); return }
+    if (num(input.qty) <= 0) { alert(`请输入${T.qtyHead}`); return }
     if (input.price === '' || isNaN(Number(input.price))) { alert('请输入进货单价'); return }
     setDraft(d => ({
       ...d,
@@ -227,7 +255,7 @@ export default function PurchaseIn() {
         unitsPerPiece: p.unitsPerPiece ?? null,
         qty: input.qty,
         unitPrice: input.price,
-        discount: rateOf(d.discountRate),
+        discount: isReturn ? 100 : rateOf(d.discountRate),
         pieces: calcPieces(input.qty, p.unitsPerPiece ?? null),
         notes: input.notes,
         checked: false,
@@ -256,31 +284,38 @@ export default function PurchaseIn() {
   async function handleSave() {
     if (saving) return
     if (!draft.supplier) { alert('请选择供应商'); return }
-    if (draft.lines.length === 0) { alert('进货单中没有产品'); return }
-    if (draft.lines.some(l => num(l.qty) <= 0)) { alert('进货数量必须大于0'); return }
+    if (draft.lines.length === 0) { alert(`${T.doc}中没有产品`); return }
+    if (draft.lines.some(l => num(l.qty) <= 0)) { alert(`${T.qtyHead}必须大于0`); return }
     if (draft.lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入进货单价'); return }
     const rate = Number(draft.discountRate)
-    if (draft.discountRate === '' || isNaN(rate) || rate < 0 || rate > 100) { alert('请输入0-100之间的折扣率'); return }
-    const orderDate = parseSlashDate(draft.orderDate)
-    if (!orderDate) { alert('开单日期格式不正确，例如 2026/10/1'); return }
+    if (!isReturn && (draft.discountRate === '' || isNaN(rate) || rate < 0 || rate > 100)) { alert('请输入0-100之间的折扣率'); return }
+    const date = parseSlashDate(draft.orderDate)
+    if (!date) { alert('日期格式不正确，例如 2026/10/1'); return }
+
+    const items = draft.lines.map(l => ({
+      productId: l.productId,
+      qty: num(l.qty),
+      pieces: num(l.pieces),
+      unitPrice: num(l.unitPrice),
+      notes: l.notes.trim() || undefined,
+    }))
+    const notes = draft.notes.trim() || undefined
 
     setSaving(true)
     try {
-      const order = await createPurchaseOrder({
-        supplierId: draft.supplier.id,
-        orderDate,
-        notes: draft.notes.trim() || undefined,
-        items: draft.lines.map(l => ({
-          productId: l.productId,
-          qty: num(l.qty),
-          pieces: num(l.pieces),
-          unitPrice: num(l.unitPrice),
-          discount: l.discount,
-          notes: l.notes.trim() || undefined,
-        })),
-      })
+      if (isReturn) {
+        const ret = await createPurchaseReturn({ supplierId: draft.supplier.id, returnDate: date, notes, items })
+        setSaved({ id: ret.id, no: ret.returnNo })
+      } else {
+        const order = await createPurchaseOrder({
+          supplierId: draft.supplier.id,
+          orderDate: date,
+          notes,
+          items: items.map((it, i) => ({ ...it, discount: draft.lines[i].discount })),
+        })
+        setSaved({ id: order.id, no: order.orderNo })
+      }
       setDraft(d => newDraft(d.supplier))
-      setSaved(order)
       // refresh stock numbers in the left table
       getProducts({ supplierId: draft.supplier.id }).then(setProducts).catch(() => {})
     } catch (err) {
@@ -308,7 +343,7 @@ export default function PurchaseIn() {
         <span className={styles.btnPickSupp} onClick={() => setPickerOpen(true)}>
           <span className={styles.listIcon}>☰</span>选择供应商
         </span>
-        {DAY_OPTIONS.map(o => (
+        {!isReturn && DAY_OPTIONS.map(o => (
           <label key={o.days}>
             <input className={styles.dayCheck} type="checkbox" checked={days === o.days} onChange={() => setDays(o.days)} />
             {o.label}
@@ -361,7 +396,7 @@ export default function PurchaseIn() {
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 <th>&nbsp;库存&nbsp;</th>
-                <th>进货数量</th>
+                <th>{T.qtyHead}</th>
                 <th>进货单价</th>
                 <th></th>
                 <th>备注</th>
@@ -441,18 +476,18 @@ export default function PurchaseIn() {
         <div className={styles.orderCol}>
           {saved && draft.lines.length === 0 ? (
             <div className={styles.success}>
-              <div className={styles.successMsg}>进货单据已经成功保存!是否打印进货单?</div>
+              <div className={styles.successMsg}>{T.success}</div>
               <a
                 className={styles.printLink}
-                onClick={() => window.open(`/print/purchase/${saved.id}`, '_blank')}
+                onClick={() => window.open(`${T.printPath}${saved.id}`, '_blank')}
               >
-                {saved.orderNo}
+                {saved.no}
               </a>
             </div>
           ) : (
             <>
               <div className={styles.orderTitle}>
-                <span className={styles.orderTitleBig}>进货单</span>
+                <span className={styles.orderTitleBig}>{T.doc}</span>
                 {supplier ? `(${supplier.code}　${supplier.name})` : '(　　)'}
               </div>
               <table className={styles.orderTable}>
@@ -465,15 +500,15 @@ export default function PurchaseIn() {
                     <th>数量</th>
                     <th>单价</th>
                     <th>金额</th>
-                    <th>折扣</th>
-                    <th>折后</th>
-                    <th>件数</th>
+                    {!isReturn && <th>折扣</th>}
+                    {!isReturn && <th>折后</th>}
+                    {!isReturn && <th>件数</th>}
                     <th>备注</th>
                   </tr>
                 </thead>
                 <tbody>
                   {draft.lines.length === 0 && (
-                    <tr className={styles.noRecord}><td colSpan={11}>无记录!</td></tr>
+                    <tr className={styles.noRecord}><td colSpan={isReturn ? 8 : 11}>无记录!</td></tr>
                   )}
                   {draft.lines.map(l => (
                     <tr key={l.key}>
@@ -495,12 +530,14 @@ export default function PurchaseIn() {
                           onChange={e => setLine(l.key, { unitPrice: e.target.value.replace(/[^\d.]/g, '') })} />
                       </td>
                       <td className={styles.num}>{fmt(lineAmount(l))}</td>
-                      <td className={styles.num}>{l.discount}</td>
-                      <td className={styles.num}>{fmt(lineFinal(l))}</td>
-                      <td>
-                        <input className={styles.linePieces} type="text" value={l.pieces}
-                          onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
-                      </td>
+                      {!isReturn && <td className={styles.num}>{l.discount}</td>}
+                      {!isReturn && <td className={styles.num}>{fmt(lineFinal(l))}</td>}
+                      {!isReturn && (
+                        <td>
+                          <input className={styles.linePieces} type="text" value={l.pieces}
+                            onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
+                        </td>
+                      )}
                       <td>
                         <input className={styles.lineNotes} type="text" value={l.notes}
                           onChange={e => setLine(l.key, { notes: e.target.value })} />
@@ -513,9 +550,13 @@ export default function PurchaseIn() {
                       <td className={styles.pinkNum}>{fmt(totalQty)}</td>
                       <td></td>
                       <td className={styles.pinkNum}>{fmt(totalAmount)}</td>
-                      <td></td>
-                      <td className={styles.pinkNum}>{fmt(totalFinal)}</td>
-                      <td className={styles.pinkNum}>{fmt(totalPieces)}</td>
+                      {!isReturn && (
+                        <>
+                          <td></td>
+                          <td className={styles.pinkNum}>{fmt(totalFinal)}</td>
+                          <td className={styles.pinkNum}>{fmt(totalPieces)}</td>
+                        </>
+                      )}
                       <td></td>
                     </tr>
                   )}
@@ -524,26 +565,28 @@ export default function PurchaseIn() {
 
               {draft.lines.length > 0 && (
                 <>
-                  <div className={styles.discountRow}>
-                    输入折扣率
-                    <input
-                      className={styles.rateInput}
-                      type="text"
-                      value={draft.discountRate}
-                      onChange={e => handleRateChange(e.target.value)}
-                    />
-                    %
-                  </div>
+                  {!isReturn && (
+                    <div className={styles.discountRow}>
+                      输入折扣率
+                      <input
+                        className={styles.rateInput}
+                        type="text"
+                        value={draft.discountRate}
+                        onChange={e => handleRateChange(e.target.value)}
+                      />
+                      %
+                    </div>
+                  )}
                   <div className={styles.pinkArea}>
                     <div className={styles.pinkRow}>
-                      开单日期
+                      {T.dateLabel}
                       <input
                         className={styles.dateInput}
                         type="text"
                         value={draft.orderDate}
                         onChange={e => setDraft(d => ({ ...d, orderDate: e.target.value }))}
                       />
-                      经办人
+                      {T.operatorLabel}
                       <input className={styles.operatorInput} type="text" value={user?.name ?? ''} readOnly />
                     </div>
                     <textarea

@@ -69,6 +69,7 @@ const NAV_ITEMS: NavItem[] = [
 // Detail pages with ids in the path, checked before the prefix labels below
 const ROUTE_PATTERNS: [RegExp, string][] = [
   [/^\/purchase\/orders\/\d+\/edit$/, '修改采购单'],
+  [/^\/purchase\/returns\/\d+\/edit$/, '修改退货单'],
   [/^\/purchase\/(orders|returns)\/\d+$/, '单据明细'],
 ]
 
@@ -88,7 +89,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/master/suppliers': '供应商资料',
   '/settings/password': '修改密码',
   '/purchase/orders/new': '进货单录入',
-  '/purchase/returns/new': '采购退货',
+  '/purchase/returns/new': '进货退回(退货)',
   '/purchase/orders/detail': '进货单据明细',
   '/purchase/orders': '进货单据汇总',
   '/sales/orders/new': '销售出库',

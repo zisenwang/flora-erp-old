@@ -23,7 +23,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
-  { path: '/print/purchase/:id', element: <RequireAuth><PurchasePrint /></RequireAuth> },
+  { path: '/print/purchase/:id', element: <RequireAuth><PurchasePrint key="order" /></RequireAuth> },
+  { path: '/print/purchase-return/:id', element: <RequireAuth><PurchasePrint key="return" kind="return" /></RequireAuth> },
   {
     path: '/',
     element: <RequireAuth><MainLayout /></RequireAuth>,
@@ -39,11 +40,13 @@ const router = createBrowserRouter([
       { path: 'master/customers', element: <Customers /> },
       { path: 'master/customers/new', element: <CustomerForm /> },
       { path: 'master/customers/edit/:id', element: <CustomerForm /> },
-      { path: 'purchase/orders/new', element: <PurchaseIn /> },
+      { path: 'purchase/orders/new', element: <PurchaseIn key="order" /> },
+      { path: 'purchase/returns/new', element: <PurchaseIn key="return" kind="return" /> },
       { path: 'purchase/orders', element: <PurchaseList mode="summary" /> },
       { path: 'purchase/orders/detail', element: <PurchaseList mode="detail" /> },
       { path: 'purchase/orders/:id', element: <PurchaseView kind="order" /> },
-      { path: 'purchase/orders/:id/edit', element: <PurchaseEdit /> },
+      { path: 'purchase/orders/:id/edit', element: <PurchaseEdit key="order" /> },
+      { path: 'purchase/returns/:id/edit', element: <PurchaseEdit key="return" kind="return" /> },
       { path: 'purchase/returns/:id', element: <PurchaseView kind="return" /> },
     ],
   },

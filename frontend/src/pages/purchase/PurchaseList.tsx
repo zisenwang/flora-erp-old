@@ -181,11 +181,12 @@ export default function PurchaseList({ mode }: Props) {
   const viewPath = (kind: Kind, id: number) => (kind === 'order' ? `/purchase/orders/${id}` : `/purchase/returns/${id}`)
 
   function ops(kind: Kind, id: number) {
-    if (kind !== 'order') return null  // 采退单 修改/打印 come with the 采购退货 pages
+    const base = kind === 'order' ? 'orders' : 'returns'
+    const print = kind === 'order' ? `/print/purchase/${id}` : `/print/purchase-return/${id}`
     return (
       <>
-        <EditIcon title="修改单据" onClick={() => navigate(`/purchase/orders/${id}/edit`)} />
-        <span className={styles.printImg} title="打印单据" onClick={() => window.open(`/print/purchase/${id}`, '_blank')}>打印</span>
+        <EditIcon title="修改单据" onClick={() => navigate(`/purchase/${base}/${id}/edit`)} />
+        <span className={styles.printImg} title="打印单据" onClick={() => window.open(print, '_blank')}>打印</span>
       </>
     )
   }

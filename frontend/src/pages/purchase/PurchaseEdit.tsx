@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { getPurchaseOrder, updatePurchaseOrder, type PurchaseOrder } from '@/api/purchase'
+import { getPurchaseOrder, getPurchaseReturn, updatePurchaseOrder, updatePurchaseReturn } from '@/api/purchase'
 import { getProducts, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getErrorMessage } from '@/utils/error'
@@ -23,6 +23,15 @@ interface EditLine {
   pieces: string
   discount: number
   notes: string
+}
+
+// header info shared by 采购单 and 采退单
+interface DocMeta {
+  id: number
+  no: string
+  date: string
+  operator: string
+  discount: number  // order-level discount (采购单 only, kept as-is)
 }
 
 interface EditSupplier {
@@ -64,14 +73,19 @@ function lineFromProduct(p: Product, qty: string, discount: number): EditLine {
   }
 }
 
-// 修改采购单 — replicates old edit_buy.asp
-export default function PurchaseEdit() {
+interface Props {
+  kind?: 'order' | 'return'
+}
+
+// 修改采购单 / 修改退货单 — replicates old edit_buy.asp
+export default function PurchaseEdit({ kind = 'order' }: Props) {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams()
-  const orderId = Number(id)
+  const docId = Number(id)
+  const isReturn = kind === 'return'
 
-  const [order, setOrder] = useState<PurchaseOrder | null>(null)
+  const [order, setOrder] = useState<DocMeta | null>(null)
   const [supplier, setSupplier] = useState<EditSupplier | null>(null)
   const [lines, setLines] = useState<EditLine[]>([])
   const [rate, setRate] = useState('100')
@@ -87,17 +101,30 @@ export default function PurchaseEdit() {
 
   // ── Load data ────────────────────────────────────────────────
   useEffect(() => {
-    Promise.all([getPurchaseOrder(orderId), getSuppliers()])
+    // normalize 采购单 / 采退单 into one shape
+    const load = isReturn
+      ? getPurchaseReturn(docId).then(r => ({
+          meta: { id: r.id, no: r.returnNo, date: r.returnDate, operator: r.operator ?? '', discount: 100 },
+          supplierId: r.supplierId, supplierCode: r.supplierCode, supplierName: r.supplierName, notes: r.notes,
+          items: (r.items ?? []).map(i => ({ ...i, discount: 100 })),
+        }))
+      : getPurchaseOrder(docId).then(o => ({
+          meta: { id: o.id, no: o.orderNo, date: o.orderDate, operator: o.operator ?? '', discount: o.discount },
+          supplierId: o.supplierId, supplierCode: o.supplierCode, supplierName: o.supplierName, notes: o.notes,
+          items: o.items ?? [],
+        }))
+
+    Promise.all([load, getSuppliers()])
       .then(async ([o, supps]) => {
         const prods = await getProducts({ supplierId: o.supplierId })
         const byId = Object.fromEntries(prods.map(p => [p.id, p]))
-        const items = o.items ?? []
+        const items = o.items
         const discounts = new Set(items.map(i => i.discount))
-        setOrder(o)
+        setOrder(o.meta)
         setSuppliers(supps)
         setProducts(prods)
         setSupplier({ id: o.supplierId, code: o.supplierCode, name: o.supplierName })
-        setOrderDate(toSlashDate(o.orderDate))
+        setOrderDate(toSlashDate(o.meta.date))
         setNotes(o.notes ?? '')
         setRate(discounts.size === 1 ? String(items[0].discount) : '100')
         setLines(items.map(i => ({
@@ -117,7 +144,7 @@ export default function PurchaseEdit() {
         })))
       })
       .catch(err => alert(getErrorMessage(err)))
-  }, [orderId])
+  }, [docId, isReturn])
 
   // products for the pickers follow the order's (possibly changed) supplier
   const supplierId = supplier?.id ?? null
@@ -154,35 +181,44 @@ export default function PurchaseEdit() {
 
   function goBack() {
     if (location.key !== 'default') navigate(-1)
-    else navigate('/purchase/orders')
+    else navigate('/purchase/orders')  // 汇总表 lists both 采购单 and 采退单
   }
 
   async function handleSave() {
     if (saving || !order || !supplier) return
     if (lines.length === 0) { alert('单据中没有产品'); return }
-    if (lines.some(l => num(l.qty) <= 0)) { alert('进货数量必须大于0'); return }
+    if (lines.some(l => num(l.qty) <= 0)) { alert('数量必须大于0'); return }
     if (lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
     const r = Number(rate)
-    if (rate === '' || isNaN(r) || r < 0 || r > 100) { alert('请输入0-100之间的折扣率'); return }
+    if (!isReturn && (rate === '' || isNaN(r) || r < 0 || r > 100)) { alert('请输入0-100之间的折扣率'); return }
     const date = parseSlashDate(orderDate)
     if (!date) { alert('开单日期格式不正确，例如 2026/10/1'); return }
 
     setSaving(true)
     try {
-      await updatePurchaseOrder(order.id, {
-        supplierId: supplier.id,
-        orderDate: date,
-        discount: order.discount,
-        notes: notes.trim() || undefined,
-        items: lines.map(l => ({
-          productId: l.productId,
-          qty: num(l.qty),
-          pieces: num(l.pieces),
-          unitPrice: num(l.unitPrice),
-          discount: l.discount,
-          notes: l.notes.trim() || undefined,
-        })),
-      })
+      const items = lines.map(l => ({
+        productId: l.productId,
+        qty: num(l.qty),
+        pieces: num(l.pieces),
+        unitPrice: num(l.unitPrice),
+        notes: l.notes.trim() || undefined,
+      }))
+      if (isReturn) {
+        await updatePurchaseReturn(order.id, {
+          supplierId: supplier.id,
+          returnDate: date,
+          notes: notes.trim() || undefined,
+          items,
+        })
+      } else {
+        await updatePurchaseOrder(order.id, {
+          supplierId: supplier.id,
+          orderDate: date,
+          discount: order.discount,
+          notes: notes.trim() || undefined,
+          items: items.map((it, i) => ({ ...it, discount: lines[i].discount })),
+        })
+      }
       alert('修改成功')
       goBack()
     } catch (err) {
@@ -200,6 +236,7 @@ export default function PurchaseEdit() {
   const totalFinal = lines.reduce((s, l) => s + lineFinal(l), 0)
   const totalPieces = lines.reduce((s, l) => s + num(l.pieces), 0)
   const replacing = lines.find(l => l.key === replaceKey) ?? null
+  const typeLabel = isReturn ? '采退单' : '采购单'
 
   return (
     <div className={styles.page}>
@@ -221,12 +258,12 @@ export default function PurchaseEdit() {
               <th>编码</th>
               <th>产品名称&nbsp;&nbsp;规格&nbsp;&nbsp;等级</th>
               <th>单位</th>
-              <th>进货数量</th>
+              <th>{isReturn ? '退货数量' : '进货数量'}</th>
               <th>单价</th>
-              <th>进货金额</th>
-              <th>件数</th>
-              <th>折扣</th>
-              <th>折后金额</th>
+              <th>{isReturn ? '金额' : '进货金额'}</th>
+              {!isReturn && <th>件数</th>}
+              {!isReturn && <th>折扣</th>}
+              {!isReturn && <th>折后金额</th>}
               <th>备注</th>
               <th>经办人</th>
             </tr>
@@ -234,13 +271,13 @@ export default function PurchaseEdit() {
           <tbody>
             {lines.map(l => (
               <tr key={l.key}>
-                <td>采购单</td>
+                <td>{typeLabel}</td>
                 <td>
                   <span className={styles.badgeGreen} title="更换供应商" onClick={() => setPickSupplier(true)}>更换</span>
                   {supplier.code} {supplier.name}
                 </td>
-                <td>{toSlashDate(order.orderDate)}</td>
-                <td>{order.orderNo}</td>
+                <td>{toSlashDate(order.date)}</td>
+                <td>{order.no}</td>
                 <td>{l.code}</td>
                 <td>
                   <span className={styles.badgeRed} title="更换产品" onClick={() => setReplaceKey(l.key)}>更换</span>
@@ -259,17 +296,21 @@ export default function PurchaseEdit() {
                     onChange={e => setLine(l.key, { unitPrice: e.target.value.replace(/[^\d.]/g, '') })} />
                 </td>
                 <td className={styles.c}>{fmt(lineAmount(l))}</td>
-                <td>
-                  <input className={styles.lineInput} type="text" value={l.pieces}
-                    onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
-                </td>
-                <td className={styles.c}>{l.discount}</td>
-                <td className={styles.c}>{fmt(lineFinal(l))}</td>
+                {!isReturn && (
+                  <>
+                    <td>
+                      <input className={styles.lineInput} type="text" value={l.pieces}
+                        onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
+                    </td>
+                    <td className={styles.c}>{l.discount}</td>
+                    <td className={styles.c}>{fmt(lineFinal(l))}</td>
+                  </>
+                )}
                 <td>
                   <input className={styles.lineNotes} type="text" value={l.notes}
                     onChange={e => setLine(l.key, { notes: e.target.value })} />
                 </td>
-                <td className={styles.c}>{order.operator ?? ''}</td>
+                <td className={styles.c}>{order.operator}</td>
               </tr>
             ))}
             <tr className={styles.docSumGray}>
@@ -278,9 +319,13 @@ export default function PurchaseEdit() {
               <td className={styles.c}>{fmt(totalQty)}</td>
               <td></td>
               <td className={styles.c}>¥{fmt(totalAmount)}</td>
-              <td className={styles.c}>{fmt(totalPieces)}</td>
-              <td></td>
-              <td className={styles.c}>¥{fmt(totalFinal)}</td>
+              {!isReturn && (
+                <>
+                  <td className={styles.c}>{fmt(totalPieces)}</td>
+                  <td></td>
+                  <td className={styles.c}>¥{fmt(totalFinal)}</td>
+                </>
+              )}
               <td colSpan={2}></td>
             </tr>
           </tbody>
@@ -289,9 +334,14 @@ export default function PurchaseEdit() {
         <textarea className={styles.notesArea} value={notes} onChange={e => setNotes(e.target.value)} />
 
         <div className={styles.editFoot}>
-          输入折扣率
-          <input className={styles.rateInput} type="text" value={rate} onChange={e => handleRateChange(e.target.value)} />
-          %&nbsp;修改开单日期
+          {!isReturn && (
+            <>
+              输入折扣率
+              <input className={styles.rateInput} type="text" value={rate} onChange={e => handleRateChange(e.target.value)} />
+              %&nbsp;
+            </>
+          )}
+          修改开单日期
           <input className={styles.dateInput} type="text" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
           &nbsp;&nbsp;
           <input type="button" value={saving ? '保存中...' : '确认修改'} disabled={saving} onClick={handleSave} />
@@ -327,10 +377,10 @@ export default function PurchaseEdit() {
               </thead>
               <tbody>
                 <tr>
-                  <td>采购单</td>
+                  <td>{typeLabel}</td>
                   <td>{supplier.code} {supplier.name}</td>
-                  <td>{toSlashDate(order.orderDate)}</td>
-                  <td>{order.orderNo}</td>
+                  <td>{toSlashDate(order.date)}</td>
+                  <td>{order.no}</td>
                   <td>{replacing.code}</td>
                   <td>{replacing.name} {replacing.spec} {replacing.grade}</td>
                   <td className={styles.c}>{replacing.unit}</td>
@@ -338,7 +388,7 @@ export default function PurchaseEdit() {
                   <td className={styles.c}>{replacing.unitPrice}</td>
                   <td className={styles.c}>{fmt(lineAmount(replacing))}</td>
                   <td className={styles.c}>{replacing.pieces}</td>
-                  <td className={styles.c}>{order.operator ?? ''}</td>
+                  <td className={styles.c}>{order.operator}</td>
                 </tr>
               </tbody>
             </table>
