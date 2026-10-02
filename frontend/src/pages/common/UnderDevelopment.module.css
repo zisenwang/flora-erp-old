@@ -1,0 +1,9 @@
+.page {
+  min-height: 100%;
+  padding: 24px 10px;
+  font-size: 14px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  background: #fff;
+  color: #FF0000;
+  font-weight: bold;
+}

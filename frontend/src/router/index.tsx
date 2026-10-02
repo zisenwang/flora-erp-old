@@ -14,6 +14,7 @@ import SalesView from '@/pages/sales/SalesView'
 import SalesEdit from '@/pages/sales/SalesEdit'
 import SalesIn from '@/pages/sales/SalesIn'
 import SalesPrint from '@/pages/print/SalesPrint'
+import UnderDevelopment from '@/pages/common/UnderDevelopment'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       { path: 'sales/orders/:id/edit', element: <SalesEdit key="order" /> },
       { path: 'sales/returns/:id', element: <SalesView key="return" kind="return" /> },
       { path: 'sales/returns/:id/edit', element: <SalesEdit key="return" kind="return" /> },
+      // 报损管理 / 修改密码 — not planned, placeholder only
+      { path: 'loss', element: <UnderDevelopment /> },
+      { path: 'loss/new', element: <UnderDevelopment /> },
+      { path: 'settings/password', element: <UnderDevelopment /> },
     ],
   },
 ])
