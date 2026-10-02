@@ -11,12 +11,18 @@ interface Props {
   header?: ReactNode
   onPick: (p: Product) => void
   onClose: () => void
+  /** 单价 column: cost price for purchases (default), sale price for sales */
+  priceField?: 'costPrice' | 'price'
+  /** pre-filled search, e.g. the name of the product being replaced */
+  initialSearch?: string
 }
 
 // 请选择产品 — full-screen overlay (old prods_xz.asp / add-product picker)
-export default function ProductPicker({ products, mode, header, onPick, onClose }: Props) {
-  const [search, setSearch] = useState('')
-  const [applied, setApplied] = useState('')
+export default function ProductPicker({
+  products, mode, header, onPick, onClose, priceField = 'costPrice', initialSearch = '',
+}: Props) {
+  const [search, setSearch] = useState(initialSearch)
+  const [applied, setApplied] = useState(initialSearch)
 
   const list = products.filter(p => {
     if (!applied) return true
@@ -70,7 +76,7 @@ export default function ProductPicker({ products, mode, header, onPick, onClose 
                 <td>&nbsp;{p.name}&nbsp;</td>
                 <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
                 <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
-                <td className={styles.pickPrice}>&nbsp;{p.costPrice != null ? +p.costPrice : ''}&nbsp;</td>
+                <td className={styles.pickPrice}>&nbsp;{p[priceField] != null ? +p[priceField] : ''}&nbsp;</td>
                 <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                 <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                 <td className={styles.c}>&nbsp;{p.stock}&nbsp;</td>

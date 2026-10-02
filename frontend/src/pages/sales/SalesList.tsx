@@ -253,7 +253,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
     <div className={styles.page}>
 
       {/* ── Sub-toolbar ── */}
-      <div className={styles.subbar}>
+      <form className={styles.subbar} onSubmit={e => { e.preventDefault(); handleSearch() }}>
         <SearchIcon />
         从<input className={styles.dateInput} type="text" value={form.start} onChange={e => setField('start', e.target.value)} />
         至<input className={styles.dateInput} type="text" value={form.end} onChange={e => setField('end', e.target.value)} />
@@ -265,9 +265,8 @@ export default function SalesList({ mode = 'summary' }: Props) {
           type="text"
           value={form.keyword}
           onChange={e => setField('keyword', e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSearch()}
         />
-        <input type="button" value="查找" onClick={handleSearch} />
+        <input type="submit" value="查找" />
         <input type="button" value="显示全部" onClick={handleShowAll} />
         {mode === 'summary' ? (
           <>
@@ -280,7 +279,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
         ) : (
           <input type="button" value="查看汇总表" onClick={() => navigate('/sales/orders')} />
         )}
-      </div>
+      </form>
 
       <div className={styles.body}>
         {loading ? <div className={styles.loading}>数据加载中，请稍候...</div> : mode === 'detail' ? renderDetail() : (

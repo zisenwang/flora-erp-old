@@ -407,3 +407,57 @@
   background: #FF0000 !important;
   color: #fff;
 }
+
+/* ── Sales: 单据明细 notes row, 修改销售单 extras ── */
+.docNotesRow td {
+  background: #FFCCFF;
+  text-align: right;
+  height: 22px;
+}
+
+/* 作废此单 — green pill */
+.greenBtn {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 4px;
+  margin-right: 6px;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #fff;
+  background: #0C8D02;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btnGap {
+  display: inline-block;
+  width: 24px;
+}
+
+.profitText {
+  color: #FF0099;
+  font-weight: bold;
+}
+
+/* 老板贵姓 / 送货地址 / 合计件数 rows */
+.infoRows {
+  margin-top: 6px;
+  border-collapse: collapse;
+}
+
+.infoRows td {
+  height: 24px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.greenInput {
+  box-sizing: border-box;
+  height: 18px;
+  border: 1px solid #00FF00;
+  font-size: 12px;
+  font-family: 宋体, SimSun, sans-serif;
+  background: #fff;
+}

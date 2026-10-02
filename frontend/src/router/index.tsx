@@ -10,6 +10,8 @@ import PurchaseList from '@/pages/purchase/PurchaseList'
 import PurchaseView from '@/pages/purchase/PurchaseView'
 import PurchaseEdit from '@/pages/purchase/PurchaseEdit'
 import SalesList from '@/pages/sales/SalesList'
+import SalesView from '@/pages/sales/SalesView'
+import SalesEdit from '@/pages/sales/SalesEdit'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -51,6 +53,8 @@ const router = createBrowserRouter([
       { path: 'purchase/returns/:id', element: <PurchaseView kind="return" /> },
       { path: 'sales/orders', element: <SalesList key="summary" /> },
       { path: 'sales/orders/detail', element: <SalesList key="detail" mode="detail" /> },
+      { path: 'sales/orders/:id', element: <SalesView /> },
+      { path: 'sales/orders/:id/edit', element: <SalesEdit /> },
     ],
   },
 ])

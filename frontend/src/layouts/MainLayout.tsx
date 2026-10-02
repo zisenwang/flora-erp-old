@@ -71,6 +71,8 @@ const ROUTE_PATTERNS: [RegExp, string][] = [
   [/^\/purchase\/orders\/\d+\/edit$/, '修改采购单'],
   [/^\/purchase\/returns\/\d+\/edit$/, '修改退货单'],
   [/^\/purchase\/(orders|returns)\/\d+$/, '单据明细'],
+  [/^\/sales\/orders\/\d+\/edit$/, '修改销售单'],
+  [/^\/sales\/orders\/\d+$/, '单据明细'],
 ]
 
 const ROUTE_LABELS: Record<string, string> = {
