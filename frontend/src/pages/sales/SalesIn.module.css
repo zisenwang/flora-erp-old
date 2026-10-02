@@ -1,0 +1,96 @@
+/* 销售单录入 extras (base layout comes from purchase/PurchaseIn.module.css) */
+
+/* 选择客户 / 更换客户 sit on the toolbar; 更换客户 pushed to the right */
+.pushRight {
+  margin-left: auto;
+}
+
+/* products already in the order — orange row (提示：橙色背景…) */
+.added td {
+  background: #FF9900 !important;
+}
+
+/* old row hover: #66FF00 */
+.hoverRow:hover td {
+  background: #66FF00 !important;
+}
+
+.hint {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+
+/* 老板贵姓 / 送货地址 / 合计件数 block */
+.orangeArea {
+  background: #FF9900;
+  padding: 2px 0;
+}
+
+.orangeRow {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+}
+
+.bossInput {
+  width: 140px;
+  height: 38px;
+  box-sizing: border-box;
+  font-size: 30px;
+  font-family: 宋体, SimSun, serif;
+}
+
+.addrInput {
+  width: 386px;
+  box-sizing: border-box;
+}
+
+.piecesInput {
+  width: 80px;
+  box-sizing: border-box;
+  border: 1px solid #00FF00;
+}
+
+/* 历史单据明细(只显示20笔) — grey on light green */
+.histCaption {
+  margin-top: 20px;
+  height: 18px;
+  line-height: 18px;
+  background: #FCF7F8;
+  color: #999999;
+  white-space: pre;
+}
+
+.histTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 12px;
+  color: #999999;
+  font-family: 宋体, SimSun, sans-serif;
+}
+
+.histTable th {
+  height: 16px;
+  padding: 0 2px;
+  background: #C7FD9F;
+  color: #999999;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.histTable td {
+  height: 14px;
+  padding: 0 2px;
+  background: #fff;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.histTable td.left {
+  text-align: left;
+}

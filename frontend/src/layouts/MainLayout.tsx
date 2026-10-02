@@ -94,7 +94,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/purchase/returns/new': '进货退回(退货)',
   '/purchase/orders/detail': '进货单据明细',
   '/purchase/orders': '进货单据汇总',
-  '/sales/orders/new': '销售出库',
+  '/sales/orders/new': '销售单录入',
   '/sales/returns/new': '销售退货',
   '/sales/orders/detail': '销售单据明细',
   '/sales/orders': '销售单据汇总',

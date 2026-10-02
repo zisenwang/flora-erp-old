@@ -1,0 +1,72 @@
+/* 销售送货单打印 — replicates old dy_xsd.asp */
+
+.page {
+  margin: 0;
+  background: #fff;
+  font-size: 16px;
+  font-family: 'Times New Roman', 宋体, SimSun, serif;
+  color: #000;
+}
+
+.sheet {
+  width: 740px;
+  border-collapse: collapse;
+}
+
+.sheet td {
+  padding: 0;
+  font-size: 16px;
+}
+
+/* .style15 */
+.title {
+  height: 40px;
+  font-size: 26px;
+  letter-spacing: 10px;
+  text-align: center;
+}
+
+/* .style14 — customer name */
+.customerName {
+  font-size: 30px;
+}
+
+/* items: cellspacing=1 bgcolor=#000000 */
+.items {
+  width: 740px;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #000;
+}
+
+.items td {
+  background: #fff;
+  padding: 0;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.c {
+  text-align: center;
+}
+
+.r {
+  text-align: right;
+}
+
+/* notes box: width=600, 1px black frame, right-aligned */
+.notesBox {
+  width: 600px;
+  min-height: 28px;
+  margin-left: auto;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.loading {
+  padding: 20px;
+  color: #666;
+}
