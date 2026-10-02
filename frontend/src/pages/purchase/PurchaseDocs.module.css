@@ -461,3 +461,15 @@
   font-family: 宋体, SimSun, sans-serif;
   background: #fff;
 }
+
+/* class=style8 green (产品库存表 供应商 / 库存) */
+.green {
+  color: #006600;
+}
+
+/* "共N个产品" line under a table */
+.countLine {
+  height: 24px;
+  line-height: 24px;
+  font-weight: bold;
+}

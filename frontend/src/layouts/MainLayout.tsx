@@ -101,7 +101,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/sales/orders': '销售单据汇总',
   '/loss': '报损记录',
   '/loss/new': '新增报损',
-  '/inventory': '产品库存',
+  '/inventory': '产品库存表',
   '/inventory/adjust': '库存调整',
   '/inventory/adjustments': '调整单据',
   '/inventory/check': '库存盘点',
