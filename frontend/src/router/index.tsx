@@ -29,7 +29,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
   { path: '/print/purchase/:id', element: <RequireAuth><PurchasePrint key="order" /></RequireAuth> },
-  { path: '/print/sales/:id', element: <RequireAuth><SalesPrint /></RequireAuth> },
+  { path: '/print/sales/:id', element: <RequireAuth><SalesPrint key="order" /></RequireAuth> },
+  { path: '/print/sales-return/:id', element: <RequireAuth><SalesPrint key="return" kind="return" /></RequireAuth> },
   { path: '/print/purchase-return/:id', element: <RequireAuth><PurchasePrint key="return" kind="return" /></RequireAuth> },
   {
     path: '/',
@@ -54,11 +55,14 @@ const router = createBrowserRouter([
       { path: 'purchase/orders/:id/edit', element: <PurchaseEdit key="order" /> },
       { path: 'purchase/returns/:id/edit', element: <PurchaseEdit key="return" kind="return" /> },
       { path: 'purchase/returns/:id', element: <PurchaseView kind="return" /> },
-      { path: 'sales/orders/new', element: <SalesIn /> },
+      { path: 'sales/orders/new', element: <SalesIn key="order" /> },
+      { path: 'sales/returns/new', element: <SalesIn key="return" kind="return" /> },
       { path: 'sales/orders', element: <SalesList key="summary" /> },
       { path: 'sales/orders/detail', element: <SalesList key="detail" mode="detail" /> },
-      { path: 'sales/orders/:id', element: <SalesView /> },
-      { path: 'sales/orders/:id/edit', element: <SalesEdit /> },
+      { path: 'sales/orders/:id', element: <SalesView key="order" /> },
+      { path: 'sales/orders/:id/edit', element: <SalesEdit key="order" /> },
+      { path: 'sales/returns/:id', element: <SalesView key="return" kind="return" /> },
+      { path: 'sales/returns/:id/edit', element: <SalesEdit key="return" kind="return" /> },
     ],
   },
 ])

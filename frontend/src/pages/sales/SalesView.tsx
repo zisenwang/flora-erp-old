@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getSalesOrder, type SalesOrder } from '@/api/sales'
+import { getSalesOrder, getSalesReturn } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { toSlashDate } from '@/utils/slashDate'
@@ -8,31 +8,86 @@ import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
 const fmt = (n: number) => String(+Number(n).toFixed(2))
 
-// 单据明细 (销售单) — replicates old main_all_djmx_info.asp for a sales order (来源 dropped)
-export default function SalesView() {
+interface ViewLine {
+  id: number
+  productId: number
+  supplierCode: string
+  productCode: string
+  productName: string
+  unit: string
+  qty: number
+  unitPrice: number
+  amount: number
+  costPrice: number | null   // 销售单 only
+  pieces: number
+  notes: string
+}
+
+interface ViewDoc {
+  no: string
+  date: string
+  customerCode: string
+  customerName: string
+  customerAddress: string
+  customerPhone: string
+  operator: string
+  notes: string
+  lines: ViewLine[]
+}
+
+interface Props {
+  kind?: 'order' | 'return'
+}
+
+// 单据明细 (销售单 / 退货单) — replicates old main_all_djmx_info.asp (来源 dropped)
+export default function SalesView({ kind = 'order' }: Props) {
   const navigate = useNavigate()
   const { id } = useParams()
-  const [order, setOrder] = useState<SalesOrder | null>(null)
+  const isReturn = kind === 'return'
+  const [doc, setDoc] = useState<ViewDoc | null>(null)
   const [productsById, setProductsById] = useState<Record<number, Product>>({})  // items carry no 规格 / 等级
 
   useEffect(() => {
-    getSalesOrder(Number(id))
-      .then(setOrder)
-      .catch(err => alert(getErrorMessage(err)))
+    const load: Promise<ViewDoc> = isReturn
+      ? getSalesReturn(Number(id)).then(r => ({
+          no: r.returnNo, date: r.returnDate,
+          customerCode: r.customerCode, customerName: r.customerName,
+          customerAddress: r.customerAddress ?? '', customerPhone: r.customerPhone ?? '',
+          operator: r.operator ?? '', notes: r.notes ?? '',
+          lines: (r.items ?? []).map(i => ({
+            id: i.id, productId: i.productId, supplierCode: i.supplierCode,
+            productCode: i.productCode, productName: i.productName, unit: i.unit,
+            qty: i.qty, unitPrice: i.unitPrice, amount: i.amount, costPrice: null,
+            pieces: i.pieces, notes: i.notes ?? '',
+          })),
+        }))
+      : getSalesOrder(Number(id)).then(o => ({
+          no: o.orderNo, date: o.orderDate,
+          customerCode: o.customerCode, customerName: o.customerName,
+          customerAddress: o.customerAddress ?? '', customerPhone: o.customerPhone ?? '',
+          operator: o.operator ?? '', notes: o.notes ?? '',
+          lines: (o.items ?? []).map(i => ({
+            id: i.id, productId: i.productId, supplierCode: i.supplierCode,
+            productCode: i.productCode, productName: i.productName, unit: i.unit,
+            qty: i.qty, unitPrice: i.unitPrice, amount: i.finalAmount, costPrice: i.costPrice ?? 0,
+            pieces: i.pieces, notes: i.notes ?? '',
+          })),
+        }))
+    load.then(setDoc).catch(err => alert(getErrorMessage(err)))
     getProducts()
       .then(list => setProductsById(Object.fromEntries(list.map(p => [p.id, p]))))
       .catch(() => {})
-  }, [id])
+  }, [id, isReturn])
 
-  if (!order) return <div className={styles.loading}>数据加载中，请稍候...</div>
+  if (!doc) return <div className={styles.loading}>数据加载中，请稍候...</div>
 
-  const items = order.items ?? []
-  const profitOf = (i: SalesOrder['items'][number]) => i.finalAmount - (i.costPrice ?? 0) * i.qty
-  const totalQty = items.reduce((s, i) => s + i.qty, 0)
-  const totalAmount = items.reduce((s, i) => s + i.finalAmount, 0)
-  const totalProfit = items.reduce((s, i) => s + profitOf(i), 0)
-  const totalPieces = items.reduce((s, i) => s + i.pieces, 0)
-  const customer = `${order.customerCode} ${order.customerName}`
+  const profitOf = (l: ViewLine) => (l.costPrice == null ? 0 : l.amount - l.costPrice * l.qty)
+  const totalQty = doc.lines.reduce((s, l) => s + l.qty, 0)
+  const totalAmount = doc.lines.reduce((s, l) => s + l.amount, 0)
+  const totalProfit = doc.lines.reduce((s, l) => s + profitOf(l), 0)
+  const totalPieces = doc.lines.reduce((s, l) => s + l.pieces, 0)
+  const customer = `${doc.customerCode} ${doc.customerName}`
+  const typeLabel = isReturn ? '退货单' : '销售单'
 
   return (
     <div className={styles.page}>
@@ -59,42 +114,42 @@ export default function SalesView() {
             </tr>
           </thead>
           <tbody>
-            {items.map(i => {
-              const p = productsById[i.productId]
+            {doc.lines.map(l => {
+              const p = productsById[l.productId]
               return (
-                <tr key={i.id}>
-                  <td>销售单</td>
+                <tr key={l.id}>
+                  <td>{typeLabel}</td>
                   <td>{customer}</td>
-                  <td>{toSlashDate(order.orderDate)}</td>
-                  <td>{order.orderNo}</td>
-                  <td>{i.supplierCode}</td>
-                  <td>{i.productCode}</td>
-                  <td>{i.productName} {p?.spec ?? ''} {p?.grade ?? ''}</td>
-                  <td className={styles.c}>{i.unit}</td>
-                  <td className={styles.c}>{fmt(i.qty)}</td>
-                  <td className={styles.c}>{fmt(i.unitPrice)}</td>
-                  <td className={styles.c}>{fmt(i.finalAmount)}</td>
-                  <td className={styles.c}>{fmt(i.costPrice ?? 0)}</td>
-                  <td className={styles.c}>{fmt(profitOf(i))}</td>
-                  <td className={styles.c}>{i.pieces}</td>
-                  <td className={styles.c}>{order.operator ?? ''}</td>
-                  <td>{i.notes ?? ''}</td>
+                  <td>{toSlashDate(doc.date)}</td>
+                  <td>{doc.no}</td>
+                  <td>{l.supplierCode}</td>
+                  <td>{l.productCode}</td>
+                  <td>{l.productName} {p?.spec ?? ''} {p?.grade ?? ''}</td>
+                  <td className={styles.c}>{l.unit}</td>
+                  <td className={styles.c}>{fmt(l.qty)}</td>
+                  <td className={styles.c}>{fmt(l.unitPrice)}</td>
+                  <td className={styles.c}>{fmt(l.amount)}</td>
+                  <td className={styles.c}>{l.costPrice == null ? '' : fmt(l.costPrice)}</td>
+                  <td className={styles.c}>{l.costPrice == null ? '' : fmt(profitOf(l))}</td>
+                  <td className={styles.c}>{l.pieces}</td>
+                  <td className={styles.c}>{doc.operator}</td>
+                  <td>{l.notes}</td>
                 </tr>
               )
             })}
             <tr className={styles.docSumYellow}>
-              <td colSpan={7} className={styles.c}>总共{items.length}个产品</td>
+              <td colSpan={7} className={styles.c}>总共{doc.lines.length}个产品</td>
               <td className={styles.c}>合计</td>
               <td className={styles.c}>{fmt(totalQty)}</td>
               <td></td>
               <td className={styles.c}>¥{fmt(totalAmount)}</td>
               <td></td>
-              <td className={styles.c}>¥{fmt(totalProfit)}</td>
+              <td className={styles.c}>{isReturn ? '' : `¥${fmt(totalProfit)}`}</td>
               <td className={styles.c}>{fmt(totalPieces)}</td>
               <td colSpan={2}></td>
             </tr>
             <tr className={styles.docNotesRow}>
-              <td colSpan={16}>{order.notes ?? ''}</td>
+              <td colSpan={16}>{doc.notes}</td>
             </tr>
           </tbody>
         </table>
@@ -104,9 +159,9 @@ export default function SalesView() {
         <div className={styles.infoBox}>
           <div className={styles.infoTitle}>客户\供应商\部门信息</div>
           <div className={styles.infoBody} style={{ height: 'auto', minHeight: 56, paddingBottom: 6 }}>
-            {order.customerCode}　{order.customerName}
-            {order.customerAddress ? `\n${order.customerAddress}` : ''}
-            {order.customerPhone ? `\n${order.customerPhone}` : ''}
+            {doc.customerCode}　{doc.customerName}
+            {doc.customerAddress ? `\n${doc.customerAddress}` : ''}
+            {doc.customerPhone ? `\n${doc.customerPhone}` : ''}
           </div>
         </div>
       </div>

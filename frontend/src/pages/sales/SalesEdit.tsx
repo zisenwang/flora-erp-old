@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { getSalesOrder, updateSalesOrder, voidSalesOrder, type SalesOrder } from '@/api/sales'
+import {
+  getSalesOrder, getSalesReturn, updateSalesOrder, updateSalesReturn, voidSalesOrder, voidSalesReturn,
+} from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
 import { getCustomers, type Customer } from '@/api/customers'
 import { getErrorMessage } from '@/utils/error'
@@ -26,6 +28,15 @@ interface EditLine {
   costPrice: string
   discount: number
   notes: string
+}
+
+// header info shared by 销售单 and 退货单
+interface DocMeta {
+  id: number
+  no: string
+  date: string
+  operator: string
+  voided: boolean
 }
 
 interface EditCustomer {
@@ -68,14 +79,19 @@ function lineFromProduct(p: Product, qty: string, discount: number): EditLine {
   }
 }
 
-// 修改销售单 — replicates old edit_xs.asp (复制此单 / 送货时间 dropped)
-export default function SalesEdit() {
+interface Props {
+  kind?: 'order' | 'return'
+}
+
+// 修改销售单 / 退货单 — replicates old edit_xs.asp (复制此单 / 送货时间 dropped; 退货单 has no 进价/成本/毛利)
+export default function SalesEdit({ kind = 'order' }: Props) {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams()
   const orderId = Number(id)
+  const isReturn = kind === 'return'
 
-  const [order, setOrder] = useState<SalesOrder | null>(null)
+  const [order, setOrder] = useState<DocMeta | null>(null)
   const [customer, setCustomer] = useState<EditCustomer | null>(null)
   const [lines, setLines] = useState<EditLine[]>([])
   const [orderDate, setOrderDate] = useState('')
@@ -90,19 +106,34 @@ export default function SalesEdit() {
 
   // ── Load data ────────────────────────────────────────────────
   useEffect(() => {
-    Promise.all([getSalesOrder(orderId), getCustomers(), getProducts()])
+    // normalize 销售单 / 退货单 into one shape
+    const load = isReturn
+      ? getSalesReturn(orderId).then(r => ({
+          meta: { id: r.id, no: r.returnNo, date: r.returnDate, operator: r.operator ?? '', voided: (r.notes ?? '').startsWith('作废') },
+          customerId: r.customerId, customerCode: r.customerCode, customerName: r.customerName,
+          customerAddress: r.customerAddress, notes: r.notes,
+          items: (r.items ?? []).map(i => ({ ...i, supplierId: null as number | null, costPrice: null as number | null, discount: 100 })),
+        }))
+      : getSalesOrder(orderId).then(o => ({
+          meta: { id: o.id, no: o.orderNo, date: o.orderDate, operator: o.operator ?? '', voided: o.status === '作废' },
+          customerId: o.customerId, customerCode: o.customerCode, customerName: o.customerName,
+          customerAddress: o.customerAddress, notes: o.notes,
+          items: (o.items ?? []).map(i => ({ ...i, supplierId: i.supplierId as number | null })),
+        }))
+
+    Promise.all([load, getCustomers(), getProducts()])
       .then(([o, custs, prods]) => {
         const byId = Object.fromEntries(prods.map(p => [p.id, p]))
-        setOrder(o)
+        setOrder(o.meta)
         setCustomers(custs)
         setProducts(prods)
         setCustomer({ id: o.customerId, code: o.customerCode, name: o.customerName, address: o.customerAddress ?? '' })
-        setOrderDate(toSlashDate(o.orderDate))
+        setOrderDate(toSlashDate(o.meta.date))
         setNotes(o.notes ?? '')
-        setLines((o.items ?? []).map(i => ({
+        setLines(o.items.map(i => ({
           key: nextKey(),
           productId: i.productId,
-          supplierId: i.supplierId,
+          supplierId: i.supplierId ?? byId[i.productId]?.supplierId ?? 0,
           supplierCode: i.supplierCode,
           code: i.productCode,
           name: i.productName,
@@ -119,7 +150,7 @@ export default function SalesEdit() {
         })))
       })
       .catch(err => alert(getErrorMessage(err)))
-  }, [orderId])
+  }, [orderId, isReturn])
 
   // ── Line edits ───────────────────────────────────────────────
   function setLine(key: string, patch: Partial<EditLine>) {
@@ -143,7 +174,7 @@ export default function SalesEdit() {
 
   function goBack() {
     if (location.key !== 'default') navigate(-1)
-    else navigate('/sales/orders')
+    else navigate('/sales/orders')  // 汇总表 lists both 销售单 and 退货单
   }
 
   async function handleSave() {
@@ -157,21 +188,36 @@ export default function SalesEdit() {
 
     setSaving(true)
     try {
-      await updateSalesOrder(order.id, {
-        customerId: customer.id,
-        orderDate: date,
-        notes: notes.trim() || undefined,
-        items: lines.map(l => ({
-          productId: l.productId,
-          supplierId: l.supplierId,
-          qty: num(l.qty),
-          unitPrice: num(l.unitPrice),
-          discount: l.discount,
-          pieces: num(l.pieces),
-          notes: l.notes.trim() || undefined,
-          costPrice: l.costPrice === '' ? null : num(l.costPrice),
-        })),
-      })
+      if (isReturn) {
+        await updateSalesReturn(order.id, {
+          customerId: customer.id,
+          returnDate: date,
+          notes: notes.trim() || undefined,
+          items: lines.map(l => ({
+            productId: l.productId,
+            qty: num(l.qty),
+            pieces: num(l.pieces),
+            unitPrice: num(l.unitPrice),
+            notes: l.notes.trim() || undefined,
+          })),
+        })
+      } else {
+        await updateSalesOrder(order.id, {
+          customerId: customer.id,
+          orderDate: date,
+          notes: notes.trim() || undefined,
+          items: lines.map(l => ({
+            productId: l.productId,
+            supplierId: l.supplierId,
+            qty: num(l.qty),
+            unitPrice: num(l.unitPrice),
+            discount: l.discount,
+            pieces: num(l.pieces),
+            notes: l.notes.trim() || undefined,
+            costPrice: l.costPrice === '' ? null : num(l.costPrice),
+          })),
+        })
+      }
       alert('修改成功')
       goBack()
     } catch (err) {
@@ -185,7 +231,8 @@ export default function SalesEdit() {
     if (!order) return
     if (!window.confirm('作废后数量归零，单据保留，确定作废此单吗？')) return
     try {
-      await voidSalesOrder(order.id)
+      if (isReturn) await voidSalesReturn(order.id)
+      else await voidSalesOrder(order.id)
       alert('已作废')
       goBack()
     } catch (err) {
@@ -201,7 +248,8 @@ export default function SalesEdit() {
   const totalPieces = lines.reduce((s, l) => s + num(l.pieces), 0)
   const totalCost = lines.reduce((s, l) => s + lineCost(l), 0)
   const replacing = lines.find(l => l.key === replaceKey) ?? null
-  const isVoided = order.status === '作废'
+  const isVoided = order.voided
+  const typeLabel = isReturn ? '退货单' : '销售单'
 
   return (
     <div className={styles.page}>
@@ -231,8 +279,8 @@ export default function SalesEdit() {
               <th>单价</th>
               <th>金额</th>
               <th>件数</th>
-              <th>进价</th>
-              <th>成本</th>
+              {!isReturn && <th>进价</th>}
+              {!isReturn && <th>成本</th>}
               <th>备注</th>
               <th>经办人</th>
             </tr>
@@ -240,13 +288,13 @@ export default function SalesEdit() {
           <tbody>
             {lines.map(l => (
               <tr key={l.key}>
-                <td>销售单</td>
+                <td>{typeLabel}</td>
                 <td>
                   <span className={styles.badgeGreen} title="更换客户" onClick={() => setPickCustomer(true)}>更换</span>
                   {customer.code} {customer.name}
                 </td>
-                <td>{toSlashDate(order.orderDate)}</td>
-                <td>{order.orderNo}</td>
+                <td>{toSlashDate(order.date)}</td>
+                <td>{order.no}</td>
                 <td>{l.supplierCode}</td>
                 <td>{l.code}</td>
                 <td>
@@ -271,17 +319,21 @@ export default function SalesEdit() {
                   <input className={styles.lineInput} type="text" value={l.pieces}
                     onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
                 </td>
-                <td>
-                  <input className={styles.lineInput} type="text" value={l.costPrice}
-                    onChange={e => setLine(l.key, { costPrice: e.target.value.replace(/[^\d.]/g, '') })} />
-                </td>
-                <td className={styles.c}>{fmt(lineCost(l))}</td>
+                {!isReturn && (
+                  <>
+                    <td>
+                      <input className={styles.lineInput} type="text" value={l.costPrice}
+                        onChange={e => setLine(l.key, { costPrice: e.target.value.replace(/[^\d.]/g, '') })} />
+                    </td>
+                    <td className={styles.c}>{fmt(lineCost(l))}</td>
+                  </>
+                )}
                 <td>
                   <input className={styles.lineNotes} type="text" value={l.notes}
                     onChange={e => setLine(l.key, { notes: e.target.value })} />
                 </td>
                 <td>
-                  <input className={styles.lineInput} type="text" value={order.operator ?? ''} readOnly />
+                  <input className={styles.lineInput} type="text" value={order.operator} readOnly />
                 </td>
               </tr>
             ))}
@@ -292,11 +344,17 @@ export default function SalesEdit() {
               <td></td>
               <td className={styles.c}>¥{fmt(totalAmount)}</td>
               <td className={styles.c}>{fmt(totalPieces)}</td>
-              <td></td>
-              <td className={styles.c}>¥{fmt(totalCost)}</td>
-              <td colSpan={2} className={styles.c}>
-                毛利:¥<span className={styles.profitText}>{fmt(totalAmount - totalCost)}</span>
-              </td>
+              {isReturn ? (
+                <td colSpan={2}></td>
+              ) : (
+                <>
+                  <td></td>
+                  <td className={styles.c}>¥{fmt(totalCost)}</td>
+                  <td colSpan={2} className={styles.c}>
+                    毛利:¥<span className={styles.profitText}>{fmt(totalAmount - totalCost)}</span>
+                  </td>
+                </>
+              )}
             </tr>
           </tbody>
         </table>
@@ -361,10 +419,10 @@ export default function SalesEdit() {
               </thead>
               <tbody>
                 <tr>
-                  <td>销售单</td>
+                  <td>{typeLabel}</td>
                   <td>{customer.code} {customer.name}</td>
-                  <td>{toSlashDate(order.orderDate)}</td>
-                  <td>{order.orderNo}</td>
+                  <td>{toSlashDate(order.date)}</td>
+                  <td>{order.no}</td>
                   <td>{replacing.code}</td>
                   <td>{replacing.name} {replacing.spec} {replacing.grade}</td>
                   <td className={styles.c}>{replacing.unit}</td>
@@ -373,7 +431,7 @@ export default function SalesEdit() {
                   <td className={styles.c}>{replacing.unitPrice}</td>
                   <td className={styles.c}>{fmt(lineAmount(replacing))}</td>
                   <td className={styles.c}>{replacing.pieces}</td>
-                  <td className={styles.c}>{order.operator ?? ''}</td>
+                  <td className={styles.c}>{order.operator}</td>
                 </tr>
                 <tr className={styles.docSumYellow}>
                   <td colSpan={8} className={styles.c}>总共1个产品</td>

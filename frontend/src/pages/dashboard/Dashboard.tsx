@@ -6,6 +6,7 @@ import { getSalesGroup, getRankings, type ReportGroupRow } from '@/api/reports'
 import { getProducts } from '@/api/products'
 import { getCustomers } from '@/api/customers'
 import { getSuppliers } from '@/api/suppliers'
+import { peekSalesDraftCustomer } from '@/utils/salesDraft'
 import styles from './Dashboard.module.css'
 
 export default function Dashboard() {
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [supplierCount, setSupplierCount] = useState(0)
   const [yearlyData, setYearlyData] = useState<ReportGroupRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [draftCustomer] = useState(peekSalesDraftCustomer)  // 未提交销售单 from 销售单录入
 
   const today = dayjs().format('YYYY-MM-DD')
   const monthStart = dayjs().startOf('month').format('YYYY-MM-DD')
@@ -93,7 +95,10 @@ export default function Dashboard() {
       {/* ── Alert bar: 未提交销售单 ── */}
       <div className={styles.alertOuter}>
         <div className={styles.alertInner}>
-          &nbsp;未提交销售单:（暂无）
+          &nbsp;未提交销售单:
+          {draftCustomer == null
+            ? '（暂无）'
+            : <span className={styles.alertLink} onClick={() => navigate('/sales/orders/new')}>{draftCustomer || '（未选客户）'}</span>}
         </div>
       </div>
 

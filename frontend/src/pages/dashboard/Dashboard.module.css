@@ -34,6 +34,15 @@
   color: #ff69b4;
 }
 
+/* customer of the unsubmitted 销售单 — click to continue in 销售单录入 */
+.alertLink {
+  cursor: pointer;
+}
+
+.alertLink:hover {
+  text-decoration: underline;
+}
+
 /* ─── Outer layout: main-left | daily-right ─────────────── */
 .layout {
   display: inline-flex;

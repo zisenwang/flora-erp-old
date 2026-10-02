@@ -3,10 +3,11 @@ import dayjs from 'dayjs'
 import { getProducts, getProductCategories, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getCustomers, type Customer } from '@/api/customers'
-import { createSalesOrder, getSalesOrdersDetail, type SalesDetailRow } from '@/api/sales'
+import { createSalesOrder, createSalesReturn, getSalesOrdersDetail, type SalesDetailRow } from '@/api/sales'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { SALES_DRAFT_KEY } from '@/utils/salesDraft'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import SupplierPicker from '@/pages/purchase/SupplierPicker'
 import styles from '@/pages/purchase/PurchaseIn.module.css'
@@ -46,7 +47,25 @@ interface Draft {
   notes: string
 }
 
-const DRAFT_KEY = 'flora.salesDraft'
+type Kind = 'order' | 'return'
+
+// 销售单录入 (xs_in.asp) vs 销售退货单录入 (th_in.asp) — same page, different wording/columns
+const TEXT = {
+  order: {
+    doc: '销售单',
+    priceHead: '单价',
+    success: '销售单据已经成功保存!是否打印销售单?',
+    printPath: '/print/sales/',
+    draftKey: SALES_DRAFT_KEY,
+  },
+  return: {
+    doc: '销售退货单',
+    priceHead: '销售单价',
+    success: '退货单据已经成功保存!是否打印退货单?',
+    printPath: '/print/sales-return/',
+    draftKey: 'flora.salesReturnDraft',
+  },
+} as const
 
 const newDraft = (customer: DraftCustomer | null = null): Draft => ({
   customer,
@@ -55,16 +74,16 @@ const newDraft = (customer: DraftCustomer | null = null): Draft => ({
   notes: '',
 })
 
-function loadDraft(): Draft {
+function loadDraft(key: string): Draft {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY)
+    const raw = localStorage.getItem(key)
     if (raw) return { ...newDraft(), ...JSON.parse(raw) }
   } catch { /* storage unavailable — start empty */ }
   return newDraft()
 }
 
-function saveDraft(draft: Draft) {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)) } catch { /* ignore */ }
+function saveDraft(key: string, draft: Draft) {
+  try { localStorage.setItem(key, JSON.stringify(draft)) } catch { /* ignore */ }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -94,11 +113,19 @@ const HISTORY_ROWS = 20
 interface RowInput {
   qty: string
   price: string
+  notes: string
+}
+
+interface Props {
+  kind?: Kind
 }
 
 // 销售单录入 — replicates old xs_in.asp (手工刷新库存 / 核对 / 开单时收款 / 送货时间 dropped)
-export default function SalesIn() {
+// 销售退货单录入 — old th_in.asp: no day filter / 更换客户 / 库存 / 件数 / history
+export default function SalesIn({ kind = 'order' }: Props) {
   const { user } = useAuth()
+  const isReturn = kind === 'return'
+  const T = TEXT[kind]
 
   // ── Data state ───────────────────────────────────────────────
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -109,7 +136,7 @@ export default function SalesIn() {
   const [history, setHistory] = useState<SalesDetailRow[]>([])
 
   // ── Draft (right panel) ──────────────────────────────────────
-  const [draft, setDraftState] = useState<Draft>(loadDraft)
+  const [draft, setDraftState] = useState<Draft>(() => loadDraft(T.draftKey))
   const [saved, setSaved] = useState<{ id: number; no: string } | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -131,7 +158,7 @@ export default function SalesIn() {
   function setDraft(update: (d: Draft) => Draft) {
     setDraftState(d => {
       const next = update(d)
-      saveDraft(next)
+      saveDraft(T.draftKey, next)
       return next
     })
   }
@@ -159,13 +186,13 @@ export default function SalesIn() {
   // 历史单据明细: this customer's latest 20 sold item rows
   const customerCode = customer?.code ?? null
   const loadHistory = useCallback(() => {
-    if (customerCode == null) { setHistory([]); return }
+    if (isReturn || customerCode == null) { setHistory([]); return }
     getSalesOrdersDetail({ search: customerCode, searchField: 'customerCode' })
       .then(rows => setHistory(rows
         .filter(r => r.rowType === 'order' && r.customerCode === customerCode)
         .slice(0, HISTORY_ROWS)))
       .catch(() => setHistory([]))
-  }, [customerCode])
+  }, [isReturn, customerCode])
 
   useEffect(() => { loadHistory() }, [loadHistory])
 
@@ -204,7 +231,7 @@ export default function SalesIn() {
   // 选择客户: start a new, empty order for this customer
   function selectCustomer(c: Customer) {
     if (draft.lines.length > 0 && draft.customer?.id !== c.id &&
-        !window.confirm(`销售单中已有产品，选择新客户将清空当前销售单，确定吗？`)) return
+        !window.confirm(`${T.doc}中已有产品，选择新客户将清空当前${T.doc}，确定吗？`)) return
     if (draft.customer?.id !== c.id) setDraft(() => newDraft(toDraftCustomer(c)))
     setSaved(null)
   }
@@ -216,7 +243,7 @@ export default function SalesIn() {
 
   // ── Left table: 加入 ─────────────────────────────────────────
   function rowInput(p: Product): RowInput {
-    return rowInputs[p.id] ?? { qty: '', price: p.price != null ? p.price.toFixed(2) : '' }
+    return rowInputs[p.id] ?? { qty: '', price: p.price != null ? p.price.toFixed(2) : '', notes: '' }
   }
 
   function setRowInput(p: Product, patch: Partial<RowInput>) {
@@ -244,11 +271,11 @@ export default function SalesIn() {
         qty: input.qty,
         unitPrice: input.price,
         pieces: calcPieces(input.qty, p.unitsPerPiece ?? null),
-        notes: '',
+        notes: input.notes,
         checked: false,
       }],
     }))
-    setRowInput(p, { qty: '' })
+    setRowInput(p, { qty: '', notes: '' })
     setSaved(null)
   }
 
@@ -265,31 +292,48 @@ export default function SalesIn() {
   async function handleSave() {
     if (saving) return
     if (!draft.customer) { alert('请先选择客户'); return }
-    if (draft.lines.length === 0) { alert('销售单中没有产品'); return }
+    if (draft.lines.length === 0) { alert(`${T.doc}中没有产品`); return }
     if (draft.lines.some(l => num(l.qty) <= 0)) { alert('数量必须大于0'); return }
     if (draft.lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
     const date = parseSlashDate(draft.orderDate)
     if (!date) { alert('开单日期格式不正确，例如 2026/10/1'); return }
 
+    const notes = draft.notes.trim() || undefined
     setSaving(true)
     try {
-      const order = await createSalesOrder({
-        customerId: draft.customer.id,
-        orderDate: date,
-        notes: draft.notes.trim() || undefined,
-        items: draft.lines.map(l => ({
-          productId: l.productId,
-          supplierId: l.supplierId,
-          qty: num(l.qty),
-          unitPrice: num(l.unitPrice),
-          discount: 100,
-          pieces: num(l.pieces),
-          notes: l.notes.trim() || undefined,
-          costPrice: l.costPrice,
-        })),
-      })
+      if (isReturn) {
+        const ret = await createSalesReturn({
+          customerId: draft.customer.id,
+          returnDate: date,
+          notes,
+          items: draft.lines.map(l => ({
+            productId: l.productId,
+            qty: num(l.qty),
+            pieces: num(l.pieces),
+            unitPrice: num(l.unitPrice),
+            notes: l.notes.trim() || undefined,
+          })),
+        })
+        setSaved({ id: ret.id, no: ret.returnNo })
+      } else {
+        const order = await createSalesOrder({
+          customerId: draft.customer.id,
+          orderDate: date,
+          notes,
+          items: draft.lines.map(l => ({
+            productId: l.productId,
+            supplierId: l.supplierId,
+            qty: num(l.qty),
+            unitPrice: num(l.unitPrice),
+            discount: 100,
+            pieces: num(l.pieces),
+            notes: l.notes.trim() || undefined,
+            costPrice: l.costPrice,
+          })),
+        })
+        setSaved({ id: order.id, no: order.orderNo })
+      }
       setDraft(d => newDraft(d.customer))
-      setSaved({ id: order.id, no: order.orderNo })
       loadProducts()   // refresh stock
       loadHistory()
     } catch (err) {
@@ -317,15 +361,17 @@ export default function SalesIn() {
         <span className={styles.btnPickSupp} onClick={() => setPicker('select')}>
           <span className={styles.listIcon}>☰</span>选择客户
         </span>
-        {DAY_OPTIONS.map(o => (
+        {!isReturn && DAY_OPTIONS.map(o => (
           <label key={o.days}>
             <input className={styles.dayCheck} type="checkbox" checked={days === o.days} onChange={() => setDays(o.days)} />
             {o.label}
           </label>
         ))}
-        <span className={`${styles.btnPickSupp} ${sales.pushRight}`} onClick={() => setPicker('change')}>
-          <span className={styles.listIcon}>☰</span>更换客户
-        </span>
+        {!isReturn && (
+          <span className={`${styles.btnPickSupp} ${sales.pushRight}`} onClick={() => setPicker('change')}>
+            <span className={styles.listIcon}>☰</span>更换客户
+          </span>
+        )}
       </div>
 
       <div className={styles.layout}>
@@ -372,23 +418,24 @@ export default function SalesIn() {
                 <th>&nbsp;品名&nbsp;&nbsp;规格&nbsp;&nbsp;等级&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
-                <th>&nbsp;库存&nbsp;</th>
+                {!isReturn && <th>&nbsp;库存&nbsp;</th>}
                 <th>数量</th>
-                <th>单价</th>
+                <th>{T.priceHead}</th>
                 <th></th>
+                {isReturn && <th>备注</th>}
               </tr>
             </thead>
             <tbody>
               {paged.map(p => {
                 const input = rowInput(p)
                 return (
-                  <tr key={p.id} className={`${sales.hoverRow} ${addedIds.has(p.id) ? sales.added : ''}`}>
+                  <tr key={p.id} className={isReturn ? '' : `${sales.hoverRow} ${addedIds.has(p.id) ? sales.added : ''}`}>
                     <td>&nbsp;{p.supplierCode}&nbsp;</td>
                     <td>&nbsp;{p.code}&nbsp;</td>
                     <td>&nbsp;{p.name}&nbsp;<em className={styles.spec}>{p.spec ?? ''}</em>&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
-                    <td className={styles.stock}>&nbsp;{p.stock}&nbsp;</td>
+                    {!isReturn && <td className={styles.stock}>&nbsp;{p.stock}&nbsp;</td>}
                     <td>
                       <input
                         className={styles.qtyInput}
@@ -409,6 +456,17 @@ export default function SalesIn() {
                       />
                     </td>
                     <td><input type="button" value="加入" onClick={() => handleAdd(p)} /></td>
+                    {isReturn && (
+                      <td>
+                        <input
+                          className={styles.noteInput}
+                          type="text"
+                          value={input.notes}
+                          onChange={e => setRowInput(p, { notes: e.target.value })}
+                          onKeyDown={e => e.key === 'Enter' && handleAdd(p)}
+                        />
+                      </td>
+                    )}
                   </tr>
                 )
               })}
@@ -430,7 +488,7 @@ export default function SalesIn() {
               </tr>
             </tbody>
           </table>
-          <div className={sales.hint}>提示：橙色背景的产品表示已经加入到销售单中了。</div>
+          {!isReturn && <div className={sales.hint}>提示：橙色背景的产品表示已经加入到销售单中了。</div>}
         </div>
 
         <div className={styles.gapCol}>«</div>
@@ -439,15 +497,15 @@ export default function SalesIn() {
         <div className={styles.orderCol}>
           {saved && draft.lines.length === 0 ? (
             <div className={styles.success}>
-              <div className={styles.successMsg}>销售单据已经成功保存!是否打印销售单?</div>
-              <a className={styles.printLink} onClick={() => window.open(`/print/sales/${saved.id}`, '_blank')}>
+              <div className={styles.successMsg}>{T.success}</div>
+              <a className={styles.printLink} onClick={() => window.open(`${T.printPath}${saved.id}`, '_blank')}>
                 {saved.no}
               </a>
             </div>
           ) : (
             <>
               <div className={styles.orderTitle}>
-                <span className={styles.orderTitleBig}>销售单</span>
+                <span className={styles.orderTitleBig}>{T.doc}</span>
                 {customer ? `(${customer.code}　${customer.name})` : '(　　)'}
               </div>
               <table className={styles.orderTable}>
@@ -460,13 +518,13 @@ export default function SalesIn() {
                     <th>数量</th>
                     <th>单价</th>
                     <th>金额</th>
-                    <th>件数</th>
+                    {!isReturn && <th>件数</th>}
                     <th>备注</th>
                   </tr>
                 </thead>
                 <tbody>
                   {draft.lines.length === 0 && (
-                    <tr className={styles.noRecord}><td colSpan={9}>无记录!</td></tr>
+                    <tr className={styles.noRecord}><td colSpan={isReturn ? 8 : 9}>无记录!</td></tr>
                   )}
                   {draft.lines.map(l => (
                     <tr key={l.key}>
@@ -488,10 +546,12 @@ export default function SalesIn() {
                           onChange={e => setLine(l.key, { unitPrice: e.target.value.replace(/[^\d.]/g, '') })} />
                       </td>
                       <td className={styles.num}>{fmt(lineAmount(l))}</td>
-                      <td>
-                        <input className={styles.linePieces} type="text" value={l.pieces}
-                          onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
-                      </td>
+                      {!isReturn && (
+                        <td>
+                          <input className={styles.linePieces} type="text" value={l.pieces}
+                            onChange={e => setLine(l.key, { pieces: e.target.value.replace(/\D/g, '') })} />
+                        </td>
+                      )}
                       <td>
                         <input className={styles.lineNotes} type="text" value={l.notes}
                           onChange={e => setLine(l.key, { notes: e.target.value })} />
@@ -504,7 +564,7 @@ export default function SalesIn() {
                       <td className={styles.pinkNum}>{fmt(totalQty)}</td>
                       <td></td>
                       <td className={styles.pinkNum}>{fmt(totalAmount)}</td>
-                      <td className={styles.pinkNum}>{fmt(totalPieces)}</td>
+                      {!isReturn && <td className={styles.pinkNum}>{fmt(totalPieces)}</td>}
                       <td></td>
                     </tr>
                   )}
@@ -514,7 +574,7 @@ export default function SalesIn() {
               {draft.lines.length > 0 && customer && (
                 <>
                   {/* 老板贵姓 / 送货地址 / 合计件数 — from the customer record and lines, not saved */}
-                  <div className={sales.orangeArea}>
+                  {!isReturn && <div className={sales.orangeArea}>
                     <div className={sales.orangeRow}>
                       老板贵姓
                       <input className={sales.bossInput} type="text" value={customer.name} readOnly />
@@ -527,7 +587,7 @@ export default function SalesIn() {
                       合计件数
                       <input className={sales.piecesInput} type="text" value={fmt(totalPieces)} readOnly />
                     </div>
-                  </div>
+                  </div>}
                   <div className={styles.pinkArea}>
                     <div className={styles.pinkRow}>
                       开单日期
@@ -556,7 +616,7 @@ export default function SalesIn() {
             </>
           )}
 
-          {customer && (
+          {!isReturn && customer && (
             <>
               <div className={sales.histCaption}>
                 {customer.code}　{customer.name}　历史单据明细(只显示{HISTORY_ROWS}笔)

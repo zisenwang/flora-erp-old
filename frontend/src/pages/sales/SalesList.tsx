@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { getSalesOrders, getSalesOrdersDetail, type SalesOrder } from '@/api/sales'
+import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
@@ -10,7 +10,10 @@ import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
+type TypeFilter = 'all' | 'order' | 'return'
+
 interface Filters {
+  type: TypeFilter
   start: string   // slash date text, '' = no limit
   end: string
   field: string
@@ -31,8 +34,29 @@ const PAGE_WINDOW = 10
 const fmt = (n: number) => String(+Number(n).toFixed(2))
 const blankZero = (n: number) => (n ? fmt(n) : '')
 
-// 明细表: one row per item (sales orders only, like the 汇总表)
+type Kind = 'order' | 'return'
+const TYPE_LABEL: Record<Kind, string> = { order: '销售单', return: '退货单' }
+// 退货单 quantities / amounts count against sales: shown negative, totals are net
+const sign = (kind: Kind) => (kind === 'return' ? -1 : 1)
+
+// 汇总表: one row per document (销售单 + 退货单)
+interface SumRow {
+  kind: Kind
+  id: number
+  no: string
+  customer: string
+  date: string
+  qty: number
+  amount: number
+  pieces: number
+  paid: boolean        // 销售单 fully paid (已收款)
+  operator: string
+  notes: string
+}
+
+// 明细表: one row per item
 interface DetailRow {
+  kind: Kind
   id: number
   no: string
   customer: string
@@ -63,6 +87,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
   // ── Toolbar inputs and applied filters ───────────────────────
   // default range: 1st of the month three months back → today (old page: 2026/7/1 → 2026/10/1)
   const [form, setForm] = useState<Filters>({
+    type: 'all',
     start: toSlashDate(dayjs().subtract(3, 'month').startOf('month').toDate()),
     end: toSlashDate(),
     field: 'customerCode',
@@ -73,7 +98,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
   const [page, setPage] = useState(1)
 
   // ── Data ─────────────────────────────────────────────────────
-  const [orders, setOrders] = useState<SalesOrder[]>([])
+  const [sumRows, setSumRows] = useState<SumRow[]>([])
   const [detailRows, setDetailRows] = useState<DetailRow[]>([])
   const [productsByCode, setProductsByCode] = useState<Record<string, Product>>({})
   const [loading, setLoading] = useState(true)
@@ -94,24 +119,45 @@ export default function SalesList({ mode = 'summary' }: Props) {
     }
     setLoading(true)
     if (mode === 'summary') {
-      getSalesOrders(params)
-        .then(list => setOrders(list.sort((a, b) =>
-          dayjs(b.orderDate).valueOf() - dayjs(a.orderDate).valueOf() || b.id - a.id)))
+      Promise.all([
+        applied.type !== 'return' ? getSalesOrders(params) : Promise.resolve([]),
+        applied.type !== 'order' ? getSalesReturns(params) : Promise.resolve([]),
+      ])
+        .then(([orders, returns]) => setSumRows([
+          ...orders.map((o): SumRow => ({
+            kind: 'order', id: o.id, no: o.orderNo,
+            customer: `${o.customerCode}.${o.customerName}`,
+            date: dayjs(o.orderDate).format('YYYY-MM-DD'),
+            qty: o.totalQty, amount: o.totalAmount, pieces: o.totalPieces,
+            paid: o.paymentStatus === '已收款',
+            operator: o.operator ?? '', notes: o.notes ?? '',
+          })),
+          ...returns.map((r): SumRow => ({
+            kind: 'return', id: r.id, no: r.returnNo,
+            customer: `${r.customerCode}.${r.customerName}`,
+            date: dayjs(r.returnDate).format('YYYY-MM-DD'),
+            qty: -r.totalQty, amount: -r.totalAmount, pieces: r.totalPieces,
+            paid: false,
+            operator: r.operator ?? '', notes: r.notes ?? '',
+          })),
+        ].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)))
         .catch(err => alert(getErrorMessage(err)))
         .finally(() => setLoading(false))
     } else {
       getSalesOrdersDetail(params)
         .then(rows => setDetailRows(rows
-          .filter(r => r.rowType === 'order')
+          .filter(r => applied.type === 'all' || r.rowType === applied.type)
           .map((r): DetailRow => {
             const profit = r.profit ?? 0
+            const k = sign(r.rowType)
             return {
-              id: r.id, no: r.no,
+              kind: r.rowType, id: r.id, no: r.no,
               customer: `${r.customerCode}.${r.customerName}`,
               date: r.date,
               productCode: r.productCode, productName: r.productName, supplierCode: r.supplierCode,
-              unit: r.unit, qty: r.qty, unitPrice: r.unitPrice, amount: r.amount,
-              costPrice: r.qty ? +((r.amount - profit) / r.qty).toFixed(2) : 0,
+              unit: r.unit, qty: k * r.qty, unitPrice: r.unitPrice, amount: k * r.amount,
+              // 退货单 rows carry no 毛利 → no 进价 either
+              costPrice: r.rowType === 'order' && r.qty ? +((r.amount - profit) / r.qty).toFixed(2) : 0,
               profit, pieces: r.pieces, operator: r.operator ?? '', notes: r.notes ?? '',
             }
           })))
@@ -124,9 +170,9 @@ export default function SalesList({ mode = 'summary' }: Props) {
   useEffect(() => { setPage(1) }, [applied, pay])
 
   // ── Derived ──────────────────────────────────────────────────
-  // 已收款 = fully paid; 未收款 = anything not fully paid (未收款 / 部分收款)
-  const rows = orders.filter(o =>
-    pay === 'all' || (pay === 'paid' ? o.paymentStatus === '已收款' : o.paymentStatus !== '已收款'))
+  // 已收款 = fully paid; 未收款 = anything not fully paid (未收款 / 部分收款); both only list 销售单
+  const rows = sumRows.filter(r =>
+    pay === 'all' || (r.kind === 'order' && (pay === 'paid' ? r.paid : !r.paid)))
   const total = mode === 'summary' ? rows.length : detailRows.length
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const paged = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -134,19 +180,23 @@ export default function SalesList({ mode = 'summary' }: Props) {
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
   const windowEnd = Math.min(windowStart + PAGE_WINDOW - 1, totalPages)
 
-  const sum = (list: SalesOrder[]) => ({
-    qty: list.reduce((s, o) => s + o.totalQty, 0),
-    amount: list.reduce((s, o) => s + o.totalAmount, 0),
-    pieces: list.reduce((s, o) => s + o.totalPieces, 0),
+  const sum = (list: SumRow[]) => ({
+    qty: list.reduce((s, r) => s + r.qty, 0),
+    amount: list.reduce((s, r) => s + r.amount, 0),
+    pieces: list.reduce((s, r) => s + r.pieces, 0),
   })
   const pageSum = sum(paged)
   const allSum = sum(rows)
 
-  function ops(id: number) {
+  const base = (kind: Kind) => (kind === 'order' ? 'orders' : 'returns')
+  const viewPath = (kind: Kind, id: number) => `/sales/${base(kind)}/${id}`
+
+  function ops(kind: Kind, id: number) {
+    const print = kind === 'order' ? `/print/sales/${id}` : `/print/sales-return/${id}`
     return (
       <>
-        <EditIcon title="修改单据" onClick={() => navigate(`/sales/orders/${id}/edit`)} />
-        <span className={styles.printImg} title="打印单据" onClick={() => window.open(`/print/sales/${id}`, '_blank')}>打印</span>
+        <EditIcon title="修改单据" onClick={() => navigate(`/sales/${base(kind)}/${id}/edit`)} />
+        <span className={styles.printImg} title="打印单据" onClick={() => window.open(print, '_blank')}>打印</span>
       </>
     )
   }
@@ -200,11 +250,11 @@ export default function SalesList({ mode = 'summary' }: Props) {
           {pagedDetail.map((r, i) => {
             const p = productsByCode[r.productCode]
             return (
-              <tr key={`${r.id}-${i}`} className={styles.row}>
-                <td>&nbsp;销售单&nbsp;</td>
+              <tr key={`${r.kind}-${r.id}-${i}`} className={styles.row}>
+                <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                 <td>&nbsp;{r.customer}&nbsp;</td>
                 <td>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
-                <td>&nbsp;<a onClick={() => navigate(`/sales/orders/${r.id}`)}>{r.no}</a>&nbsp;</td>
+                <td>&nbsp;<a onClick={() => navigate(viewPath(r.kind, r.id))}>{r.no}</a>&nbsp;</td>
                 <td>&nbsp;{r.productCode}&nbsp;</td>
                 <td>&nbsp;{r.productName}&nbsp;<em className={styles.spec}>{p?.spec ?? ''}</em>&nbsp;{p?.grade ?? ''}&nbsp;</td>
                 <td>&nbsp;{p?.unitsPerPiece ?? ''}&nbsp;</td>
@@ -218,7 +268,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <td className={styles.c}>{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}</td>
                 <td>&nbsp;{r.operator}&nbsp;</td>
                 <td>&nbsp;{r.notes}&nbsp;</td>
-                <td className={styles.c}>{ops(r.id)}</td>
+                <td className={styles.c}>{ops(r.kind, r.id)}</td>
               </tr>
             )
           })}
@@ -242,7 +292,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
 
   // first 显示全部: drop every filter
   function handleShowAll() {
-    const all: Filters = { start: '', end: '', field: form.field, keyword: '' }
+    const all: Filters = { type: 'all', start: '', end: '', field: form.field, keyword: '' }
     setForm(all)
     setApplied(all)
     setPay('all')
@@ -255,6 +305,11 @@ export default function SalesList({ mode = 'summary' }: Props) {
       {/* ── Sub-toolbar ── */}
       <form className={styles.subbar} onSubmit={e => { e.preventDefault(); handleSearch() }}>
         <SearchIcon />
+        <select value={form.type} onChange={e => setField('type', e.target.value as TypeFilter)}>
+          <option value="all">全部</option>
+          <option value="order">销售单</option>
+          <option value="return">退货单</option>
+        </select>
         从<input className={styles.dateInput} type="text" value={form.start} onChange={e => setField('start', e.target.value)} />
         至<input className={styles.dateInput} type="text" value={form.end} onChange={e => setField('end', e.target.value)} />
         <select value={form.field} onChange={e => setField('field', e.target.value)}>
@@ -299,19 +354,19 @@ export default function SalesList({ mode = 'summary' }: Props) {
               </tr>
             </thead>
             <tbody>
-              {paged.map(o => (
-                <tr key={o.id} className={styles.row}>
-                  <td>&nbsp;销售单&nbsp;</td>
-                  <td>&nbsp;{o.customerCode}.{o.customerName}&nbsp;</td>
-                  <td>&nbsp;{toSlashDate(o.orderDate)}&nbsp;</td>
-                  <td>&nbsp;<a onClick={() => navigate(`/sales/orders/${o.id}`)}>{o.orderNo}</a>&nbsp;</td>
-                  <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(o.totalQty)}&nbsp;</td>
-                  <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(o.totalAmount)}&nbsp;</td>
-                  <td className={styles.c}>&nbsp;{o.totalPieces ? <em className={styles.qty}>{o.totalPieces}</em> : ''}&nbsp;</td>
-                  <td>&nbsp;{o.operator ?? ''}&nbsp;</td>
-                  <td>&nbsp;{o.notes ?? ''}&nbsp;</td>
+              {paged.map(r => (
+                <tr key={`${r.kind}-${r.id}`} className={styles.row}>
+                  <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
+                  <td>&nbsp;{r.customer}&nbsp;</td>
+                  <td>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
+                  <td>&nbsp;<a onClick={() => navigate(viewPath(r.kind, r.id))}>{r.no}</a>&nbsp;</td>
+                  <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.qty)}&nbsp;</td>
+                  <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.amount)}&nbsp;</td>
+                  <td className={styles.c}>&nbsp;{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}&nbsp;</td>
+                  <td>&nbsp;{r.operator}&nbsp;</td>
+                  <td>&nbsp;{r.notes}&nbsp;</td>
                   <td className={styles.c}>
-                    {ops(o.id)}
+                    {ops(r.kind, r.id)}
                   </td>
                 </tr>
               ))}
