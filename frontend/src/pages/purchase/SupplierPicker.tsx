@@ -1,15 +1,25 @@
 import { useState } from 'react'
-import type { Supplier } from '@/api/suppliers'
 import styles from './PurchaseIn.module.css'
 
-interface Props {
-  suppliers: Supplier[]
-  onSelect: (s: Supplier) => void
-  onClose: () => void
+interface PickItem {
+  id: number
+  code: string
+  name: string
 }
 
-// 请选择供应商 — full-screen overlay (old buy_xzkh_list.asp)
-export default function SupplierPicker({ suppliers, onSelect, onClose }: Props) {
+interface Props<T extends PickItem> {
+  suppliers: T[]
+  onSelect: (item: T) => void
+  onClose: () => void
+  /** overlay title / search label — defaults to the 供应商 wording */
+  title?: string
+  searchLabel?: string
+}
+
+// 请选择供应商 / 请选择客户 — full-screen overlay (old buy_xzkh_list.asp)
+export default function SupplierPicker<T extends PickItem>({
+  suppliers, onSelect, onClose, title = '请选择供应商', searchLabel = '查找供应商',
+}: Props<T>) {
   const [search, setSearch] = useState('')
   const [applied, setApplied] = useState('')
   const [sort, setSort] = useState<'code' | 'name'>('code')
@@ -24,11 +34,11 @@ export default function SupplierPicker({ suppliers, onSelect, onClose }: Props) 
   return (
     <div className={styles.overlay}>
       <div className={styles.overlayTitle}>
-        请选择供应商
+        {title}
         <span className={styles.overlayClose} onClick={onClose}>✕</span>
       </div>
       <div className={styles.overlayBar}>
-        查找供应商
+        {searchLabel}
         <input
           className={styles.overlaySearch}
           type="text"

@@ -9,6 +9,7 @@ import PurchaseIn from '@/pages/purchase/PurchaseIn'
 import PurchaseList from '@/pages/purchase/PurchaseList'
 import PurchaseView from '@/pages/purchase/PurchaseView'
 import PurchaseEdit from '@/pages/purchase/PurchaseEdit'
+import SalesList from '@/pages/sales/SalesList'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -48,6 +49,8 @@ const router = createBrowserRouter([
       { path: 'purchase/orders/:id/edit', element: <PurchaseEdit key="order" /> },
       { path: 'purchase/returns/:id/edit', element: <PurchaseEdit key="return" kind="return" /> },
       { path: 'purchase/returns/:id', element: <PurchaseView kind="return" /> },
+      { path: 'sales/orders', element: <SalesList key="summary" /> },
+      { path: 'sales/orders/detail', element: <SalesList key="detail" mode="detail" /> },
     ],
   },
 ])
