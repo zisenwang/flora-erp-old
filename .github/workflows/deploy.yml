@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Aliyun
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.ALIYUN_HOST }}
+          username: ${{ secrets.ALIYUN_USER }}
+          key: ${{ secrets.ALIYUN_SSH_KEY }}
+          port: ${{ secrets.ALIYUN_PORT }}
+          command_timeout: 20m
+
+          script: |
+            set -e
+
+            cd /www/FloraERP-old
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Backend"
+            cd backend
+            npm ci
+            npm run build
+
+            # plain restart keeps the saved PORT=8001 (do not add --update-env)
+            pm2 restart flora-erp-old-api || PORT=8001 pm2 start dist/server.js --name flora-erp-old-api
+            pm2 save
+
+            echo "Frontend"
+            cd ../frontend
+            npm ci
+            npx vite build
+
+            sleep 2
+            # fails the job if the API is not listening (expects 401 未授权)
+            curl -s -o /dev/null -w "api status %{http_code}\n" http://127.0.0.1:8001/api/suppliers
+
+            echo "Done"
