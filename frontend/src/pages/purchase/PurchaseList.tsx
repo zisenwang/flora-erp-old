@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { getPurchaseOrders, getPurchaseReturns, getPurchaseOrdersDetail } from '@/api/purchase'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
-import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import styles from './PurchaseDocs.module.css'
 
@@ -80,7 +80,8 @@ export default function PurchaseList({ mode }: Props) {
   const today = toSlashDate()
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  const [form, setForm] = useState<Filters>({ type: 'all', start: today, end: today, field: 'supplierCode', keyword: '' })
+  // default range: current month (1st → today)
+  const [form, setForm] = useState<Filters>({ type: 'all', start: monthStart(), end: today, field: 'supplierCode', keyword: '' })
   const [applied, setApplied] = useState<Filters>(form)
   const [page, setPage] = useState(1)
 

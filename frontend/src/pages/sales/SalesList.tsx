@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
-import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
@@ -85,10 +85,10 @@ export default function SalesList({ mode = 'summary' }: Props) {
   const navigate = useNavigate()
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  // default range: 1st of the month three months back → today (old page: 2026/7/1 → 2026/10/1)
+  // default range: current month (1st → today)
   const [form, setForm] = useState<Filters>({
     type: 'all',
-    start: toSlashDate(dayjs().subtract(3, 'month').startOf('month').toDate()),
+    start: monthStart(),
     end: toSlashDate(),
     field: 'customerCode',
     keyword: '',

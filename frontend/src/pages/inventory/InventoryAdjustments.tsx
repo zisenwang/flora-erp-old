@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
 import { getManualAdjustments, type ManualAdjustment } from '@/api/inventory'
 import { getErrorMessage } from '@/utils/error'
-import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import { LookIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
@@ -18,7 +17,7 @@ const PAGE_SIZE = 50
 const PAGE_WINDOW = 10
 
 const defaultFilters = (): Filters => ({
-  start: toSlashDate(dayjs().startOf('year').toDate()),   // old page: 2026/1/1 → today
+  start: monthStart(),   // current month (1st → today)
   end: toSlashDate(),
   field: 'productCode',
   keyword: '',

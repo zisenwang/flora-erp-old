@@ -13,3 +13,8 @@ export function parseSlashDate(text: string): string | null {
   const d = dayjs(`${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`)
   return d.isValid() ? d.format('YYYY-MM-DD') : null
 }
+
+/** 1st of the current month, e.g. "2026/10/1" — default start date of the 单据 lists */
+export function monthStart(): string {
+  return toSlashDate(dayjs().startOf('month').toDate())
+}
