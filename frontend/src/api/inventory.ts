@@ -63,3 +63,43 @@ export const createAdjustment = async (
   );
   return res.data.data;
 };
+
+// ——— Manual adjustments (库存调整明细) — ref_type 'manual' only ———
+
+export interface ManualAdjustment {
+  id: number
+  productId: number
+  productCode: string
+  productName: string
+  spec: string | null
+  grade: string | null
+  unit: string
+  unitsPerPiece: number | null
+  supplierCode: string
+  supplierName: string
+  qtyBefore: number
+  qtyChange: number
+  qtyAfter: number
+  reason: string | null
+  operator: string | null
+  createdAt: string // 'YYYY-MM-DD HH:mm'
+}
+
+export interface ManualAdjustmentFilters {
+  startDate?: string
+  endDate?: string
+  productCode?: string
+  productName?: string
+  operator?: string
+  reason?: string
+}
+
+export const getManualAdjustments = async (params?: ManualAdjustmentFilters): Promise<ManualAdjustment[]> => {
+  const res = await client.get<{ data: ManualAdjustment[] }>('/inventory/manual-adjustments', { params })
+  return res.data.data
+}
+
+export const getManualAdjustment = async (id: number): Promise<ManualAdjustment> => {
+  const res = await client.get<{ data: ManualAdjustment }>(`/inventory/manual-adjustments/${id}`)
+  return res.data.data
+}

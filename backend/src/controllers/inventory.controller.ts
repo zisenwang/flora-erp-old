@@ -18,6 +18,25 @@ export async function listAdjustments(req: AuthRequest, res: Response): Promise<
   res.json({ data })
 }
 
+export async function listManualAdjustments(req: AuthRequest, res: Response): Promise<void> {
+  const { startDate, endDate, productCode, productName, operator, reason } =
+    req.query as Record<string, string | undefined>
+  const data = await service.listManualAdjustments({
+    startDate,
+    endDate,
+    productCode,
+    productName,
+    operator,
+    reason,
+  })
+  res.json({ data })
+}
+
+export async function getManualAdjustment(req: AuthRequest, res: Response): Promise<void> {
+  const data = await service.getManualAdjustment(Number(req.params.id))
+  res.json({ data })
+}
+
 export async function adjust(req: AuthRequest, res: Response): Promise<void> {
   const { productId, qtyNew, reason } = req.body
   await service.adjustInventory({ productId, qtyNew, reason }, req.user?.username ?? null)

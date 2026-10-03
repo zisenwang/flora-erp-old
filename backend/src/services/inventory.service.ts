@@ -1,6 +1,13 @@
 import pool from '@/db/pool'
 import * as invRepo from '@/repositories/inventory.repo'
-import type { InventoryRow, InventoryAdjustment, AdjustInventoryDto } from '@/dto/inventory.dto'
+import type {
+  InventoryRow,
+  InventoryAdjustment,
+  AdjustInventoryDto,
+  AdjustmentRecord,
+  AdjustmentFilters,
+} from '@/dto/inventory.dto'
+import { AppError } from '@/services/supplier.service'
 
 export async function listInventory(
   filters: { supplierId?: number; category?: string; search?: string } = {},
@@ -10,6 +17,21 @@ export async function listInventory(
 
 export async function listAdjustments(productId?: number): Promise<InventoryAdjustment[]> {
   return invRepo.findAdjustments(productId)
+}
+
+// 库存调整明细 only ever shows manual adjustments (made on the 库存调整 page)
+const MANUAL = 'manual'
+
+export async function listManualAdjustments(
+  filters: Omit<AdjustmentFilters, 'refType'> = {},
+): Promise<AdjustmentRecord[]> {
+  return invRepo.findAdjustmentRecords({ ...filters, refType: MANUAL })
+}
+
+export async function getManualAdjustment(id: number): Promise<AdjustmentRecord> {
+  const record = await invRepo.findAdjustmentRecordById(id)
+  if (!record || record.refType !== MANUAL) throw new AppError(404, '调整记录不存在')
+  return record
 }
 
 export async function adjustInventory(

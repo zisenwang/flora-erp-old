@@ -74,6 +74,7 @@ const ROUTE_PATTERNS: [RegExp, string][] = [
   [/^\/sales\/orders\/\d+\/edit$/, '修改销售单'],
   [/^\/sales\/returns\/\d+\/edit$/, '修改退货单'],
   [/^\/sales\/(orders|returns)\/\d+$/, '单据明细'],
+  [/^\/inventory\/adjustments\/\d+$/, '单据明细'],
 ]
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -103,7 +104,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/loss/new': '新增报损',
   '/inventory': '产品库存表',
   '/inventory/adjust': '库存调整',
-  '/inventory/adjustments': '调整单据',
+  '/inventory/adjustments': '库存调整明细',
   '/inventory/check': '库存盘点',
   '/inventory/check-records': '盘点单据',
   '/reports/sales': '销售报表',

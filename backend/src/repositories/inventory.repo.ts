@@ -1,6 +1,11 @@
 import pool from '@/db/pool'
-import { rowsToCamel } from '@/utils/camel'
-import type { InventoryRow, InventoryAdjustment } from '@/dto/inventory.dto'
+import { rowToCamel, rowsToCamel } from '@/utils/camel'
+import type {
+  InventoryRow,
+  InventoryAdjustment,
+  AdjustmentRecord,
+  AdjustmentFilters,
+} from '@/dto/inventory.dto'
 import type { RowDataPacket, PoolConnection } from 'mysql2/promise'
 
 export async function findAll(
@@ -52,6 +57,69 @@ export async function findAdjustments(productId?: number): Promise<InventoryAdju
   sql += ' ORDER BY ia.created_at DESC LIMIT 200'
   const [rows] = await pool.query<RowDataPacket[]>(sql, params)
   return rowsToCamel<InventoryAdjustment>(rows as Record<string, unknown>[])
+}
+
+// ── Adjustment records — generic query over inventory_adjustments, filtered in SQL ──
+const RECORD_SELECT = `
+  SELECT ia.id, ia.product_id, CONCAT(s.code, '.', p.code) AS product_code, p.name AS product_name,
+         p.spec, p.grade, p.unit, p.units_per_piece,
+         s.code AS supplier_code, s.name AS supplier_name,
+         ia.type, ia.qty_before, ia.qty_change, ia.qty_after, ia.reason, ia.ref_type, ia.ref_id,
+         COALESCE(u.name, ia.operator) AS operator,
+         DATE_FORMAT(ia.created_at, '%Y-%m-%d %H:%i') AS created_at
+  FROM inventory_adjustments ia
+  JOIN products p ON p.id = ia.product_id
+  JOIN suppliers s ON s.id = p.supplier_id
+  LEFT JOIN users u ON u.username = ia.operator
+  WHERE 1=1`
+
+export async function findAdjustmentRecords(filters: AdjustmentFilters = {}): Promise<AdjustmentRecord[]> {
+  let sql = RECORD_SELECT
+  const params: unknown[] = []
+  if (filters.refType) {
+    sql += ' AND ia.ref_type = ?'
+    params.push(filters.refType)
+  }
+  if (filters.type) {
+    sql += ' AND ia.type = ?'
+    params.push(filters.type)
+  }
+  if (filters.productId) {
+    sql += ' AND ia.product_id = ?'
+    params.push(filters.productId)
+  }
+  if (filters.startDate) {
+    sql += ' AND ia.created_at >= ?'
+    params.push(`${filters.startDate} 00:00:00`)
+  }
+  if (filters.endDate) {
+    sql += ' AND ia.created_at <= ?'
+    params.push(`${filters.endDate} 23:59:59`)
+  }
+  if (filters.productCode) {
+    sql += " AND CONCAT(s.code, '.', p.code) LIKE ?"
+    params.push(`%${filters.productCode}%`)
+  }
+  if (filters.productName) {
+    sql += ' AND p.name LIKE ?'
+    params.push(`%${filters.productName}%`)
+  }
+  if (filters.operator) {
+    sql += ' AND (u.name LIKE ? OR ia.operator LIKE ?)'
+    params.push(`%${filters.operator}%`, `%${filters.operator}%`)
+  }
+  if (filters.reason) {
+    sql += ' AND ia.reason LIKE ?'
+    params.push(`%${filters.reason}%`)
+  }
+  sql += ' ORDER BY ia.created_at DESC, ia.id DESC'
+  const [rows] = await pool.query<RowDataPacket[]>(sql, params)
+  return rowsToCamel<AdjustmentRecord>(rows as Record<string, unknown>[])
+}
+
+export async function findAdjustmentRecordById(id: number): Promise<AdjustmentRecord | null> {
+  const [rows] = await pool.query<RowDataPacket[]>(`${RECORD_SELECT} AND ia.id = ?`, [id])
+  return rows.length ? rowToCamel<AdjustmentRecord>(rows[0] as Record<string, unknown>) : null
 }
 
 export async function getQuantity(productId: number, conn?: PoolConnection): Promise<number> {
