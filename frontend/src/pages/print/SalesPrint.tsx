@@ -54,7 +54,7 @@ export default function SalesPrint({ kind = 'order' }: Props) {
   const [productsById, setProductsById] = useState<Record<number, Product>>({})  // items carry no 规格 / 等级
 
   useEffect(() => {
-    document.title = isReturn ? '云达ERP-退货单' : '云达ERP-销售单'
+    document.title = isReturn ? '云达ERP复刻版-退货单' : '云达ERP复刻版-销售单'
     const load: Promise<PrintDoc> = isReturn
       ? getSalesReturn(Number(id)).then(r => ({
           no: r.returnNo, date: r.returnDate, customerCode: r.customerCode, customerName: r.customerName,

@@ -97,16 +97,6 @@
   font-weight: bold;
 }
 
-.lnk {
-  color: #0000cc;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.lnk:hover {
-  color: #ff69b4;
-}
-
 .btnInline {
   display: inline-block;
   margin-left: 4px;
@@ -122,28 +112,6 @@
 
 .btnInline:hover {
   background: #236600;
-}
-
-.btnRow {
-  display: flex;
-  gap: 3px;
-  margin-bottom: 4px;
-  flex-wrap: wrap;
-}
-
-.tabBtn {
-  background: #e0e0e0;
-  border: 1px solid #aaa;
-  font-size: 12px;
-  padding: 2px 6px;
-  cursor: pointer;
-  font-family: 宋体, SimSun, sans-serif;
-  border-radius: 2px;
-}
-
-.tabBtn:hover {
-  background: #c8dfc8;
-  border-color: #1a7500;
 }
 
 /* ─── Section labels (style7: plain bold, NOT a green bar) ─ */

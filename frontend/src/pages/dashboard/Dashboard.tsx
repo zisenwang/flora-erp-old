@@ -81,7 +81,6 @@ export default function Dashboard() {
   // amount with 1 decimal and commas like original: 42,798.0
   const fmtAmt = (n: number) =>
     n.toLocaleString('zh-CN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-  const fmtWan = (n: number) => (n / 10000).toFixed(1)
   // yearly chart: raw number no commas, strip trailing .0
   const fmtYearAmt = (n: number) => n % 1 === 0 ? n.toFixed(0) : n.toFixed(1)
   const fmtWanStrip = (n: number) => {
@@ -107,7 +106,7 @@ export default function Dashboard() {
         {/* ════ LEFT: stacked rows ════ */}
         <div className={styles.main}>
 
-          {/* ── Row 1: Sales + 收款 + 付款 ── */}
+          {/* ── Row 1: Sales + Counts ── */}
           <div className={styles.row1}>
 
             {/* Sales panel — green border #009933 */}
@@ -142,59 +141,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* 收款 panel — purple border #9900FF */}
-            <div className={styles.panel} style={{ borderColor: '#9900FF' }}>
-              <div className={styles.panelBody}>
-                <div className={styles.btnRow}>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>收到货款</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>收款明细</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>应收应付单据</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>应收总表</button>
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;今天收到货款共<em className={styles.hi}>{fmt(data.todayIncome)}</em>
-                  ({fmtWan(data.todayIncome)}万)元
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;本月收到货款共<em className={styles.hi}>{fmt(monthTotals.amount)}</em>
-                  ({fmtWan(monthTotals.amount)}万)元
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;累计未收货款共<em className={styles.hi}>0</em>(0万)元
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;<span className={styles.lnk} onClick={() => navigate('/payment')}>批量录入收款记录</span>
-                  &nbsp;&nbsp;<span className={styles.lnk} onClick={() => navigate('/payment')}>收款汇总</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 付款 panel — red border #CC3300 */}
-            <div className={styles.panel} style={{ borderColor: '#CC3300' }}>
-              <div className={styles.panelBody}>
-                <div className={styles.btnRow}>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>付款录入</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>付款明细</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>应付单据</button>
-                  <button className={styles.tabBtn} onClick={() => navigate('/payment')}>应付总表</button>
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;今天已付货款共<em className={styles.hi}>{fmt(data.todayPurchase)}</em>
-                  ({fmtWan(data.todayPurchase)}万)元
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;本月已付货款共<em className={styles.hi}>0</em>(0万)元
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;累计未付货款共<em className={styles.hi}>0</em>(0万)元
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Row 2: Counts + 预订 + 更新说明 ── */}
-          <div className={styles.row1}>
-
             {/* Counts panel — red border #FF3300 */}
             <div className={styles.panel} style={{ borderColor: '#FF3300' }}>
               <div className={styles.panelBody}>
@@ -221,34 +167,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* 预订 panel — blue border #0000FF */}
-            <div className={styles.panel} style={{ borderColor: '#0000FF' }}>
-              <div className={styles.panelBody}>
-                <div className={styles.sRow}>
-                  <span className={styles.dot}>○</span>
-                  今日预订:<em className={styles.hi}>0</em>盆,共<em className={styles.hi}>0</em>元
-                </div>
-                <div className={styles.sRow}>
-                  <span className={styles.dot}>○</span>
-                  累计预订:<em className={styles.hi}>0</em>盆,共<em className={styles.hi}>0</em>元
-                </div>
-                <div className={styles.sRow}>
-                  <span className={styles.dot}>○</span>
-                  今天新开<em className={styles.hi}>0</em>个订单,累计共有<em className={styles.hi}>0</em>个订单
-                </div>
-                <div className={styles.sRow}>
-                  &nbsp;<span className={styles.lnk}>订单按调货模式汇总</span>
-                  &nbsp;&nbsp;<span className={styles.lnk}>订单按分货模式汇总</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 更新说明 panel — cyan border #00FFFF */}
-            <div className={styles.panel} style={{ borderColor: '#00FFFF' }}>
-              <div className={styles.panelBody}>
-                <div className={styles.sRow} style={{ fontWeight: 'bold' }}>&nbsp;更新说明</div>
-              </div>
-            </div>
           </div>
 
           {/* ── Supplier rank label (style7: plain bold) ── */}

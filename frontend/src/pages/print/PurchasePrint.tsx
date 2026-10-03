@@ -50,7 +50,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
   const [specs, setSpecs] = useState<Record<number, string>>({})  // productId → 规格 (items carry no spec)
 
   useEffect(() => {
-    document.title = isReturn ? '云达ERP-退货单' : '云达ERP-进货单'
+    document.title = isReturn ? '云达ERP复刻版-退货单' : '云达ERP复刻版-进货单'
     const load: Promise<PrintDoc> = isReturn
       ? getPurchaseReturn(Number(id)).then(r => ({
           no: r.returnNo, date: r.returnDate, supplierId: r.supplierId, supplierCode: r.supplierCode,

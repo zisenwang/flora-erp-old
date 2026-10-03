@@ -59,10 +59,9 @@ const NAV_ITEMS: NavItem[] = [
       { label: '采购报表', path: '/reports/purchase' },
       { label: '销售报表', path: '/reports/sales' },
       { label: '库存报表', path: '/reports/inventory' },
-      { label: '排行榜', path: '/reports/rankings' },
     ],
   },
-  { label: '销售订单', path: '/sales/orders' },
+  { label: '销售订单', path: '/sales/bookings' },
 ]
 
 // Detail pages with ids in the path, checked before the prefix labels below
@@ -99,6 +98,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/sales/returns/new': '销售退货单录入',
   '/sales/orders/detail': '销售单据明细',
   '/sales/orders': '销售单据汇总',
+  '/sales/bookings': '销售订单',
   '/loss': '报损记录',
   '/loss/new': '新增报损',
   '/inventory': '产品库存表',
@@ -192,7 +192,7 @@ export default function MainLayout() {
         <div className={styles.navRight}>
           <span className={styles.navLink} onClick={() => navigate('/')}>首页</span>
           <span className={styles.pipe}>│</span>
-          <span className={styles.version}>云达ERP</span>
+          <span className={styles.version}>云达ERP复刻版</span>
           <span className={styles.pipe}>│</span>
           <span className={styles.navUser}>👤 {user?.name ?? '用户'}</span>
           <span className={styles.pipe}>│</span>
