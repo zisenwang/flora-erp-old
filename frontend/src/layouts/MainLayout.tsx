@@ -56,8 +56,8 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: '报表中心',
     children: [
-      { label: '销售报表', path: '/reports/sales' },
       { label: '采购报表', path: '/reports/purchase' },
+      { label: '销售报表', path: '/reports/sales' },
       { label: '库存报表', path: '/reports/inventory' },
       { label: '排行榜', path: '/reports/rankings' },
     ],
@@ -106,7 +106,9 @@ const ROUTE_LABELS: Record<string, string> = {
   '/inventory/adjustments': '库存调整明细',
   '/inventory/check': '库存盘点',
   '/reports/sales': '销售报表',
-  '/reports/purchase': '采购报表',
+  '/reports/purchase/supplier': '采购按供应商汇总',
+  '/reports/purchase/operator': '采购按经办人汇总',
+  '/reports/purchase': '采购按产品汇总',
   '/reports/inventory': '库存报表',
   '/reports/rankings': '排行榜',
   '/payment': '收支管理',
