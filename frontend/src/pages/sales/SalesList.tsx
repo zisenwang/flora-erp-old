@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
@@ -26,6 +26,14 @@ const SEARCH_FIELDS = [
   { value: 'orderNo', label: '单号' },
   { value: 'operator', label: '开单人' },
   { value: 'notes', label: '备注' },
+]
+
+// 明细表 can also search by product / supplier (target of the 销售报表 查询明细 magnifiers)
+const DETAIL_FIELDS = [
+  ...SEARCH_FIELDS,
+  { value: 'productCode', label: '产品编码' },
+  { value: 'productName', label: '产品名称' },
+  { value: 'supplierCode', label: '供货商' },
 ]
 
 const PAGE_SIZE = 50
@@ -83,15 +91,21 @@ interface Props {
 // (来源 / 状态 / 收款备注 / 打印标签 dropped)
 export default function SalesList({ mode = 'summary' }: Props) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const fields = mode === 'detail' ? DETAIL_FIELDS : SEARCH_FIELDS
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  // default range: current month (1st → today)
-  const [form, setForm] = useState<Filters>({
-    type: 'all',
-    start: monthStart(),
-    end: toSlashDate(),
-    field: 'customerCode',
-    keyword: '',
+  // default range: current month (1st → today); the 销售报表 magnifiers pass
+  // ?field=&keyword=&start=&end= to open this list already filtered
+  const [form, setForm] = useState<Filters>(() => {
+    const field = searchParams.get('field')
+    return {
+      type: 'all',
+      start: searchParams.get('start') ?? monthStart(),
+      end: searchParams.get('end') ?? toSlashDate(),
+      field: field && fields.some(f => f.value === field) ? field : 'customerCode',
+      keyword: searchParams.get('keyword') ?? '',
+    }
   })
   const [applied, setApplied] = useState<Filters>(form)
   const [pay, setPay] = useState<PayFilter>('all')
@@ -111,11 +125,13 @@ export default function SalesList({ mode = 'summary' }: Props) {
   }, [mode])
 
   useEffect(() => {
+    // the backend can't search by supplier — that filter is applied to the rows below
+    const bySupplier = applied.field === 'supplierCode'
     const params = {
       startDate: parseSlashDate(applied.start) ?? undefined,
       endDate: parseSlashDate(applied.end) ?? undefined,
-      search: applied.keyword || undefined,
-      searchField: applied.keyword ? applied.field : undefined,
+      search: applied.keyword && !bySupplier ? applied.keyword : undefined,
+      searchField: applied.keyword && !bySupplier ? applied.field : undefined,
     }
     setLoading(true)
     if (mode === 'summary') {
@@ -147,6 +163,8 @@ export default function SalesList({ mode = 'summary' }: Props) {
       getSalesOrdersDetail(params)
         .then(rows => setDetailRows(rows
           .filter(r => applied.type === 'all' || r.rowType === applied.type)
+          .filter(r => !bySupplier || !applied.keyword ||
+            r.supplierCode.toLowerCase().includes(applied.keyword.toLowerCase()))
           .map((r): DetailRow => {
             const profit = r.profit ?? 0
             const k = sign(r.rowType)
@@ -313,7 +331,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
         从<input className={styles.dateInput} type="text" value={form.start} onChange={e => setField('start', e.target.value)} />
         至<input className={styles.dateInput} type="text" value={form.end} onChange={e => setField('end', e.target.value)} />
         <select value={form.field} onChange={e => setField('field', e.target.value)}>
-          {SEARCH_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+          {fields.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
         <input
           className={styles.kwInput}

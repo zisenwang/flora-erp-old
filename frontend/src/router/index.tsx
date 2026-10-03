@@ -21,6 +21,7 @@ import InventoryAdjustments from '@/pages/inventory/InventoryAdjustments'
 import InventoryAdjustmentView from '@/pages/inventory/InventoryAdjustmentView'
 import InventoryCheck from '@/pages/inventory/InventoryCheck'
 import PurchaseReport from '@/pages/reports/PurchaseReport'
+import SalesReport from '@/pages/reports/SalesReport'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -78,6 +79,12 @@ const router = createBrowserRouter([
       { path: 'reports/purchase', element: <PurchaseReport key="product" mode="product" /> },
       { path: 'reports/purchase/supplier', element: <PurchaseReport key="supplier" mode="supplier" /> },
       { path: 'reports/purchase/operator', element: <PurchaseReport key="operator" mode="operator" /> },
+      { path: 'reports/sales', element: <SalesReport key="product" mode="product" /> },
+      { path: 'reports/sales/customer', element: <SalesReport key="customer" mode="customer" /> },
+      { path: 'reports/sales/supplier', element: <SalesReport key="supplier" mode="supplier" /> },
+      { path: 'reports/sales/monthly', element: <SalesReport key="monthly" mode="monthly" /> },
+      { path: 'reports/sales/customer-product', element: <SalesReport key="customerProduct" mode="customerProduct" /> },
+      { path: 'reports/sales/year-month', element: <SalesReport key="yearMonth" mode="yearMonth" /> },
       // 报损管理 / 修改密码 — not planned, placeholder only
       { path: 'loss', element: <UnderDevelopment /> },
       { path: 'loss/new', element: <UnderDevelopment /> },

@@ -128,3 +128,47 @@
   color: #fff;
   height: 16px;
 }
+
+/* ── 销售报表 extras ── */
+.boldCode {
+  font-weight: bold;
+}
+
+/* 查询明细 / 查询汇总 magnifier cells */
+.lens {
+  text-align: center;
+  cursor: pointer;
+}
+
+/* 销售月报表 / 按年+月汇总: 9月 / 1日 labels */
+.periodLabel {
+  color: #FF0066;
+  font-weight: bold;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+/* "9合计" / "2025年合计" rows */
+.subtotalLabel {
+  font-size: 16px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.bigRed {
+  color: #FF0000;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* current month row in 按年+月汇总 */
+.currentRow td {
+  background: #FFFFCC !important;
+}
+
+/* year separator under each 年合计 row */
+.yearBreak td {
+  border-bottom: 2px solid #FF9900;
+}
