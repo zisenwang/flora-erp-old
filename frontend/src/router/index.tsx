@@ -19,6 +19,7 @@ import InventoryList from '@/pages/inventory/InventoryList'
 import InventoryAdjust from '@/pages/inventory/InventoryAdjust'
 import InventoryAdjustments from '@/pages/inventory/InventoryAdjustments'
 import InventoryAdjustmentView from '@/pages/inventory/InventoryAdjustmentView'
+import InventoryCheck from '@/pages/inventory/InventoryCheck'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -72,6 +73,7 @@ const router = createBrowserRouter([
       { path: 'inventory/adjust', element: <InventoryAdjust /> },
       { path: 'inventory/adjustments', element: <InventoryAdjustments /> },
       { path: 'inventory/adjustments/:id', element: <InventoryAdjustmentView /> },
+      { path: 'inventory/check', element: <InventoryCheck /> },
       // 报损管理 / 修改密码 — not planned, placeholder only
       { path: 'loss', element: <UnderDevelopment /> },
       { path: 'loss/new', element: <UnderDevelopment /> },

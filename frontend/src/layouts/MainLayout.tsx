@@ -49,9 +49,8 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: '产品库存', path: '/inventory' },
       { label: '库存调整', path: '/inventory/adjust' },
-      { label: '调整单据', path: '/inventory/adjustments' },
       { label: '库存盘点', path: '/inventory/check' },
-      { label: '盘点单据', path: '/inventory/check-records' },
+      { label: '调整单据', path: '/inventory/adjustments' },
     ],
   },
   {
@@ -106,7 +105,6 @@ const ROUTE_LABELS: Record<string, string> = {
   '/inventory/adjust': '库存调整',
   '/inventory/adjustments': '库存调整明细',
   '/inventory/check': '库存盘点',
-  '/inventory/check-records': '盘点单据',
   '/reports/sales': '销售报表',
   '/reports/purchase': '采购报表',
   '/reports/inventory': '库存报表',

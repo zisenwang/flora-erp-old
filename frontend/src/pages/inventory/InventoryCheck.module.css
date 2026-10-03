@@ -1,0 +1,45 @@
+/* 库存盘点 — old pd_byd_in.asp extras (table / sidebar styles come from the shared modules) */
+
+/* search row sits above the table, right of the sidebar */
+.searchRow {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 6px 0 2px 176px;
+  white-space: nowrap;
+}
+
+/* 原库存: <em> bold green */
+.stock {
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  color: #006600;
+}
+
+/* class=lvwbk — green-bordered input */
+.countInput {
+  width: 72px;
+  box-sizing: border-box;
+  border: 1px solid #70BF0A;
+}
+
+.gain {
+  font-weight: bold;
+  color: #006600;
+}
+
+.loss {
+  font-weight: bold;
+  color: #FF0000;
+}
+
+/* blue bar under the table with the 批量生成盘点单 button */
+.footer {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  background: #3B79B5;
+  color: #fff;
+  white-space: nowrap;
+}
