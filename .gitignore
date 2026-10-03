@@ -19,3 +19,7 @@ backend/dist/
 *.log
 .DS_Store
 CLAUDE.md
+# Environment files (secrets) — keep .env.example as the template
+.env
+.env.*
+!.env.example
