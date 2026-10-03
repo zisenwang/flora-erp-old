@@ -174,6 +174,17 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
     setReplaceKey(null)
   }
 
+  // 更换供应商: the whole order moves to the new supplier and its products must be
+  // re-selected; nothing is saved until 确认修改 (which refuses an empty order)
+  function handleSupplierChange(s: Supplier) {
+    if (s.id === supplier?.id) return
+    if (lines.length > 0 &&
+        !window.confirm('更换供应商后，单据中的产品需要全部重新选择，确定更换吗？')) return
+    setSupplier({ id: s.id, code: s.code, name: s.name })
+    setLines([])
+    setReplaceKey(null)
+  }
+
   function handleAdd(p: Product) {
     setLines(ls => [...ls, lineFromProduct(p, '1', rateOf(rate))])
     setPickAdd(false)
@@ -186,7 +197,7 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
 
   async function handleSave() {
     if (saving || !order || !supplier) return
-    if (lines.length === 0) { alert('单据中没有产品'); return }
+    if (lines.length === 0) { alert('单据中没有产品，请点击【向此单追加产品】重新选择产品'); return }
     if (lines.some(l => num(l.qty) <= 0)) { alert('数量必须大于0'); return }
     if (lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
     const r = Number(rate)
@@ -269,6 +280,18 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
             </tr>
           </thead>
           <tbody>
+            {lines.length === 0 && (
+              <tr>
+                <td>{typeLabel}</td>
+                <td>
+                  <span className={styles.badgeGreen} title="更换供应商" onClick={() => setPickSupplier(true)}>更换</span>
+                  {supplier.code} {supplier.name}
+                </td>
+                <td colSpan={isReturn ? 10 : 13} className={styles.c} style={{ color: '#FF0000' }}>
+                  请点击【向此单追加产品】选择 {supplier.code} {supplier.name} 的产品，未选择产品前修改不会保存
+                </td>
+              </tr>
+            )}
             {lines.map(l => (
               <tr key={l.key}>
                 <td>{typeLabel}</td>
@@ -353,7 +376,7 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
       {pickSupplier && (
         <SupplierPicker
           suppliers={suppliers}
-          onSelect={s => setSupplier({ id: s.id, code: s.code, name: s.name })}
+          onSelect={handleSupplierChange}
           onClose={() => setPickSupplier(false)}
         />
       )}

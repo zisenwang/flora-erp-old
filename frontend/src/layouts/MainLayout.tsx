@@ -114,7 +114,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/reports/purchase/supplier': '采购按供应商汇总',
   '/reports/purchase/operator': '采购按经办人汇总',
   '/reports/purchase': '采购按产品汇总',
-  '/reports/inventory': '库存报表',
+  '/reports/inventory': '库存按产品汇总',
   '/reports/rankings': '排行榜',
   '/payment': '收支管理',
   '/settings': '系统设置',

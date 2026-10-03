@@ -22,6 +22,7 @@ import InventoryAdjustmentView from '@/pages/inventory/InventoryAdjustmentView'
 import InventoryCheck from '@/pages/inventory/InventoryCheck'
 import PurchaseReport from '@/pages/reports/PurchaseReport'
 import SalesReport from '@/pages/reports/SalesReport'
+import InventoryReport from '@/pages/reports/InventoryReport'
 import PurchasePrint from '@/pages/print/PurchasePrint'
 import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
@@ -79,6 +80,7 @@ const router = createBrowserRouter([
       { path: 'reports/purchase', element: <PurchaseReport key="product" mode="product" /> },
       { path: 'reports/purchase/supplier', element: <PurchaseReport key="supplier" mode="supplier" /> },
       { path: 'reports/purchase/operator', element: <PurchaseReport key="operator" mode="operator" /> },
+      { path: 'reports/inventory', element: <InventoryReport /> },
       { path: 'reports/sales', element: <SalesReport key="product" mode="product" /> },
       { path: 'reports/sales/customer', element: <SalesReport key="customer" mode="customer" /> },
       { path: 'reports/sales/supplier', element: <SalesReport key="supplier" mode="supplier" /> },

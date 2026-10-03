@@ -172,3 +172,31 @@
 .yearBreak td {
   border-bottom: 2px solid #FF9900;
 }
+
+/* ── 库存报表 extras ── */
+/* old two-row toolbar: dates on the bar, red title + 筛选 row below */
+.invTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0 4px 4px;
+  white-space: nowrap;
+}
+
+.invTitle {
+  color: #FF0000;
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 14px;
+}
+
+.invKeyword {
+  width: 170px;
+}
+
+.countLine {
+  height: 24px;
+  line-height: 24px;
+  padding-left: 4px;
+  font-weight: bold;
+}
