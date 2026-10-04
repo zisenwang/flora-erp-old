@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '@/api/auth'
 import { useAuth } from '@/store/AuthContext'
+import { shouldUseMobile } from '@/utils/device'
 import styles from './Login.module.css'
 
 export default function Login() {
@@ -20,7 +21,7 @@ export default function Login() {
     try {
       const res = await login({ username, password })
       setAuth(res.token, res.user)
-      navigate('/')
+      navigate(shouldUseMobile() ? '/m' : '/')   // phones go to 手机版
     } catch {
       setError('用户账号或密码错误，请重试')
     } finally {

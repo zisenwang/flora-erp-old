@@ -1,0 +1,523 @@
+/* 手机开单 — recreates the old jhsmpS mobile pages (mmcss.css + mps/*.gif images) */
+
+.page {
+  min-height: 100vh;
+  background: #fff;
+  font-family: 宋体, SimSun, serif;
+  font-size: 14px;
+  color: #000;
+}
+
+.page em {
+  font-style: normal;
+  font-weight: bold;
+  color: #FF0099;
+}
+
+.left { text-align: left !important; }
+.right { text-align: right !important; }
+.center { text-align: center; }
+.nowrap { white-space: nowrap; }
+.bold { font-weight: bold; }
+
+/* ─── Top bar (bj.gif green, back / home / title) ──────────── */
+.header {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  background: linear-gradient(#3CC83C, #0EA50E 55%, #088C08);
+  color: #fff;
+  box-shadow: 0 2px 2px #9c9;
+  margin-bottom: 6px;
+}
+
+.headerBtn {
+  width: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.headerTitle {
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.headerUser {
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.userIcon { font-size: 11px; }
+
+/* ─── 销售开单 title (class sj) ────────────────────────────── */
+.sj {
+  color: #FF0000;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 28px;
+}
+
+/* ─── Recent customers bar (red frame, lime fill) ──────────── */
+.recentOuter {
+  padding: 4px 0;
+}
+
+.recentInner {
+  border: 2px solid #FF0000;
+  background: #99FF00;
+  min-height: 32px;
+  line-height: 28px;
+  padding: 0 4px;
+}
+
+.recentLink {
+  color: #000;
+  font-size: 15px;
+  margin-right: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ─── 点击这里选择 grey box ─────────────────────────────────── */
+.pickBox {
+  width: 244px;
+  margin: 60px auto 0;
+  padding: 10px 0;
+  background: #CCCCCC;
+  color: #fff;
+  font-size: 15px;
+  line-height: 34px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ─── 查找产品 + product table (mxs_in.asp) ─────────────────── */
+.searchRow {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  font-size: 14px;
+}
+
+.searchInput {
+  width: 160px;
+  height: 22px;
+  font-size: 14px;
+}
+
+.prodTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #C7FD9F;
+  font-size: 13px;
+}
+
+.prodTable th {
+  background: #70BF0A;
+  color: #fff;
+  font-weight: normal;
+  height: 18px;
+  padding: 0 1px;
+}
+
+.prodTable td {
+  background: #fff;
+  text-align: left;
+  height: 44px;
+  padding: 1px 2px;
+  word-break: break-all;
+}
+
+.prodTable tr:hover td { background: #66FF00; }
+
+.plusBtn {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+/* ─── 选择客户 (mxs_xzkh_list.asp) ──────────────────────────── */
+.custSearch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 14px;
+}
+
+.custSearchInput {
+  width: 160px;
+  height: 22px;
+}
+
+.cityRow {
+  line-height: 24px;
+  font-size: 14px;
+}
+
+.cityRow a {
+  color: #006699;
+  cursor: pointer;
+}
+
+.custList { margin-top: 4px; }
+
+.custRow {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: bold;
+  color: #006600;
+  cursor: pointer;
+}
+
+.custRow:hover { background: #FFFF00; }
+
+.custBtn {
+  display: inline-block;
+  width: 92px;
+  height: 32px;
+  margin: 0 8px 0 28px;
+  line-height: 32px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: normal;
+  color: #fff;
+  background: linear-gradient(#6DD86D, #2FA52F);
+  border: 1px solid #2A8A2A;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── 修改信息 form (mxs_in_xz.asp) ─────────────────────────── */
+.formTable {
+  margin: 0 auto;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.formTable td {
+  height: 34px;
+  padding: 0 2px;
+  border-bottom: 1px solid #F0FFF0;
+  white-space: nowrap;
+}
+
+.label {
+  text-align: right;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.green { color: #006600; }
+.teal { color: #0099CC; }
+.red { color: #FF0000; }
+.big { font-size: 15px; font-weight: bold; }
+
+.inShort { width: 84px; height: 22px; font-size: 14px; }
+.inMid { width: 114px; height: 22px; font-size: 14px; }
+.inLong { width: 190px; height: 22px; font-size: 14px; }
+
+.addBtn {
+  font-size: 22px;
+  font-weight: bold;
+  padding: 1px 6px;
+  margin: 4px 0;
+}
+
+.formGap { height: 60px; }
+
+.backBar {
+  height: 42px !important;
+  background: #9999FF;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ─── 销售出库单 (mxs_list.asp) ─────────────────────────────── */
+.orderHead {
+  height: 28px;
+  line-height: 28px;
+  background: #00CC00;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.orderCust {
+  height: 28px;
+  line-height: 28px;
+  background: #CCFFCC;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.scrollX { overflow-x: auto; }
+
+.orderTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.orderTable th {
+  background: #C7FD9F;
+  font-weight: normal;
+  white-space: nowrap;
+  height: 16px;
+}
+
+.orderTable td {
+  text-align: center;
+  white-space: nowrap;
+  background: #fff;
+}
+
+.orderTable tbody tr:hover td { background: #FFFF00; }
+.orderTable tr.shortRow td { background: #FF0000; }
+
+.cellIn { width: 64px; height: 22px; font-size: 14px; }
+.cellNotes { width: 90px; height: 22px; font-size: 14px; }
+
+.pink {
+  color: #FF0099;
+}
+
+.noRecord {
+  color: #999;
+  height: 24px;
+}
+
+.yellowLine {
+  height: 2px;
+  background: #FFFF99;
+  margin: 6px 0;
+}
+
+.orderForm {
+  padding: 2px 0;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.dateIn { width: 100px; height: 22px; font-size: 14px; }
+.operatorIn { width: 80px; height: 22px; font-size: 14px; }
+
+.notesArea {
+  width: 300px;
+  max-width: 100%;
+  font-size: 14px;
+}
+
+.histCaption {
+  font-size: 12px;
+  color: #333;
+}
+
+.histTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1px;
+  background: #CCCCCC;
+  font-size: 12px;
+  color: #666;
+}
+
+.histTable th {
+  background: #C7FD9F;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.histTable td {
+  background: #fff;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.histTable tbody tr:hover td { background: #FFFF00; }
+
+/* ─── Bottom bar (#Foot, mps/bj.png orange) ────────────────── */
+.footSpace { height: 60px; }
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  height: 34px;
+  background: linear-gradient(#FFC266, #FFAA44);
+  color: #fff;
+  font-size: 13px;
+  z-index: 10;
+}
+
+.footItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 14px;
+  border-right: 1px solid #FFD699;
+  cursor: pointer;
+}
+
+.footItem:last-child { border-right: none; }
+.footItem:hover { background: #FFFF00; }
+.footWide { flex: 2; }
+
+.footIcon {
+  font-size: 15px;
+  line-height: 16px;
+}
+
+.footerBack {
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* ─── 请选择产品分类 overlay ───────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  padding: 4px;
+  background: #009900;
+  display: flex;
+  flex-direction: column;
+}
+
+.overlayHead {
+  height: 24px;
+  line-height: 24px;
+  color: #fff;
+  font-size: 15px;
+  position: relative;
+}
+
+.overlayClose {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.overlayBody {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  padding: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px 14px;
+}
+
+.catItem {
+  font-size: 16px;
+  line-height: 30px;
+  color: #006600;
+  cursor: pointer;
+}
+
+/* ─── 手机版首页 (main.asp) ─────────────────────────────────── */
+.homeBtnRow {
+  display: flex;
+  padding: 0 1%;
+  margin-bottom: 4px;
+}
+
+.homeBtn {
+  padding: 0 10px;
+  height: 34px;
+  line-height: 34px;
+  background: #99FF66;
+  color: #006600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.redBox {
+  width: 98%;
+  margin: 0 auto 4px;
+  border: 2px solid #FF0000;
+  padding: 4px 0;
+}
+
+.sumTitle {
+  height: 24px;
+  line-height: 24px;
+  font-weight: bold;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.sumDot {
+  color: #FF6600;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.sumRow {
+  height: 24px;
+  line-height: 24px;
+  padding-left: 28px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.blueBox {
+  width: 98%;
+  margin: 0 auto 4px;
+  border: 1px solid #0000FF;
+  height: 34px;
+  line-height: 32px;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.toDesktop {
+  color: #000;
+  cursor: pointer;
+}
+
+.gotoArrow {
+  color: #FF0000;
+  font-size: 10px;
+}
+
+.homeTable {
+  width: 98%;
+  margin: 0 auto 14px;
+  border-collapse: separate;
+  border-spacing: 1px;
+  font-size: 13px;
+}
+
+.homeTable th {
+  color: #fff;
+  font-weight: normal;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.homeTable td {
+  background: #fff;
+  white-space: nowrap;
+}
+
+.homeTable tbody tr:hover td { background: #FFFF00; }

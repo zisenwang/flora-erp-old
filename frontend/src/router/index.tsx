@@ -28,6 +28,12 @@ import Suppliers from '@/pages/master/Suppliers'
 import SupplierForm from '@/pages/master/SupplierForm'
 import Customers from '@/pages/master/Customers'
 import CustomerForm from '@/pages/master/CustomerForm'
+import MobileHome from '@/pages/mobile/MobileHome'
+import MobileStart from '@/pages/mobile/MobileStart'
+import MobileSales from '@/pages/mobile/MobileSales'
+import MobileCustomers from '@/pages/mobile/MobileCustomers'
+import MobileAddProduct from '@/pages/mobile/MobileAddProduct'
+import MobileOrder from '@/pages/mobile/MobileOrder'
 
 const isLoggedIn = () => !!localStorage.getItem('token')
 
@@ -41,6 +47,13 @@ const router = createBrowserRouter([
   { path: '/print/sales/:id', element: <RequireAuth><SalesPrint key="order" /></RequireAuth> },
   { path: '/print/sales-return/:id', element: <RequireAuth><SalesPrint key="return" kind="return" /></RequireAuth> },
   { path: '/print/purchase-return/:id', element: <RequireAuth><PurchasePrint key="return" kind="return" /></RequireAuth> },
+  // 手机版 (old jhsmpS pages): 首页, then 手机开单 1 选择客户提示 → 2 选择客户 → 3 选择产品 → 4 修改信息 → 5 开单信息 → back to 1
+  { path: '/m', element: <RequireAuth><MobileHome /></RequireAuth> },
+  { path: '/m/sales', element: <RequireAuth><MobileStart /></RequireAuth> },
+  { path: '/m/sales/customers', element: <RequireAuth><MobileCustomers /></RequireAuth> },
+  { path: '/m/sales/products', element: <RequireAuth><MobileSales /></RequireAuth> },
+  { path: '/m/sales/add/:id', element: <RequireAuth><MobileAddProduct /></RequireAuth> },
+  { path: '/m/sales/order', element: <RequireAuth><MobileOrder /></RequireAuth> },
   {
     path: '/',
     element: <RequireAuth><MainLayout /></RequireAuth>,

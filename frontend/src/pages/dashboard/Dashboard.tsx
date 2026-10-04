@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getDashboardSummary, type DashboardSummary, type DailySalesRow } from '@/api/dashboard'
 import { getSalesGroup, getRankings, type ReportGroupRow } from '@/api/reports'
@@ -7,9 +7,16 @@ import { getProducts } from '@/api/products'
 import { getCustomers } from '@/api/customers'
 import { getSuppliers } from '@/api/suppliers'
 import { peekSalesDraftCustomer } from '@/utils/salesDraft'
+import { shouldUseMobile } from '@/utils/device'
 import styles from './Dashboard.module.css'
 
+// Phones opening the computer 首页 go to 手机版 instead (unless 切换到电脑版 was chosen)
 export default function Dashboard() {
+  if (shouldUseMobile()) return <Navigate to="/m" replace />
+  return <DesktopDashboard />
+}
+
+function DesktopDashboard() {
   const navigate = useNavigate()
   const [data, setData] = useState<DashboardSummary | null>(null)
   const [supplierRank, setSupplierRank] = useState<ReportGroupRow[]>([])

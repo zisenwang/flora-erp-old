@@ -6,46 +6,15 @@ import { getCustomers, type Customer } from '@/api/customers'
 import { createSalesOrder, createSalesReturn, getSalesOrdersDetail, type SalesDetailRow } from '@/api/sales'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
-import { parseSlashDate, toSlashDate } from '@/utils/slashDate'
-import { SALES_DRAFT_KEY } from '@/utils/salesDraft'
+import { parseSlashDate } from '@/utils/slashDate'
+import {
+  SALES_DRAFT_KEY, newDraft, loadDraft, saveDraft, toDraftCustomer, calcPieces,
+  type Draft, type DraftLine,
+} from '@/utils/salesDraft'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import SupplierPicker from '@/pages/purchase/SupplierPicker'
 import styles from '@/pages/purchase/PurchaseIn.module.css'
 import sales from './SalesIn.module.css'
-
-// ─── Unsaved 销售单 kept in localStorage (old system kept it server-side) ──
-interface DraftCustomer {
-  id: number
-  code: string
-  name: string
-  address: string
-  phone: string
-}
-
-interface DraftLine {
-  key: string
-  productId: number
-  supplierId: number
-  costPrice: number | null   // latest purchase price, saved for 毛利
-  code: string
-  name: string
-  spec: string
-  grade: string
-  unit: string
-  unitsPerPiece: number | null
-  qty: string
-  unitPrice: string
-  pieces: string
-  notes: string
-  checked: boolean
-}
-
-interface Draft {
-  customer: DraftCustomer | null
-  lines: DraftLine[]
-  orderDate: string
-  notes: string
-}
 
 type Kind = 'order' | 'return'
 
@@ -67,37 +36,10 @@ const TEXT = {
   },
 } as const
 
-const newDraft = (customer: DraftCustomer | null = null): Draft => ({
-  customer,
-  lines: [],
-  orderDate: toSlashDate(),
-  notes: '',
-})
-
-function loadDraft(key: string): Draft {
-  try {
-    const raw = localStorage.getItem(key)
-    if (raw) return { ...newDraft(), ...JSON.parse(raw) }
-  } catch { /* storage unavailable — start empty */ }
-  return newDraft()
-}
-
-function saveDraft(key: string, draft: Draft) {
-  try { localStorage.setItem(key, JSON.stringify(draft)) } catch { /* ignore */ }
-}
-
 // ─── Helpers ─────────────────────────────────────────────────
 const num = (v: string) => (v === '' ? 0 : Number(v))
 const fmt = (n: number) => String(+n.toFixed(2))
 const lineAmount = (l: DraftLine) => num(l.qty) * num(l.unitPrice)
-// 件数 = ceil(数量 / 包装), same rule as 进货单录入
-const calcPieces = (qty: string, unitsPerPiece: number | null) =>
-  unitsPerPiece && num(qty) > 0 ? String(Math.ceil(num(qty) / unitsPerPiece)) : '0'
-
-const toDraftCustomer = (c: Customer): DraftCustomer => ({
-  id: c.id, code: c.code, name: c.name, address: c.address ?? '', phone: c.phone ?? '',
-})
-
 const DAY_OPTIONS = [
   { days: 1, label: '今天' },
   { days: 7, label: '7天' },
