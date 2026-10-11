@@ -232,19 +232,6 @@
   background: #236600;
 }
 
-.btnInlineGrey {
-  display: inline-block;
-  background: #999;
-  color: #ccc;
-  font-size: 12px;
-  font-family: 宋体, SimSun, sans-serif;
-  padding: 1px 5px;
-  cursor: default;
-  border-radius: 2px;
-  border: none;
-  vertical-align: middle;
-}
-
 /* ── Table area (scrollable) ── */
 .tableArea {
   flex: 1;

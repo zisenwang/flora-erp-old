@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { getManualAdjustments, type ManualAdjustment } from '@/api/inventory'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportRows, rangeName } from '@/utils/exportExcel'
 import { LookIcon, SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
 interface Filters {
@@ -79,6 +81,22 @@ export default function InventoryAdjustments() {
     setApplied(all)
   }
 
+  // 导出EXCEL (old kp_djmx_list_excel.asp): every record, same columns as the table + 总计
+  function handleExport() {
+    exportRows(
+      `库存调整明细_${rangeName(applied.start, applied.end)}`,
+      ['类型', '日期', '编码', '产品', '包装', '供应商', '单位', '库存数量', '盘点数量', '盈亏数量', '经办人', '备注'],
+      [
+        ...rows.map(r => [
+          '库存调整单', toSlashDate(r.createdAt.slice(0, 10)), r.productCode,
+          [r.productName, r.spec, r.grade].filter(Boolean).join(' '), r.unitsPerPiece, r.supplierCode, r.unit,
+          r.qtyBefore, r.qtyAfter, r.qtyChange, r.operator, r.reason,
+        ]),
+        ['总计', '', '', '', '', '', '', allSum.before, allSum.after, allSum.change, '', ''],
+      ],
+    )
+  }
+
   const totalRow = (label: string, t: ReturnType<typeof sum>) => (
     <tr>
       <td colSpan={7} className={`${styles.r} ${styles.hatch}`}>{label}</td>
@@ -107,6 +125,7 @@ export default function InventoryAdjustments() {
         <input className={styles.kwInput} type="text" value={form.keyword} onChange={e => setField('keyword', e.target.value)} />
         <input type="submit" value="查找" />
         <input type="button" value="显示全部" onClick={handleShowAll} />
+        &nbsp;<ExcelButton onClick={handleExport} />
       </form>
 
       <div className={styles.body}>

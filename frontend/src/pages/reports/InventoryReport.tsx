@@ -1,10 +1,12 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { getProducts, type Product } from '@/api/products'
 import { getPurchaseOrdersDetail } from '@/api/purchase'
 import { getSalesOrdersDetail } from '@/api/sales'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
 
 type Business = 'all' | 'with' | 'without'
@@ -45,6 +47,7 @@ export default function InventoryReport() {
   const [products, setProducts] = useState<Product[]>([])
   const [moves, setMoves] = useState<Record<string, Moves>>({})
   const [loading, setLoading] = useState(true)
+  const tableRef = useRef<HTMLTableElement>(null)
 
   useEffect(() => {
     getProducts().then(setProducts).catch(err => alert(getErrorMessage(err)))
@@ -100,8 +103,9 @@ export default function InventoryReport() {
     setAppliedDates(dates)
   }
 
-  const header = (
-    <tr>
+  // repeated headers inside the table are left out of the export
+  const header = (repeat = false) => (
+    <tr data-noexport={repeat || undefined}>
       <th>&nbsp;编码&nbsp;</th>
       <th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;规格&nbsp;等级&nbsp;</th>
       <th>&nbsp;当前库存&nbsp;</th>
@@ -119,6 +123,11 @@ export default function InventoryReport() {
   const caption = appliedDates.start || appliedDates.end
     ? `从${appliedDates.start || '最早'}到${appliedDates.end || '今天'}产品库存报表`
     : '全部产品库存报表'
+
+  // 导出EXCEL (old bb_hzb_byd_excel.asp): the report table as shown
+  function handleExport() {
+    exportTable(`产品库存报表_${rangeName(appliedDates.start, appliedDates.end)}`, tableRef.current)
+  }
 
   // ── Render ───────────────────────────────────────────────────
   return (
@@ -149,20 +158,21 @@ export default function InventoryReport() {
         </select>
         <input className={styles.invKeyword} type="text" value={keyword} onChange={e => setKeyword(e.target.value)} />
         <input type="submit" value="筛选" />
+        &nbsp;&nbsp;<ExcelButton onClick={handleExport} />
       </form>
 
       <div className={styles.body}>
         {loading ? <div className={styles.loading}>数据加载中，请稍候...</div> : (
-          <table className={styles.grid}>
-            <thead>{header}</thead>
+          <table ref={tableRef} className={styles.grid}>
+            <thead>{header()}</thead>
             <tbody>
               {rows.map((p, i) => {
                 const mv = moves[p.code] ?? NO_MOVES
                 return (
                   <Fragment key={p.id}>
-                    {i > 0 && i % HEADER_EVERY === 0 && header}
+                    {i > 0 && i % HEADER_EVERY === 0 && header(true)}
                     <tr className={styles.row}>
-                      <td>&nbsp;<span className={styles.boldCode}>{p.code}</span>&nbsp;</td>
+                      <td data-t="s">&nbsp;<span className={styles.boldCode}>{p.code}</span>&nbsp;</td>
                       <td>&nbsp;{p.name}&nbsp;{p.spec ?? ''}&nbsp;{p.grade ?? ''}&nbsp;</td>
                       <td className={`${styles.c} ${styles.bold}`}>&nbsp;{p.stock}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{piecesOf(p)}&nbsp;</td>

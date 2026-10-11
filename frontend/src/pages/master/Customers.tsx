@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCustomers, deleteCustomer, type Customer } from '@/api/customers'
 import { getErrorMessage } from '@/utils/error'
+import { exportRows } from '@/utils/exportExcel'
+import ExcelButton from '@/pages/common/ExcelButton'
 import { EditIcon, DeleteIcon, SearchIcon } from './SupplierIcons'
 import sup from './Suppliers.module.css'
 import styles from './Customers.module.css'
@@ -72,6 +74,15 @@ export default function Customers() {
     setSortKey('code')
   }
 
+  // 导出EXCEL (old members_excel.asp): every filtered customer, same columns as the table
+  function handleExport() {
+    exportRows(
+      '客户资料',
+      ['客户名称', '电话', '详细地址'],
+      filtered.map(c => [`${c.code} ${c.name}`, c.phone, c.address]),
+    )
+  }
+
   async function handleDelete(c: Customer) {
     if (!window.confirm('此操作将直接把客户资料删除掉,并且不可恢复,真的要进行吗?')) return
     try {
@@ -107,6 +118,8 @@ export default function Customers() {
         <input type="button" value="显示全部" onClick={handleShowAll} />
         &nbsp;
         <span className={sup.btnAddSupp} style={{ width: 78 }} onClick={() => navigate('/master/customers/new')}>新增客户资料</span>
+        &nbsp;
+        <ExcelButton onClick={handleExport} />
       </div>
 
       <div className={sup.body}>

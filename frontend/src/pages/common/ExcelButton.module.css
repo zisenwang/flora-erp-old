@@ -1,0 +1,23 @@
+/* old ../mmimg/excel.gif (58×15): green box, white 导出EXCEL */
+.btn {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 58px;
+  height: 15px;
+  line-height: 13px;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 11px;
+  font-family: 宋体, SimSun, sans-serif;
+  color: #fff;
+  background: #33CC33;
+  border: 1px solid #009900;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:hover {
+  background: #22B822;
+}

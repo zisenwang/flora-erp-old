@@ -5,7 +5,9 @@ import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sal
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportRows, rangeName } from '@/utils/exportExcel'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
@@ -206,6 +208,43 @@ export default function SalesList({ mode = 'summary' }: Props) {
   const pageSum = sum(paged)
   const allSum = sum(rows)
 
+  // 导出EXCEL (old xs_djhz_list_excel.asp): every row of the current filter, same columns as the table + 总计
+  function handleExport() {
+    const num = (n: number) => +Number(n).toFixed(2)
+    const range = rangeName(applied.start, applied.end)
+    if (mode === 'summary') {
+      exportRows(
+        `销售单据汇总_${range}`,
+        ['类型', '客户', '日期', '单号', '数量', '金额', '件数', '经办人', '备注'],
+        [
+          ...rows.map(r => [
+            TYPE_LABEL[r.kind], r.customer, toSlashDate(r.date), r.no, num(r.qty), num(r.amount),
+            r.pieces || '', r.operator, r.notes,
+          ]),
+          ['总计', '', '', '', num(allSum.qty), num(allSum.amount), num(allSum.pieces), '', ''],
+        ],
+      )
+      return
+    }
+    const total = (key: 'qty' | 'amount' | 'profit' | 'pieces') => num(detailRows.reduce((s, r) => s + r[key], 0))
+    exportRows(
+      `销售单据明细_${range}`,
+      ['类型', '客户', '日期', '单号', '编码', '产品', '包装', '供应商', '单位', '数量', '单价', '金额', '进价', '毛利', '件数', '经办人', '备注'],
+      [
+        ...detailRows.map(r => {
+          const p = productsByCode[r.productCode]
+          return [
+            TYPE_LABEL[r.kind], r.customer, toSlashDate(r.date), r.no, r.productCode,
+            [r.productName, p?.spec, p?.grade].filter(Boolean).join(' '), p?.unitsPerPiece, r.supplierCode, r.unit,
+            r.qty ? num(r.qty) : '', num(r.unitPrice), r.amount ? num(r.amount) : '',
+            r.costPrice ? num(r.costPrice) : '', r.profit ? num(r.profit) : '', r.pieces || '', r.operator, r.notes,
+          ]
+        }),
+        ['总计', '', '', '', '', '', '', '', '', total('qty'), '', total('amount'), '', total('profit'), total('pieces'), '', ''],
+      ],
+    )
+  }
+
   const base = (kind: Kind) => (kind === 'order' ? 'orders' : 'returns')
   const viewPath = (kind: Kind, id: number) => `/sales/${base(kind)}/${id}`
 
@@ -352,6 +391,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
         ) : (
           <input type="button" value="查看汇总表" onClick={() => navigate('/sales/orders')} />
         )}
+        &nbsp;<ExcelButton onClick={handleExport} />
       </form>
 
       <div className={styles.body}>

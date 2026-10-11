@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { getProducts, getProductCategories, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getErrorMessage } from '@/utils/error'
+import { exportRows } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import side from '@/pages/purchase/PurchaseIn.module.css'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 
@@ -29,7 +31,7 @@ function piecesOf(p: Product): string {
   return (p.stock / p.unitsPerPiece).toFixed(1)
 }
 
-// 产品库存表 — replicates old kc_byd_list.asp (导出EXCEL dropped)
+// 产品库存表 — replicates old kc_byd_list.asp
 export default function InventoryList() {
   // ── Data ─────────────────────────────────────────────────────
   const [products, setProducts] = useState<Product[]>([])
@@ -102,6 +104,18 @@ export default function InventoryList() {
     setSupplierFilter(null)
   }
 
+  // 导出EXCEL (old kc_byd_excel.asp): every filtered product, same columns as the table
+  function handleExport() {
+    exportRows(
+      '产品库存',
+      ['编码', '产品名称 规格 等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
+      rows.map(p => [
+        p.code, [p.name, p.spec, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
+        +money(p.costPrice), +money(p.price), p.stock, piecesOf(p) === '' ? '' : +piecesOf(p),
+      ]),
+    )
+  }
+
   // ── Render ───────────────────────────────────────────────────
   return (
     <div className={styles.page}>
@@ -126,6 +140,7 @@ export default function InventoryList() {
         </select>
         <input type="submit" value="查找" />
         <input type="button" value="显示全部" onClick={handleShowAll} />
+        &nbsp;<ExcelButton onClick={handleExport} />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="button" value="只显示有库存的产品" onClick={() => setInStockOnly(true)} />
       </form>

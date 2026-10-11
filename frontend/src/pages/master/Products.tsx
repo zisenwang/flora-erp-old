@@ -7,6 +7,8 @@ import {
   type Product,
 } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
+import ExcelButton from '@/pages/common/ExcelButton'
+import { exportRows } from '@/utils/exportExcel'
 import styles from './Products.module.css'
 
 export default function Products() {
@@ -87,6 +89,18 @@ export default function Products() {
 
   function handleSearch() {
     setAppliedSearch(searchText)
+  }
+
+  // 导出EXCEL: every filtered product, same columns as the table (操作 left out)
+  function handleExport() {
+    exportRows(
+      '产品资料',
+      ['ID', '供应商', '分类', '编码', '品名', '规格', '等级', '单位', '包装', '进货价', '销售价'],
+      filteredProducts.map(p => [
+        p.id, p.supplierName, p.category, p.code, p.name, p.spec, p.grade, p.unit,
+        p.unitsPerPiece, p.costPrice != null ? +p.costPrice.toFixed(2) : '', p.price != null ? +p.price.toFixed(2) : '',
+      ]),
+    )
   }
 
   function handleCatSearchKey(e: React.KeyboardEvent) {
@@ -188,7 +202,7 @@ export default function Products() {
             &nbsp;
             <button className={styles.btnInline} onClick={() => navigate('/master/suppliers')}>新增产品资料</button>
             &nbsp;
-            <button className={styles.btnInlineGrey} disabled>导出EXCEL</button>
+            <ExcelButton onClick={handleExport} />
           </span>
         </div>
 

@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getSalesOrderRows, type ReportOrderRow } from '@/api/reports'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
 
 type Mode = 'product' | 'customer' | 'supplier' | 'monthly' | 'customerProduct' | 'yearMonth'
@@ -180,6 +182,7 @@ export default function SalesReport({ mode }: Props) {
   const [lines, setLines] = useState<Line[]>([])
   const [productsByCode, setProductsByCode] = useState<Record<string, Product>>({})
   const [loading, setLoading] = useState(true)
+  const tableRef = useRef<HTMLTableElement>(null)
 
   // the customer-code search only exists when arriving from 按客户汇总's 查询汇总
   const fieldOptions: Opt[] = [
@@ -248,8 +251,14 @@ export default function SalesReport({ mode }: Props) {
   const openSummary = (field: string, keyword: string) => openTab('/reports/sales', field, keyword)
 
   const lens = (onClick: () => void) => (
-    <td className={styles.lens} onClick={onClick}><SearchIcon /></td>
+    <td className={styles.lens} data-noexport onClick={onClick}><SearchIcon /></td>
   )
+
+  // 导出EXCEL (old bb_xs_*_excel.asp): the report table as shown, without the magnifier columns
+  function handleExport() {
+    const label = MODES.find(m => m.mode === mode)?.label ?? ''
+    exportTable(`销售报表_${label}_${rangeName(applied.start, applied.end)}`, tableRef.current)
+  }
 
   const caption = mode === 'monthly'
     ? `从${applied.start}到${applied.end} 销售月报表`
@@ -269,7 +278,7 @@ export default function SalesReport({ mode }: Props) {
 
   function renderProduct() {
     return (
-      <table className={styles.grid}>
+      <table ref={tableRef} className={styles.grid}>
         <thead>
           <tr>
             <th>&nbsp;编码&nbsp;</th>
@@ -280,7 +289,7 @@ export default function SalesReport({ mode }: Props) {
             <th>&nbsp;退货数量&nbsp;</th>
             <th>&nbsp;退货金额&nbsp;</th>
             <th>&nbsp;毛利&nbsp;</th>
-            <th>&nbsp;查询明细&nbsp;</th>
+            <th data-noexport>&nbsp;查询明细&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -288,7 +297,7 @@ export default function SalesReport({ mode }: Props) {
             const p = productsByCode[g.line.productCode]
             return (
               <tr key={g.key} className={styles.row}>
-                <td className={styles.c}>&nbsp;{g.line.productCode}&nbsp;</td>
+                <td className={styles.c} data-t="s">&nbsp;{g.line.productCode}&nbsp;</td>
                 <td>&nbsp;{g.line.productName}&nbsp;{p?.spec ?? ''}&nbsp;{g.line.unit}&nbsp;{g.line.supplierCode}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.qty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.amount)}&nbsp;</td>
@@ -308,7 +317,7 @@ export default function SalesReport({ mode }: Props) {
             <td className={styles.r}>&nbsp;{fmt(total.retQty)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retAmount)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.profit)}&nbsp;</td>
-            <td>&nbsp;</td>
+            <td data-noexport>&nbsp;</td>
           </tr>
           {footer(2, 3, 4)}
         </tbody>
@@ -319,7 +328,7 @@ export default function SalesReport({ mode }: Props) {
   // 按客户汇总 / 按供货商汇总 share one layout
   function renderParty(kind: 'customer' | 'supplier') {
     return (
-      <table className={styles.grid}>
+      <table ref={tableRef} className={styles.grid}>
         <thead>
           <tr>
             <th style={{ textAlign: 'left' }}>&nbsp;{kind === 'customer' ? '客户' : '供货商'}&nbsp;</th>
@@ -328,8 +337,8 @@ export default function SalesReport({ mode }: Props) {
             <th>&nbsp;退货数量&nbsp;</th>
             <th>&nbsp;退货金额&nbsp;</th>
             <th>&nbsp;毛利&nbsp;</th>
-            <th>&nbsp;查询明细&nbsp;</th>
-            <th>&nbsp;查询汇总&nbsp;</th>
+            <th data-noexport>&nbsp;查询明细&nbsp;</th>
+            <th data-noexport>&nbsp;查询汇总&nbsp;</th>
           </tr>
         </thead>
         <tbody>
@@ -357,7 +366,7 @@ export default function SalesReport({ mode }: Props) {
             <td className={styles.r}>&nbsp;{fmt(total.retQty)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retAmount)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.profit)}&nbsp;</td>
-            <td colSpan={2}>&nbsp;</td>
+            <td colSpan={2} data-noexport>&nbsp;</td>
           </tr>
           {footer(1, 2, 5)}
         </tbody>
@@ -367,7 +376,7 @@ export default function SalesReport({ mode }: Props) {
 
   function renderCustomerProduct() {
     return (
-      <table className={styles.grid}>
+      <table ref={tableRef} className={styles.grid}>
         <thead>
           <tr>
             <th style={{ textAlign: 'left' }}>&nbsp;客户&nbsp;</th>
@@ -385,7 +394,7 @@ export default function SalesReport({ mode }: Props) {
             return (
               <tr key={g.key} className={styles.row}>
                 <td>&nbsp;{g.line.customerCode}&nbsp;<span className={styles.teal}>{g.line.customerName}</span>&nbsp;</td>
-                <td>&nbsp;{g.line.supplierCode}&nbsp;</td>
+                <td data-t="s">&nbsp;{g.line.supplierCode}&nbsp;</td>
                 <td>
                   &nbsp;{g.line.productCode}&nbsp;{g.line.productName}&nbsp;
                   <span className={styles.magenta}>{p?.spec ?? ''}</span>&nbsp;<span className={styles.bold}>{p?.grade ?? ''}</span>&nbsp;
@@ -420,7 +429,7 @@ export default function SalesReport({ mode }: Props) {
     }
     let seq = 0
     return (
-      <table className={styles.grid}>
+      <table ref={tableRef} className={styles.grid}>
         <thead>
           <tr>
             <th>&nbsp;序号&nbsp;</th>
@@ -488,7 +497,7 @@ export default function SalesReport({ mode }: Props) {
       retQty: t.retQty + a.retQty, retAmount: t.retAmount + a.retAmount,
     }), { qty: 0, amount: 0, pieces: 0, retQty: 0, retAmount: 0 })
     return (
-      <table className={styles.grid}>
+      <table ref={tableRef} className={styles.grid}>
         <thead>
           <tr>
             <th>&nbsp;序号&nbsp;</th>
@@ -607,6 +616,7 @@ export default function SalesReport({ mode }: Props) {
           </>
         )}
         <input type="submit" value="查询" />
+        &nbsp;&nbsp;<ExcelButton onClick={handleExport} />
       </form>
 
       <div className={styles.body}>

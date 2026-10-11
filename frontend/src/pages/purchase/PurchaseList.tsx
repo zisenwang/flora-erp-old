@@ -5,7 +5,9 @@ import { getPurchaseOrders, getPurchaseReturns, getPurchaseOrdersDetail } from '
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportRows, rangeName } from '@/utils/exportExcel'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './PurchaseDocs.module.css'
 
 type Kind = 'order' | 'return'
@@ -177,6 +179,51 @@ export default function PurchaseList({ mode }: Props) {
     const all: Filters = { type: 'all', start: '', end: '', field: form.field, keyword: '' }
     setForm(all)
     setApplied(all)
+  }
+
+  // 导出EXCEL (old buy_djhz_list_excel.asp): every row of the current filter, same columns as the table + 总计
+  function handleExport() {
+    const num = (n: number) => +Number(n).toFixed(2)
+    const range = rangeName(applied.start, applied.end)
+    if (mode === 'summary') {
+      const t = sumRows.reduce((s, r) => ({
+        qty: s.qty + r.qty, amount: s.amount + r.amount, pieces: s.pieces + r.pieces, final: s.final + r.final,
+      }), { qty: 0, amount: 0, pieces: 0, final: 0 })
+      exportRows(
+        `进货单据汇总_${range}`,
+        ['类型', '供应商', '日期', '单号', '数量', '金额', '件数', '折扣', '折后金额', '经办人', '备注'],
+        [
+          ...sumRows.map(r => [
+            TYPE_LABEL[r.kind], r.supplier, toSlashDate(r.date), r.no, num(r.qty), num(r.amount),
+            r.pieces || '', r.discount, num(r.final), r.operator, r.notes,
+          ]),
+          ['总计', '', '', '', num(t.qty), num(t.amount), num(t.pieces), '', num(t.final), '', ''],
+        ],
+      )
+      return
+    }
+    const orders = detailRows.filter(r => r.kind === 'order')
+    const returns = detailRows.filter(r => r.kind === 'return')
+    const total = (list: DetailRow[], key: 'qty' | 'amount' | 'final' | 'pieces') => num(list.reduce((s, r) => s + r[key], 0))
+    exportRows(
+      `进货单据明细_${range}`,
+      ['类型', '供应商', '日期', '单号', '编码', '产品', '包装', '单位', '数量', '单价', '金额', '件数', '折扣', '折后金额', '退货', '金额', '经办人', '备注'],
+      [
+        ...detailRows.map(r => {
+          const p = productsByCode[r.productCode]
+          const isOrder = r.kind === 'order'
+          return [
+            TYPE_LABEL[r.kind], r.supplier, toSlashDate(r.date), r.no, r.productCode,
+            [r.productName, p?.spec].filter(Boolean).join(' '), p?.unitsPerPiece, r.unit,
+            isOrder ? num(r.qty) : '', num(r.unitPrice), isOrder ? num(r.amount) : '', r.pieces || '',
+            isOrder ? r.discount : '', isOrder ? num(r.final) : '',
+            isOrder ? '' : num(r.qty), isOrder ? '' : num(r.final), r.operator, r.notes,
+          ]
+        }),
+        ['总计', '', '', '', '', '', '', '', total(orders, 'qty'), '', total(orders, 'amount'), total(detailRows, 'pieces'),
+          '', total(orders, 'final'), total(returns, 'qty'), total(returns, 'final'), '', ''],
+      ],
+    )
   }
 
   const viewPath = (kind: Kind, id: number) => (kind === 'order' ? `/purchase/orders/${id}` : `/purchase/returns/${id}`)
@@ -374,6 +421,7 @@ export default function PurchaseList({ mode }: Props) {
         {mode === 'summary'
           ? <input type="button" value="查看明细表" onClick={() => navigate('/purchase/orders/detail')} />
           : <input type="button" value="查看汇总表" onClick={() => navigate('/purchase/orders')} />}
+        &nbsp;<ExcelButton onClick={handleExport} />
       </div>
 
       <div className={styles.body}>

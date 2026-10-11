@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPurchaseOrdersDetail, type PurchaseDetailRow } from '@/api/purchase'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
 import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
+import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
 
 type Mode = 'product' | 'supplier' | 'operator'
@@ -73,6 +75,7 @@ export default function PurchaseReport({ mode }: Props) {
   const [rows, setRows] = useState<PurchaseDetailRow[]>([])
   const [productsByCode, setProductsByCode] = useState<Record<string, Product>>({})
   const [loading, setLoading] = useState(true)
+  const tableRef = useRef<HTMLTableElement>(null)
 
   useEffect(() => {
     if (mode !== 'product') return
@@ -145,6 +148,12 @@ export default function PurchaseReport({ mode }: Props) {
     setApplied({ ...form, keyword: form.keyword.trim() })
   }
 
+  // 导出EXCEL (old bb_cg_*_excel.asp): the report table as shown
+  function handleExport() {
+    const label = MODES.find(m => m.mode === mode)?.label ?? ''
+    exportTable(`采购报表_${label}_${rangeName(applied.start, applied.end)}`, tableRef.current)
+  }
+
   const caption = applied.start || applied.end
     ? `从${applied.start || '最早'}到${applied.end || '今天'}采购报表`
     : '全部采购报表'
@@ -196,12 +205,13 @@ export default function PurchaseReport({ mode }: Props) {
         </select>
         <input className={styles.kwInput} type="text" value={form.keyword} onChange={e => setField('keyword', e.target.value)} />
         <input type="submit" value="查询" />
+        &nbsp;&nbsp;<ExcelButton onClick={handleExport} />
       </form>
 
       <div className={styles.body}>
         <div className={styles.caption}>{caption}</div>
         {loading ? <div className={styles.loading}>数据加载中，请稍候...</div> : (
-          <table className={styles.grid}>
+          <table ref={tableRef} className={styles.grid}>
             <thead>
               <tr>
                 {labelHeads}
@@ -219,7 +229,7 @@ export default function PurchaseReport({ mode }: Props) {
                   <tr key={g.key} className={styles.row}>
                     {mode === 'product' && (
                       <>
-                        <td className={styles.c}>&nbsp;{g.code}&nbsp;</td>
+                        <td className={styles.c} data-t="s">&nbsp;{g.code}&nbsp;</td>
                         <td>
                           &nbsp;{g.name}&nbsp;<span className={styles.teal}>{p?.spec ?? ''}</span>&nbsp;{p?.unit ?? ''}&nbsp;
                           <span className={styles.grey}>{g.supplierCode}</span>&nbsp;
