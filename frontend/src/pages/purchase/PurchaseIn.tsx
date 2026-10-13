@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
-import dayjs from 'dayjs'
+import { useEffect, useState, useCallback } from 'react'
 import { getProducts, getProductCategories, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
-import { createPurchaseOrder, createPurchaseReturn, getPurchaseOrdersDetail } from '@/api/purchase'
+import { createPurchaseOrder, createPurchaseReturn, getPurchaseOrdersDetail, type PurchaseDetailRow } from '@/api/purchase'
+import { recentStartDate, recentCodes, sortByRecent } from '@/utils/recentProducts'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
@@ -131,7 +131,7 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])  // selected supplier's products
-  const [recentCodes, setRecentCodes] = useState<Set<string> | null>(null)  // null = 全部
+  const [recentRows, setRecentRows] = useState<PurchaseDetailRow[]>([])  // this supplier, last 60 days, newest first
 
   // ── Draft (right panel) ──────────────────────────────────────
   const [draft, setDraftState] = useState<Draft>(() => loadDraft(T.draftKey))
@@ -175,20 +175,16 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
       .catch(err => alert(getErrorMessage(err)))
   }, [supplierId])
 
-  // 今天 / 7天 / 15天 / 30天: products of this supplier purchased within the period
+  // 记忆功能 + 今天 / 7天 / 15天 / 30天: this supplier's products 进货/退货 in the last 60 days
   const supplierCode = supplier?.code ?? null
-  useEffect(() => {
-    if (isReturn || supplierCode == null || days === 0) { setRecentCodes(null); return }
-    getPurchaseOrdersDetail({
-      startDate: dayjs().subtract(days - 1, 'day').format('YYYY-MM-DD'),
-      search: supplierCode,
-      searchField: 'supplierCode',
-    })
-      .then(rows => setRecentCodes(new Set(
-        rows.filter(r => r.rowType === 'order' && r.supplierCode === supplierCode).map(r => r.productCode),
-      )))
+  const loadRecent = useCallback(() => {
+    if (supplierCode == null) { setRecentRows([]); return }
+    getPurchaseOrdersDetail({ startDate: recentStartDate(), search: supplierCode, searchField: 'supplierCode' })
+      .then(rows => setRecentRows(rows.filter(r => r.supplierCode === supplierCode)))
       .catch(err => alert(getErrorMessage(err)))
-  }, [isReturn, supplierCode, days])
+  }, [supplierCode])
+
+  useEffect(() => { loadRecent() }, [loadRecent])
 
   // Reset to page 1 whenever filters change
   useEffect(() => { setPage(1) }, [supplierId, catFilter, appliedSearch, days])
@@ -200,9 +196,13 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 
-  const filtered = products.filter(p => {
+  // recently 进过货 / 退过货 products on top
+  const recent = recentCodes(recentRows, kind)
+  const dayCodes = days === 0 ? null : new Set(recentCodes(recentRows, kind, days))
+
+  const filtered = sortByRecent(products, recent).filter(p => {
     if (catFilter && p.category !== catFilter) return false
-    if (recentCodes && !recentCodes.has(p.code)) return false
+    if (dayCodes && !dayCodes.has(p.code)) return false
     if (!appliedSearch) return true
     const q = appliedSearch.toLowerCase()
     return p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || (p.spec ?? '').toLowerCase().includes(q)
@@ -265,6 +265,17 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
     setSaved(null)
   }
 
+  // 重新开单: back to the default product list
+  function resetFilters() {
+    setSearchText('')
+    setAppliedSearch('')
+    setSideSearch('')
+    setCatFilter('')
+    setDays(0)
+    setPage(1)
+    setRowInputs({})
+  }
+
   // ── Right panel: edit lines ──────────────────────────────────
   function setLine(key: string, patch: Partial<DraftLine>) {
     setDraft(d => ({ ...d, lines: d.lines.map(l => (l.key === key ? { ...l, ...patch } : l)) }))
@@ -316,8 +327,10 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
         setSaved({ id: order.id, no: order.orderNo })
       }
       setDraft(d => newDraft(d.supplier))
+      resetFilters()
       // refresh stock numbers in the left table
       getProducts({ supplierId: draft.supplier.id }).then(setProducts).catch(() => {})
+      loadRecent()   // just-entered products move to the top
     } catch (err) {
       alert(getErrorMessage(err))
     } finally {

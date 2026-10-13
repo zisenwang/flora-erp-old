@@ -11,6 +11,7 @@ import {
   SALES_DRAFT_KEY, newDraft, loadDraft, saveDraft, toDraftCustomer, calcPieces,
   type Draft, type DraftLine,
 } from '@/utils/salesDraft'
+import { recentStartDate, recentCodes, sortByRecent } from '@/utils/recentProducts'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import SupplierPicker from '@/pages/purchase/SupplierPicker'
 import styles from '@/pages/purchase/PurchaseIn.module.css'
@@ -74,7 +75,7 @@ export default function SalesIn({ kind = 'order' }: Props) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])  // all products — any supplier's goods can be sold
-  const [soldCodes, setSoldCodes] = useState<Set<string> | null>(null)  // null = 全部
+  const [recentRows, setRecentRows] = useState<SalesDetailRow[]>([])  // last 60 days, newest first
   const [history, setHistory] = useState<SalesDetailRow[]>([])
 
   // ── Draft (right panel) ──────────────────────────────────────
@@ -110,20 +111,20 @@ export default function SalesIn({ kind = 'order' }: Props) {
     getProducts().then(setProducts).catch(err => alert(getErrorMessage(err)))
   }, [])
 
+  // 记忆功能 + 今天 / 7天 / 15天 / 30天: everything sold / returned (by anyone) in the last 60 days
+  const loadRecent = useCallback(() => {
+    getSalesOrdersDetail({ startDate: recentStartDate() })
+      .then(setRecentRows)
+      .catch(err => alert(getErrorMessage(err)))
+  }, [])
+
   useEffect(() => {
     Promise.all([getCustomers(), getSuppliers(), getProductCategories()])
       .then(([custs, supps, cats]) => { setCustomers(custs); setSuppliers(supps); setCategories(cats) })
       .catch(err => alert(getErrorMessage(err)))
     loadProducts()
-  }, [loadProducts])
-
-  // 今天 / 7天 / 15天 / 30天: products sold (to anyone) within the period
-  useEffect(() => {
-    if (days === 0) { setSoldCodes(null); return }
-    getSalesOrdersDetail({ startDate: dayjs().subtract(days - 1, 'day').format('YYYY-MM-DD') })
-      .then(rows => setSoldCodes(new Set(rows.filter(r => r.rowType === 'order').map(r => r.productCode))))
-      .catch(err => alert(getErrorMessage(err)))
-  }, [days])
+    loadRecent()
+  }, [loadProducts, loadRecent])
 
   // 历史单据明细: this customer's latest 20 sold item rows
   const customerCode = customer?.code ?? null
@@ -151,10 +152,14 @@ export default function SalesIn({ kind = 'order' }: Props) {
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 
-  const filtered = products.filter(p => {
+  // recently 开过单 / 退过单 products on top
+  const recent = recentCodes(recentRows, kind)
+  const dayCodes = days === 0 ? null : new Set(recentCodes(recentRows, kind, days))
+
+  const filtered = sortByRecent(products, recent).filter(p => {
     if (supplierFilter != null && p.supplierId !== supplierFilter) return false
     if (catFilter && p.category !== catFilter) return false
-    if (soldCodes && !soldCodes.has(p.code)) return false
+    if (dayCodes && !dayCodes.has(p.code)) return false
     if (!appliedSearch) return true
     const q = appliedSearch.toLowerCase()
     return p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || (p.spec ?? '').toLowerCase().includes(q)
@@ -221,6 +226,18 @@ export default function SalesIn({ kind = 'order' }: Props) {
     setSaved(null)
   }
 
+  // 重新开单: back to the default product list (old system reloaded xs_in.asp with no query)
+  function resetFilters() {
+    setSearchText('')
+    setAppliedSearch('')
+    setSideSearch('')
+    setCatFilter('')
+    setSupplierFilter(null)
+    setDays(0)
+    setPage(1)
+    setRowInputs({})
+  }
+
   // ── Right panel: edit lines ──────────────────────────────────
   function setLine(key: string, patch: Partial<DraftLine>) {
     setDraft(d => ({ ...d, lines: d.lines.map(l => (l.key === key ? { ...l, ...patch } : l)) }))
@@ -276,7 +293,9 @@ export default function SalesIn({ kind = 'order' }: Props) {
         setSaved({ id: order.id, no: order.orderNo })
       }
       setDraft(d => newDraft(d.customer))
+      resetFilters()
       loadProducts()   // refresh stock
+      loadRecent()     // just-sold products move to the top
       loadHistory()
     } catch (err) {
       alert(getErrorMessage(err))

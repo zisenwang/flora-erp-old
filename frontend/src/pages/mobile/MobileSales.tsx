@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { getProducts, type Product } from '@/api/products'
+import { getSalesOrdersDetail } from '@/api/sales'
+import { recentStartDate, recentCodes, sortByRecent } from '@/utils/recentProducts'
 import { getErrorMessage } from '@/utils/error'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import { MobileHeader, SalesFooter, RecentCustomers, CategoryOverlay, useSalesDraft, MOBILE_SALES } from './MobileShell'
@@ -13,6 +15,7 @@ export default function MobileSales() {
   const customer = draft.customer
 
   const [products, setProducts] = useState<Product[]>([])
+  const [recent, setRecent] = useState<string[]>([])  // 记忆功能: sold in the last 60 days, newest first
   const [searchText, setSearchText] = useState('')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [category, setCategory] = useState('')
@@ -20,9 +23,12 @@ export default function MobileSales() {
 
   useEffect(() => {
     getProducts().then(setProducts).catch(err => alert(getErrorMessage(err)))
+    getSalesOrdersDetail({ startDate: recentStartDate() })
+      .then(rows => setRecent(recentCodes(rows, 'order')))
+      .catch(err => alert(getErrorMessage(err)))
   }, [])
 
-  const filtered = products.filter(p => {
+  const filtered = sortByRecent(products, recent).filter(p => {
     if (category && p.category !== category) return false
     if (!appliedSearch) return true
     const q = appliedSearch.toLowerCase()
