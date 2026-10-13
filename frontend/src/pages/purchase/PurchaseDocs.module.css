@@ -56,6 +56,12 @@
   font-size: 12px;
 }
 
+/* 销售/进货 单据汇总 + 明细: wider than the old content-width tables (customer request 10-12);
+   a table never shrinks below its content, so this acts as a minimum */
+.wide {
+  width: 1200px;
+}
+
 .grid th {
   height: 16px;
   padding: 0;

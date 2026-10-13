@@ -486,7 +486,7 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
         <div className={styles.gapCol}>«</div>
 
         {/* ══ RIGHT: 进货单 ═════════════════════════════════════ */}
-        <div className={styles.orderCol}>
+        <div className={`${styles.orderCol} ${styles.bigOrder}`}>
           {saved && draft.lines.length === 0 ? (
             <div className={styles.success}>
               <div className={styles.successMsg}>{T.success}</div>

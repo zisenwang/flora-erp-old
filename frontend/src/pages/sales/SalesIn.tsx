@@ -455,7 +455,7 @@ export default function SalesIn({ kind = 'order' }: Props) {
         <div className={styles.gapCol}>«</div>
 
         {/* ══ RIGHT: 销售单 + 历史单据明细 ═══════════════════════ */}
-        <div className={styles.orderCol}>
+        <div className={`${styles.orderCol} ${styles.bigOrder}`}>
           {saved && draft.lines.length === 0 ? (
             <div className={styles.success}>
               <div className={styles.successMsg}>{T.success}</div>

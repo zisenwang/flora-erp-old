@@ -280,7 +280,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
       </tr>
     )
     return (
-      <table className={styles.grid}>
+      <table className={`${styles.grid} ${styles.wide}`}>
         <thead>
           <tr>
             <th>&nbsp;类型&nbsp;</th>
@@ -396,7 +396,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
 
       <div className={styles.body}>
         {loading ? <div className={styles.loading}>数据加载中，请稍候...</div> : mode === 'detail' ? renderDetail() : (
-          <table className={styles.grid}>
+          <table className={`${styles.grid} ${styles.wide}`}>
             <thead>
               <tr>
                 <th>&nbsp;类型&nbsp;</th>

@@ -287,6 +287,31 @@
   line-height: 14px;
 }
 
+/* 开单/退单 pages only: larger text in the 单据 panel (customer request 10-12, old system was 12px) */
+.bigOrder .orderTitle {
+  height: 24px;
+  font-size: 14px;
+}
+
+.bigOrder .orderTitleBig {
+  font-size: 20px;
+}
+
+.bigOrder .orderTable,
+.bigOrder .orderTable th,
+.bigOrder .orderTable input {
+  font-size: 14px;
+}
+
+.bigOrder .orderTable th {
+  height: 22px;
+}
+
+.bigOrder .orderTable td.wrapName {
+  max-width: 150px;
+  line-height: 17px;
+}
+
 .delAll {
   display: inline-block;
   width: 11px;

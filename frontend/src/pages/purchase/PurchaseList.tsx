@@ -261,7 +261,7 @@ export default function PurchaseList({ mode }: Props) {
       </tr>
     )
     return (
-      <table className={styles.grid}>
+      <table className={`${styles.grid} ${styles.wide}`}>
         <thead>
           <tr>
             <th>&nbsp;类型&nbsp;</th>
@@ -332,7 +332,7 @@ export default function PurchaseList({ mode }: Props) {
       </tr>
     )
     return (
-      <table className={styles.grid}>
+      <table className={`${styles.grid} ${styles.wide}`}>
         <thead>
           <tr>
             <th>&nbsp;类型&nbsp;</th>
