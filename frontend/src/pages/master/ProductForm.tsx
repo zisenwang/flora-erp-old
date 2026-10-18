@@ -15,6 +15,7 @@ import { getErrorMessage } from '@/utils/error'
 import { EditIcon, SearchIcon } from './SupplierIcons'
 import sup from './Suppliers.module.css'
 import styles from './ProductForm.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 // ─── Form state ──────────────────────────────────────────────
 interface FormState {
@@ -121,7 +122,7 @@ export default function ProductForm() {
   // ── Derived ──────────────────────────────────────────────────
   const visibleSuppliers = suppliers.filter(s =>
     sideSearch === '' ||
-    s.code.toLowerCase().includes(sideSearch.toLowerCase()) ||
+    codeEquals(s.code, sideSearch) ||
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 

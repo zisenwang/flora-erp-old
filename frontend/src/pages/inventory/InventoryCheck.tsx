@@ -8,6 +8,7 @@ import { SearchIcon } from '@/pages/master/SupplierIcons'
 import side from '@/pages/purchase/PurchaseIn.module.css'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 import check from './InventoryCheck.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type SortKey = 'supplier' | 'code' | 'name' | 'stock'
 
@@ -79,7 +80,7 @@ export default function InventoryCheck() {
   // ── Derived ──────────────────────────────────────────────────
   const visibleSuppliers = suppliers.filter(s =>
     sideSearch === '' ||
-    s.code.toLowerCase().includes(sideSearch.toLowerCase()) ||
+    codeEquals(s.code, sideSearch) ||
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 
@@ -95,7 +96,7 @@ export default function InventoryCheck() {
         case 'name': return p.name.toLowerCase().includes(q)
         case 'supplier':
         default:
-          return (p.supplierCode ?? '').toLowerCase().includes(q) || (p.supplierName ?? '').toLowerCase().includes(q)
+          return codeEquals(p.supplierCode, q) || (p.supplierName ?? '').toLowerCase().includes(q)
       }
     })
     .sort((a, b) => {

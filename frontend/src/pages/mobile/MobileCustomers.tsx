@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/utils/error'
 import { toDraftCustomer } from '@/utils/salesDraft'
 import { MobileHeader, BackFooter, useSalesDraft } from './MobileShell'
 import styles from './Mobile.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 // Quick-search links under 查找客户, as in the old mxs_xzkh_list.asp
 const CITY_ROWS = [
@@ -28,7 +29,7 @@ export default function MobileCustomers() {
   const q = appliedSearch.toLowerCase()
   const shown = customers
     .filter(c => !q ||
-      c.code.toLowerCase().includes(q) ||
+      codeEquals(c.code, q) ||
       c.name.toLowerCase().includes(q) ||
       (c.address ?? '').toLowerCase().includes(q) ||
       (c.phone ?? '').includes(q))

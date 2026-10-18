@@ -161,7 +161,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
           </tr>
           {doc.notes && (
             <tr>
-              <td colSpan={2} style={{ height: 20 }}>&nbsp;备注:&nbsp;{doc.notes}</td>
+              <td colSpan={2} className={styles.notes} style={{ height: 20 }}>&nbsp;备注:&nbsp;{doc.notes}</td>
             </tr>
           )}
           <tr>

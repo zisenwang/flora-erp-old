@@ -7,6 +7,7 @@ import { getErrorMessage } from '@/utils/error'
 import { toSlashDate } from '@/utils/slashDate'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import styles from '@/pages/purchase/PurchaseIn.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 // ─── Unsaved 库存调整单 kept in localStorage (old system kept it server-side) ──
 // The backend has no adjustment document: each line is saved as its own manual
@@ -107,7 +108,7 @@ export default function InventoryAdjust() {
   // ── Derived ──────────────────────────────────────────────────
   const visibleSuppliers = suppliers.filter(s =>
     sideSearch === '' ||
-    s.code.toLowerCase().includes(sideSearch.toLowerCase()) ||
+    codeEquals(s.code, sideSearch) ||
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 

@@ -9,6 +9,7 @@ import { exportRows, rangeName } from '@/utils/exportExcel'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
@@ -135,6 +136,9 @@ export default function SalesList({ mode = 'summary' }: Props) {
       search: applied.keyword && !bySupplier ? applied.keyword : undefined,
       searchField: applied.keyword && !bySupplier ? applied.field : undefined,
     }
+    // the backend matches 客户编码 with LIKE — keep only the exact code
+    const codeOk = (code: string) =>
+      applied.field !== 'customerCode' || !applied.keyword || codeEquals(code, applied.keyword)
     setLoading(true)
     if (mode === 'summary') {
       Promise.all([
@@ -142,7 +146,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
         applied.type !== 'order' ? getSalesReturns(params) : Promise.resolve([]),
       ])
         .then(([orders, returns]) => setSumRows([
-          ...orders.map((o): SumRow => ({
+          ...orders.filter(o => codeOk(o.customerCode)).map((o): SumRow => ({
             kind: 'order', id: o.id, no: o.orderNo,
             customer: `${o.customerCode}.${o.customerName}`,
             date: dayjs(o.orderDate).format('YYYY-MM-DD'),
@@ -150,7 +154,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
             paid: o.paymentStatus === '已收款',
             operator: o.operator ?? '', notes: o.notes ?? '',
           })),
-          ...returns.map((r): SumRow => ({
+          ...returns.filter(r => codeOk(r.customerCode)).map((r): SumRow => ({
             kind: 'return', id: r.id, no: r.returnNo,
             customer: `${r.customerCode}.${r.customerName}`,
             date: dayjs(r.returnDate).format('YYYY-MM-DD'),
@@ -165,8 +169,8 @@ export default function SalesList({ mode = 'summary' }: Props) {
       getSalesOrdersDetail(params)
         .then(rows => setDetailRows(rows
           .filter(r => applied.type === 'all' || r.rowType === applied.type)
-          .filter(r => !bySupplier || !applied.keyword ||
-            r.supplierCode.toLowerCase().includes(applied.keyword.toLowerCase()))
+          .filter(r => codeOk(r.customerCode))
+          .filter(r => !bySupplier || !applied.keyword || codeEquals(r.supplierCode, applied.keyword))
           .map((r): DetailRow => {
             const profit = r.profit ?? 0
             const k = sign(r.rowType)

@@ -53,3 +53,9 @@
   padding: 20px;
   color: #666;
 }
+
+/* order note: bold and bigger than the 14px body, per customer */
+.notes {
+  font-size: 18px;
+  font-weight: bold;
+}

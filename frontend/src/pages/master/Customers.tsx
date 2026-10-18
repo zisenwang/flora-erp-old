@@ -7,6 +7,7 @@ import ExcelButton from '@/pages/common/ExcelButton'
 import { EditIcon, DeleteIcon, SearchIcon } from './SupplierIcons'
 import sup from './Suppliers.module.css'
 import styles from './Customers.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type SortKey = 'code' | 'phone'
 
@@ -46,7 +47,7 @@ export default function Customers() {
       if (!appliedSearch) return true
       const q = appliedSearch.toLowerCase()
       switch (appliedBy) {
-        case 'bm': return c.code.toLowerCase().includes(q)
+        case 'bm': return codeEquals(c.code, q)
         case 'dh': return (c.phone ?? '').toLowerCase().includes(q)
         case 'mc':
         default:   return c.name.toLowerCase().includes(q)

@@ -7,6 +7,7 @@ import { SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import side from '@/pages/purchase/PurchaseIn.module.css'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type SortKey = 'code' | 'name' | 'stock'
 
@@ -61,7 +62,7 @@ export default function InventoryList() {
   // ── Derived ──────────────────────────────────────────────────
   const visibleSuppliers = suppliers.filter(s =>
     sideSearch === '' ||
-    s.code.toLowerCase().includes(sideSearch.toLowerCase()) ||
+    codeEquals(s.code, sideSearch) ||
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 
@@ -78,7 +79,7 @@ export default function InventoryList() {
         case 'name': return p.name.toLowerCase().includes(q)
         case 'supplier':
         default:
-          return (p.supplierCode ?? '').toLowerCase().includes(q) || (p.supplierName ?? '').toLowerCase().includes(q)
+          return codeEquals(p.supplierCode, q) || (p.supplierName ?? '').toLowerCase().includes(q)
       }
     })
     .sort((a, b) => {

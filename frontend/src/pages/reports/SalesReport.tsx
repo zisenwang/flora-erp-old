@@ -9,6 +9,7 @@ import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type Mode = 'product' | 'customer' | 'supplier' | 'monthly' | 'customerProduct' | 'yearMonth'
 type SortKey = 'qty' | 'amount' | 'code'
@@ -135,8 +136,8 @@ function matchField(l: Line, field: string, keyword: string): boolean {
   switch (field) {
     case 'productCode': return l.productCode.toLowerCase().includes(q)
     case 'productName': return l.productName.toLowerCase().includes(q)
-    case 'supplier': return l.supplierCode.toLowerCase().includes(q) || l.supplierName.toLowerCase().includes(q)
-    case 'customerCode': return l.customerCode.toLowerCase().includes(q)
+    case 'supplier': return codeEquals(l.supplierCode, q) || l.supplierName.toLowerCase().includes(q)
+    case 'customerCode': return codeEquals(l.customerCode, q)
     case 'customerName': return l.customerName.toLowerCase().includes(q)
     default: return true
   }

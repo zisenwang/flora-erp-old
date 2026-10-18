@@ -10,6 +10,7 @@ import { getSuppliers, type Supplier } from '@/api/suppliers'
 import ExcelButton from '@/pages/common/ExcelButton'
 import { exportRows } from '@/utils/exportExcel'
 import styles from './Products.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 export default function Products() {
   const navigate = useNavigate()
@@ -45,7 +46,7 @@ export default function Products() {
 
   // ── Derived: supplier codes filtered by catSearch input ──────
   const visibleSuppliers = suppliers.filter(s =>
-    catSearch === '' || s.code.toLowerCase().includes(catSearch.toLowerCase())
+    catSearch === '' || codeEquals(s.code, catSearch)
   )
 
   // ── Derived: products after catFilter + supplierFilter + search ─

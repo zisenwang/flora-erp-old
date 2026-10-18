@@ -4,6 +4,7 @@ import { getSuppliers, deleteSupplier, type Supplier } from '@/api/suppliers'
 import { getErrorMessage } from '@/utils/error'
 import { EditIcon, DeleteIcon, AddProductIcon, SearchIcon } from './SupplierIcons'
 import styles from './Suppliers.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type SortKey = 'code' | 'name' | 'address' | 'phone'
 
@@ -41,7 +42,7 @@ export default function Suppliers() {
       if (!appliedSearch) return true
       const q = appliedSearch.toLowerCase()
       switch (appliedBy) {
-        case 'kbm': return s.code.toLowerCase().includes(q)
+        case 'kbm': return codeEquals(s.code, q)
         case 'kdh': return (s.phone ?? '').toLowerCase().includes(q)
         case 'kmc':
         default:    return s.name.toLowerCase().includes(q)

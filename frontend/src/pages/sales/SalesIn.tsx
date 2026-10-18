@@ -16,6 +16,7 @@ import { SearchIcon } from '@/pages/master/SupplierIcons'
 import SupplierPicker from '@/pages/purchase/SupplierPicker'
 import styles from '@/pages/purchase/PurchaseIn.module.css'
 import sales from './SalesIn.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type Kind = 'order' | 'return'
 
@@ -148,7 +149,7 @@ export default function SalesIn({ kind = 'order' }: Props) {
 
   const visibleSuppliers = suppliers.filter(s =>
     sideSearch === '' ||
-    s.code.toLowerCase().includes(sideSearch.toLowerCase()) ||
+    codeEquals(s.code, sideSearch) ||
     s.name.toLowerCase().includes(sideSearch.toLowerCase())
   )
 

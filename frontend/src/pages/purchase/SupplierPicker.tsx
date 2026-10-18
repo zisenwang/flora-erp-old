@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import styles from './PurchaseIn.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 interface PickItem {
   id: number
@@ -27,7 +28,7 @@ export default function SupplierPicker<T extends PickItem>({
   const list = suppliers
     .filter(s =>
       applied === '' ||
-      s.code.toLowerCase().includes(applied.toLowerCase()) ||
+      codeEquals(s.code, applied) ||
       s.name.toLowerCase().includes(applied.toLowerCase()))
     .sort((a, b) => a[sort].localeCompare(b[sort], 'zh-CN'))
 

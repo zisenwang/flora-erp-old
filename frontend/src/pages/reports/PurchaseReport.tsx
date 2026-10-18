@@ -8,6 +8,7 @@ import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type Mode = 'product' | 'supplier' | 'operator'
 
@@ -102,7 +103,7 @@ export default function PurchaseReport({ mode }: Props) {
     switch (applied.field) {
       case 'productCode': return r.productCode.toLowerCase().includes(q)
       case 'productName': return r.productName.toLowerCase().includes(q)
-      case 'supplier': return r.supplierCode.toLowerCase().includes(q) || r.supplierName.toLowerCase().includes(q)
+      case 'supplier': return codeEquals(r.supplierCode, q) || r.supplierName.toLowerCase().includes(q)
       case 'operator': return (r.operator ?? '').toLowerCase().includes(q)
       default: return true
     }

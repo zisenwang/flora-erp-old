@@ -9,6 +9,7 @@ import { exportRows, rangeName } from '@/utils/exportExcel'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './PurchaseDocs.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type Kind = 'order' | 'return'
 type TypeFilter = 'all' | Kind
@@ -107,6 +108,9 @@ export default function PurchaseList({ mode }: Props) {
       search: applied.keyword || undefined,
       searchField: applied.keyword ? applied.field : undefined,
     }
+    // the backend matches 供应商编码 with LIKE — keep only the exact code
+    const codeOk = (code: string) =>
+      applied.field !== 'supplierCode' || !applied.keyword || codeEquals(code, applied.keyword)
     setLoading(true)
     setPage(1)
 
@@ -116,7 +120,7 @@ export default function PurchaseList({ mode }: Props) {
         applied.type !== 'order' ? getPurchaseReturns(params) : Promise.resolve([]),
       ])
         .then(([orders, returns]) => setSumRows([
-          ...orders.map((o): SumRow => ({
+          ...orders.filter(o => codeOk(o.supplierCode)).map((o): SumRow => ({
             kind: 'order', id: o.id, no: o.orderNo,
             supplier: `${o.supplierCode} ${o.supplierName}`,
             date: dayjs(o.orderDate).format('YYYY-MM-DD'),
@@ -124,7 +128,7 @@ export default function PurchaseList({ mode }: Props) {
             discount: o.discount, final: o.finalAmount,
             operator: o.operator ?? '', notes: o.notes ?? '',
           })),
-          ...returns.map((r): SumRow => ({
+          ...returns.filter(r => codeOk(r.supplierCode)).map((r): SumRow => ({
             kind: 'return', id: r.id, no: r.returnNo,
             supplier: `${r.supplierCode} ${r.supplierName}`,
             date: dayjs(r.returnDate).format('YYYY-MM-DD'),
@@ -139,6 +143,7 @@ export default function PurchaseList({ mode }: Props) {
       getPurchaseOrdersDetail(params)
         .then(rows => setDetailRows(rows
           .filter(r => applied.type === 'all' || r.rowType === applied.type)
+          .filter(r => codeOk(r.supplierCode))
           .map((r): DetailRow => {
             const amount = +(r.qty * r.unitPrice).toFixed(2)
             return {

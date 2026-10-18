@@ -8,6 +8,7 @@ import { exportTable, rangeName } from '@/utils/exportExcel'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './Report.module.css'
+import { codeEquals } from '@/utils/codeMatch'
 
 type Business = 'all' | 'with' | 'without'
 type Field = 'supplier' | 'code' | 'name' | 'spec'
@@ -87,7 +88,7 @@ export default function InventoryReport() {
       if (applied.business === 'without' && hasBusiness(p.code)) return false
       if (!q) return true
       switch (applied.field) {
-        case 'supplier': return (p.supplierCode ?? '').toLowerCase().includes(q) || (p.supplierName ?? '').toLowerCase().includes(q)
+        case 'supplier': return codeEquals(p.supplierCode, q) || (p.supplierName ?? '').toLowerCase().includes(q)
         case 'name': return p.name.toLowerCase().includes(q)
         case 'spec': return (p.spec ?? '').toLowerCase().includes(q)
         case 'code':
