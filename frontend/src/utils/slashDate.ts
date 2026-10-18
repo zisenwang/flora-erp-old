@@ -14,6 +14,11 @@ export function parseSlashDate(text: string): string | null {
   return d.isValid() ? d.format('YYYY-MM-DD') : null
 }
 
+/** true when the date is today — 单据 lists mark today's orders */
+export function isToday(date: string): boolean {
+  return dayjs(date).isSame(dayjs(), 'day')
+}
+
 /** 1st of the current month, e.g. "2026/10/1" — default start date of the 单据 lists */
 export function monthStart(): string {
   return toSlashDate(dayjs().startOf('month').toDate())

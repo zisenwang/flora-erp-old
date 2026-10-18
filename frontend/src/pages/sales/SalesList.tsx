@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
 import { getErrorMessage } from '@/utils/error'
-import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
+import { isToday, monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import { exportRows, rangeName } from '@/utils/exportExcel'
 import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
@@ -332,7 +332,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
               <tr key={`${r.kind}-${r.id}-${i}`} className={styles.row}>
                 <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                 <td>&nbsp;{r.customer}&nbsp;</td>
-                <td>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
+                <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
                 <td>&nbsp;<a onClick={() => navigate(viewPath(r.kind, r.id))}>{r.no}</a>&nbsp;</td>
                 <td>&nbsp;{r.productCode}&nbsp;</td>
                 <td>&nbsp;{r.productName}&nbsp;<em className={styles.spec}>{p?.spec ?? ''}</em>&nbsp;{p?.grade ?? ''}&nbsp;</td>
@@ -346,7 +346,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <td className={`${styles.r} ${r.profit < 0 ? styles.loss : ''}`}>{blankZero(r.profit)}&nbsp;</td>
                 <td className={styles.c}>{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}</td>
                 <td>&nbsp;{r.operator}&nbsp;</td>
-                <td>&nbsp;{r.notes}&nbsp;</td>
+                <td><div className={styles.notesCell} title={r.notes}>&nbsp;{r.notes}</div></td>
                 <td className={styles.c}>{ops(r.kind, r.id)}</td>
               </tr>
             )
@@ -439,14 +439,14 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <tr key={`${r.kind}-${r.id}`} className={styles.row}>
                   <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                   <td>&nbsp;{r.customer}&nbsp;</td>
-                  <td>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
+                  <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
                   <td>&nbsp;<a onClick={() => navigate(viewPath(r.kind, r.id))}>{r.no}</a>&nbsp;</td>
                   <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.qty)}&nbsp;</td>
                   <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.amount)}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{payCell(r)}&nbsp;</td>
                   <td>&nbsp;{r.operator}&nbsp;</td>
-                  <td>&nbsp;{r.notes}&nbsp;</td>
+                  <td><div className={styles.notesCell} title={r.notes}>&nbsp;{r.notes}</div></td>
                   <td className={styles.c}>
                     {ops(r.kind, r.id)}
                   </td>

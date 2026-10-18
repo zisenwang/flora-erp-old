@@ -91,6 +91,15 @@
   text-align: right;
 }
 
+/* 备注 column of the 销售 / 采购 单据 lists: 430px like 收支管理, long notes cut with … (hover shows all) */
+.notesCell {
+  width: 430px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* date of an order made today (销售单据 / 采购单据) */
 .dateCell {
   background: #FFFF99 !important;
 }
