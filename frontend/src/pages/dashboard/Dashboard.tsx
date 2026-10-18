@@ -167,10 +167,6 @@ function DesktopDashboard() {
                   供应商数量<em className={styles.hi}>{supplierCount}+</em>个
                   &nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/suppliers')}>供应商</span>
                 </div>
-                <div className={styles.sRow}>
-                  <span className={styles.dot}>○</span>
-                  今天有<em className={styles.hi}>1</em>个操作员登录系统
-                </div>
               </div>
             </div>
 

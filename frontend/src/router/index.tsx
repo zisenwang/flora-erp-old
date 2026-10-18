@@ -34,6 +34,8 @@ import MobileSales from '@/pages/mobile/MobileSales'
 import MobileCustomers from '@/pages/mobile/MobileCustomers'
 import MobileAddProduct from '@/pages/mobile/MobileAddProduct'
 import MobileOrder from '@/pages/mobile/MobileOrder'
+import PaymentList from '@/pages/payment/PaymentList'
+import PaymentNew from '@/pages/payment/PaymentNew'
 
 const isLoggedIn = () => !!localStorage.getItem('token')
 
@@ -100,14 +102,15 @@ const router = createBrowserRouter([
       { path: 'reports/sales/monthly', element: <SalesReport key="monthly" mode="monthly" /> },
       { path: 'reports/sales/customer-product', element: <SalesReport key="customerProduct" mode="customerProduct" /> },
       { path: 'reports/sales/year-month', element: <SalesReport key="yearMonth" mode="yearMonth" /> },
-      // 报损管理 / 修改密码 / 产品分类 / 产品调价 / 销售订单 / 收支管理 — not planned, placeholder only
+      { path: 'payment', element: <PaymentList /> },
+      { path: 'payment/new', element: <PaymentNew /> },
+      // 报损管理 / 修改密码 / 产品分类 / 产品调价 / 销售订单 — not planned, placeholder only
       { path: 'loss', element: <UnderDevelopment /> },
       { path: 'loss/new', element: <UnderDevelopment /> },
       { path: 'settings/password', element: <UnderDevelopment /> },
       { path: 'master/categories', element: <UnderDevelopment /> },
       { path: 'master/price-adjust', element: <UnderDevelopment /> },
       { path: 'sales/bookings', element: <UnderDevelopment /> },
-      { path: 'payment', element: <UnderDevelopment /> },
     ],
   },
 ])

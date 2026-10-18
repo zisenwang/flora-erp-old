@@ -117,6 +117,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/reports/inventory': '库存按产品汇总',
   '/reports/rankings': '排行榜',
   '/payment': '收支管理',
+  '/payment/new': '新增收款',
   '/settings': '系统设置',
 }
 

@@ -479,3 +479,14 @@
   line-height: 24px;
   font-weight: bold;
 }
+
+/* 收款状态 未收款 — red link to 新增收款; 已收款 — same look in green */
+.page a.unpaid {
+  color: #FF0000;
+  font-weight: bold;
+}
+
+.paid {
+  color: #009900;
+  font-weight: bold;
+}

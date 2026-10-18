@@ -10,6 +10,7 @@ import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 import { codeEquals } from '@/utils/codeMatch'
+import { isPaid, isVoided } from '@/utils/payment'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
@@ -60,7 +61,8 @@ interface SumRow {
   qty: number
   amount: number
   pieces: number
-  paid: boolean        // 销售单 fully paid (已收款)
+  paid: boolean        // 销售单 已收款 (部分收款 counts as paid)
+  voided: boolean      // 作废 销售单
   operator: string
   notes: string
 }
@@ -151,7 +153,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
             customer: `${o.customerCode}.${o.customerName}`,
             date: dayjs(o.orderDate).format('YYYY-MM-DD'),
             qty: o.totalQty, amount: o.totalAmount, pieces: o.totalPieces,
-            paid: o.paymentStatus === '已收款',
+            paid: isPaid(o.paymentStatus), voided: isVoided(o.status),
             operator: o.operator ?? '', notes: o.notes ?? '',
           })),
           ...returns.filter(r => codeOk(r.customerCode)).map((r): SumRow => ({
@@ -159,7 +161,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
             customer: `${r.customerCode}.${r.customerName}`,
             date: dayjs(r.returnDate).format('YYYY-MM-DD'),
             qty: -r.totalQty, amount: -r.totalAmount, pieces: r.totalPieces,
-            paid: false,
+            paid: false, voided: false,
             operator: r.operator ?? '', notes: r.notes ?? '',
           })),
         ].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)))
@@ -194,9 +196,9 @@ export default function SalesList({ mode = 'summary' }: Props) {
   useEffect(() => { setPage(1) }, [applied, pay])
 
   // ── Derived ──────────────────────────────────────────────────
-  // 已收款 = fully paid; 未收款 = anything not fully paid (未收款 / 部分收款); both only list 销售单
+  // 已收款 / 未收款 only list 销售单; 作废 orders are in neither
   const rows = sumRows.filter(r =>
-    pay === 'all' || (r.kind === 'order' && (pay === 'paid' ? r.paid : !r.paid)))
+    pay === 'all' || (r.kind === 'order' && !r.voided && (pay === 'paid' ? r.paid : !r.paid)))
   const total = mode === 'summary' ? rows.length : detailRows.length
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const paged = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -219,13 +221,13 @@ export default function SalesList({ mode = 'summary' }: Props) {
     if (mode === 'summary') {
       exportRows(
         `销售单据汇总_${range}`,
-        ['类型', '客户', '日期', '单号', '数量', '金额', '件数', '经办人', '备注'],
+        ['类型', '客户', '日期', '单号', '数量', '金额', '件数', '收款状态', '经办人', '备注'],
         [
           ...rows.map(r => [
             TYPE_LABEL[r.kind], r.customer, toSlashDate(r.date), r.no, num(r.qty), num(r.amount),
-            r.pieces || '', r.operator, r.notes,
+            r.pieces || '', payText(r), r.operator, r.notes,
           ]),
-          ['总计', '', '', '', num(allSum.qty), num(allSum.amount), num(allSum.pieces), '', ''],
+          ['总计', '', '', '', num(allSum.qty), num(allSum.amount), num(allSum.pieces), '', '', ''],
         ],
       )
       return
@@ -247,6 +249,19 @@ export default function SalesList({ mode = 'summary' }: Props) {
         ['总计', '', '', '', '', '', '', '', '', total('qty'), '', total('amount'), '', total('profit'), total('pieces'), '', ''],
       ],
     )
+  }
+
+  // 收款状态 column: blank for 退货单
+  const payText = (r: SumRow) =>
+    r.kind === 'return' ? '' : r.voided ? '已作废' : r.paid ? '已收款' : '未收款'
+
+  function payCell(r: SumRow) {
+    // 未收款 → 新增收款 with this order already ticked
+    if (r.kind === 'order' && !r.voided && !r.paid) {
+      return <a className={styles.unpaid} title="点击收款" onClick={() => navigate(`/payment/new?order=${r.id}`)}>未收款</a>
+    }
+    if (r.kind === 'order' && !r.voided) return <span className={styles.paid}>已收款</span>
+    return payText(r)
   }
 
   const base = (kind: Kind) => (kind === 'order' ? 'orders' : 'returns')
@@ -410,6 +425,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <th>&nbsp;数量&nbsp;</th>
                 <th>&nbsp;金额&nbsp;</th>
                 <th>件数</th>
+                <th>&nbsp;收款状态&nbsp;</th>
                 <th>&nbsp;经办人&nbsp;</th>
                 <th>&nbsp;备注&nbsp;</th>
                 <th>&nbsp;操作&nbsp;</th>
@@ -425,6 +441,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
                   <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.qty)}&nbsp;</td>
                   <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.amount)}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}&nbsp;</td>
+                  <td className={styles.c}>&nbsp;{payCell(r)}&nbsp;</td>
                   <td>&nbsp;{r.operator}&nbsp;</td>
                   <td>&nbsp;{r.notes}&nbsp;</td>
                   <td className={styles.c}>
@@ -437,14 +454,14 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.qty)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.amount)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.pieces)}</td>
-                <td colSpan={3}>核对数量:<em className={styles.qty}>{fmt(allSum.qty)}</em></td>
+                <td colSpan={4}>核对数量:<em className={styles.qty}>{fmt(allSum.qty)}</em></td>
               </tr>
               <tr>
                 <td colSpan={4} className={styles.r}>总计</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.qty)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.amount)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.pieces)}</td>
-                <td colSpan={3}>核对金额:<em className={styles.qty}>{fmt(allSum.amount)}</em></td>
+                <td colSpan={4}>核对金额:<em className={styles.qty}>{fmt(allSum.amount)}</em></td>
               </tr>
             </tbody>
           </table>

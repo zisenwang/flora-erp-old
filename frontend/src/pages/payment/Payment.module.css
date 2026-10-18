@@ -1,0 +1,139 @@
+/* 收支管理 / 新增收款 — extras on top of purchase/PurchaseDocs.module.css */
+
+/* fixed column widths (备注 kept narrow, long notes cut with … — hover shows all) */
+.list {
+  table-layout: fixed;
+  width: 1170px;
+}
+
+.wCustomer { width: 170px; }
+.wDate { width: 110px; }
+.wNo { width: 150px; }
+.wAmount { width: 110px; }
+.wStatus { width: 100px; }
+.wOperator { width: 100px; }
+.wNotes { width: 430px; }
+.wOps { width: 80px; }
+
+.list td {
+  overflow: hidden;
+}
+
+.notesCell {
+  text-overflow: ellipsis;
+}
+
+.unpaidText {
+  color: #FF0000;
+  font-weight: bold;
+}
+
+/* 删除 收款 */
+.list a.deleteLink {
+  color: #FF0000;
+}
+
+/* ── list (left) + 收款汇总 box (right) ── */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* same look as the 首页 panels (Dashboard.module.css .panel / .sRow) */
+.panel {
+  order: 1;   /* after the list → right of it */
+  width: 230px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 2px solid #FF3300;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+.panelTitle {
+  font-weight: bold;
+  color: #333;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #FFCC00;
+}
+
+.sRow {
+  padding: 2px 0;
+  line-height: 2;
+  white-space: nowrap;
+}
+
+.sRow em {
+  font-style: normal;
+  font-weight: bold;
+  color: #FF00FF;
+  margin: 0 2px;
+}
+
+/* 本期收款 / 未收款总额 */
+.sRow em.greenNum {
+  color: #009900;
+}
+
+.dot {
+  color: #ff6600;
+  margin-right: 2px;
+}
+
+.panelNote {
+  font-size: 12px;
+  color: #999;
+  padding-top: 2px;
+}
+
+.red {
+  color: #FF0000;
+}
+
+.viewName {
+  height: 22px;
+  line-height: 22px;
+  font-weight: bold;
+  color: #0000FF;
+}
+
+/* ── 新增收款 ── */
+.searchInput {
+  width: 160px;
+}
+
+.pick {
+  min-width: 700px;
+}
+
+.pick tbody tr {
+  cursor: pointer;
+}
+
+.ticked td {
+  background: #FFFF99 !important;
+}
+
+.pagerGap {
+  margin-top: 6px;
+}
+
+.form {
+  margin-top: 10px;
+  min-width: 700px;
+}
+
+.label {
+  width: 80px;
+  text-align: right;
+}
+
+.input {
+  width: 120px;
+}
+
+.notesInput {
+  width: 220px;
+}
