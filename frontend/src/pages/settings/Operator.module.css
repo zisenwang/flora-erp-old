@@ -1,0 +1,43 @@
+/* 操作员表 — extras on top of PurchaseDocs.module.css (list) / Suppliers.module.css (form) */
+
+.list {
+  min-width: 700px;
+}
+
+.admin {
+  color: #0000FF;
+  font-weight: bold;
+}
+
+.on {
+  color: #009900;
+}
+
+.off {
+  color: #FF0000;
+}
+
+.sep {
+  color: #999;
+  margin: 0 6px;
+}
+
+/* ── 新增 / 编辑 / 改密 / 权限 pages ── */
+.formWrap {
+  padding: 17px 0 0 10px;
+}
+
+.title {
+  height: 28px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #FF0000;
+}
+
+.flabel {
+  width: 80px;
+}
+
+.hint {
+  color: #999;
+}

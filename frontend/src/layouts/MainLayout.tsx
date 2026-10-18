@@ -1,12 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/store/AuthContext'
+import { can, isAdmin, type Permission } from '@/utils/permissions'
 import styles from './MainLayout.module.css'
+
+// permission / adminOnly: hidden from 操作员 without it (管理员 sees everything)
+interface NavLink {
+  label: string
+  path: string
+  permission?: Permission
+  adminOnly?: boolean
+}
 
 interface NavItem {
   label: string
   path?: string
-  children?: { label: string; path: string }[]
+  permission?: Permission
+  children?: NavLink[]
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -18,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: '产品调价', path: '/master/price-adjust' },
       { label: '客户资料', path: '/master/customers' },
       { label: '供应商资料', path: '/master/suppliers' },
-      { label: '修改密码', path: '/settings/password' },
+      { label: '操作员表', path: '/settings/operators', adminOnly: true },
     ],
   },
   {
@@ -39,6 +49,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: '报损管理',
+    permission: 'loss',
     children: [
       { label: '报损记录', path: '/loss' },
       { label: '新增报损', path: '/loss/new' },
@@ -48,8 +59,8 @@ const NAV_ITEMS: NavItem[] = [
     label: '库存管理',
     children: [
       { label: '产品库存', path: '/inventory' },
-      { label: '库存调整', path: '/inventory/adjust' },
-      { label: '库存盘点', path: '/inventory/check' },
+      { label: '库存调整', path: '/inventory/adjust', permission: 'inventory_adjust' },
+      { label: '库存盘点', path: '/inventory/check', permission: 'inventory_check' },
       { label: '调整单据', path: '/inventory/adjustments' },
     ],
   },
@@ -65,6 +76,9 @@ const NAV_ITEMS: NavItem[] = [
 
 // Detail pages with ids in the path, checked before the prefix labels below
 const ROUTE_PATTERNS: [RegExp, string][] = [
+  [/^\/settings\/operators\/\d+\/edit$/, '编辑操作员'],
+  [/^\/settings\/operators\/\d+\/password$/, '修改密码'],
+  [/^\/settings\/operators\/\d+\/permissions$/, '权限设置'],
   [/^\/purchase\/orders\/\d+\/edit$/, '修改采购单'],
   [/^\/purchase\/returns\/\d+\/edit$/, '修改退货单'],
   [/^\/purchase\/(orders|returns)\/\d+$/, '单据明细'],
@@ -88,7 +102,8 @@ const ROUTE_LABELS: Record<string, string> = {
   '/master/suppliers/new': '新增供应商',
   '/master/suppliers/edit': '修改供应商',
   '/master/suppliers': '供应商资料',
-  '/settings/password': '修改密码',
+  '/settings/operators': '操作员表',
+  '/settings/operators/new': '新增操作员',
   '/purchase/orders/new': '进货单录入',
   '/purchase/returns/new': '进货退回(退货)',
   '/purchase/orders/detail': '进货单据明细',
@@ -124,6 +139,12 @@ export default function MainLayout() {
   const location = useLocation()
   const { user, logout } = useAuth()
   const [openMenu, setOpenMenu] = useState<string | null>(null)
+
+  const allowed = (x: { permission?: Permission; adminOnly?: boolean }) =>
+    (!x.adminOnly || isAdmin(user)) && (!x.permission || can(x.permission, user))
+  const navItems = NAV_ITEMS
+    .filter(allowed)
+    .map(item => ({ ...item, children: item.children?.filter(allowed) }))
   const navRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -153,7 +174,7 @@ export default function MainLayout() {
       {/* ── Green top navigation bar ── */}
       <div className={styles.navbar} ref={navRef}>
         <div className={styles.navLeft}>
-          {NAV_ITEMS.map((item, idx) => (
+          {navItems.map((item, idx) => (
             <div
               key={item.label}
               className={styles.navItem}
@@ -182,10 +203,14 @@ export default function MainLayout() {
             </div>
           ))}
 
-          <span className={styles.pipe}>│</span>
-          <div className={styles.switchBtn} onClick={() => navigate('/payment')}>
-            切换到收支管理
-          </div>
+          {can('payment', user) && (
+            <>
+              <span className={styles.pipe}>│</span>
+              <div className={styles.switchBtn} onClick={() => navigate('/payment')}>
+                切换到收支管理
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.navRight}>

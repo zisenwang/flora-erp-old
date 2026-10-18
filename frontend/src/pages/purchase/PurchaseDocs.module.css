@@ -490,3 +490,9 @@
   color: #009900;
   font-weight: bold;
 }
+
+/* 未收款 for an 操作员 without 收支管理 — same look, not a link */
+.unpaidText {
+  color: #FF0000;
+  font-weight: bold;
+}

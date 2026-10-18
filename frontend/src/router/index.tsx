@@ -36,11 +36,24 @@ import MobileAddProduct from '@/pages/mobile/MobileAddProduct'
 import MobileOrder from '@/pages/mobile/MobileOrder'
 import PaymentList from '@/pages/payment/PaymentList'
 import PaymentNew from '@/pages/payment/PaymentNew'
+import OperatorList from '@/pages/settings/OperatorList'
+import OperatorForm from '@/pages/settings/OperatorForm'
+import { can, isAdmin, type Permission } from '@/utils/permissions'
 
 const isLoggedIn = () => !!localStorage.getItem('token')
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   return isLoggedIn() ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+// 操作员表: 管理员 only
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  return isAdmin() ? <>{children}</> : <Navigate to="/" replace />
+}
+
+// 库存调整 / 库存盘点 / 收支管理 / 报损管理: 管理员, or an 操作员 granted that permission
+function RequirePermission({ permission, children }: { permission: Permission; children: React.ReactNode }) {
+  return can(permission) ? <>{children}</> : <Navigate to="/" replace />
 }
 
 const router = createBrowserRouter([
@@ -88,10 +101,10 @@ const router = createBrowserRouter([
       { path: 'sales/returns/:id', element: <SalesView key="return" kind="return" /> },
       { path: 'sales/returns/:id/edit', element: <SalesEdit key="return" kind="return" /> },
       { path: 'inventory', element: <InventoryList /> },
-      { path: 'inventory/adjust', element: <InventoryAdjust /> },
+      { path: 'inventory/adjust', element: <RequirePermission permission="inventory_adjust"><InventoryAdjust /></RequirePermission> },
       { path: 'inventory/adjustments', element: <InventoryAdjustments /> },
       { path: 'inventory/adjustments/:id', element: <InventoryAdjustmentView /> },
-      { path: 'inventory/check', element: <InventoryCheck /> },
+      { path: 'inventory/check', element: <RequirePermission permission="inventory_check"><InventoryCheck /></RequirePermission> },
       { path: 'reports/purchase', element: <PurchaseReport key="product" mode="product" /> },
       { path: 'reports/purchase/supplier', element: <PurchaseReport key="supplier" mode="supplier" /> },
       { path: 'reports/purchase/operator', element: <PurchaseReport key="operator" mode="operator" /> },
@@ -102,12 +115,16 @@ const router = createBrowserRouter([
       { path: 'reports/sales/monthly', element: <SalesReport key="monthly" mode="monthly" /> },
       { path: 'reports/sales/customer-product', element: <SalesReport key="customerProduct" mode="customerProduct" /> },
       { path: 'reports/sales/year-month', element: <SalesReport key="yearMonth" mode="yearMonth" /> },
-      { path: 'payment', element: <PaymentList /> },
-      { path: 'payment/new', element: <PaymentNew /> },
-      // 报损管理 / 修改密码 / 产品分类 / 产品调价 — not planned, placeholder only
-      { path: 'loss', element: <UnderDevelopment /> },
-      { path: 'loss/new', element: <UnderDevelopment /> },
-      { path: 'settings/password', element: <UnderDevelopment /> },
+      { path: 'payment', element: <RequirePermission permission="payment"><PaymentList /></RequirePermission> },
+      { path: 'payment/new', element: <RequirePermission permission="payment"><PaymentNew /></RequirePermission> },
+      { path: 'settings/operators', element: <RequireAdmin><OperatorList /></RequireAdmin> },
+      { path: 'settings/operators/new', element: <RequireAdmin><OperatorForm key="new" mode="new" /></RequireAdmin> },
+      { path: 'settings/operators/:id/edit', element: <RequireAdmin><OperatorForm key="edit" mode="edit" /></RequireAdmin> },
+      { path: 'settings/operators/:id/password', element: <RequireAdmin><OperatorForm key="password" mode="password" /></RequireAdmin> },
+      { path: 'settings/operators/:id/permissions', element: <RequireAdmin><OperatorForm key="permissions" mode="permissions" /></RequireAdmin> },
+      // 报损管理 / 产品分类 / 产品调价 — not planned, placeholder only
+      { path: 'loss', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
+      { path: 'loss/new', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
       { path: 'master/categories', element: <UnderDevelopment /> },
       { path: 'master/price-adjust', element: <UnderDevelopment /> },
     ],

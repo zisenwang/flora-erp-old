@@ -11,6 +11,7 @@ import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 import { codeEquals } from '@/utils/codeMatch'
 import { isPaid, isVoided } from '@/utils/payment'
+import { can } from '@/utils/permissions'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
@@ -256,9 +257,11 @@ export default function SalesList({ mode = 'summary' }: Props) {
     r.kind === 'return' ? '' : r.voided ? '已作废' : r.paid ? '已收款' : '未收款'
 
   function payCell(r: SumRow) {
-    // 未收款 → 新增收款 with this order already ticked
+    // 未收款 → 新增收款 with this order already ticked (needs 收支管理 permission)
     if (r.kind === 'order' && !r.voided && !r.paid) {
-      return <a className={styles.unpaid} title="点击收款" onClick={() => navigate(`/payment/new?order=${r.id}`)}>未收款</a>
+      return can('payment')
+        ? <a className={styles.unpaid} title="点击收款" onClick={() => navigate(`/payment/new?order=${r.id}`)}>未收款</a>
+        : <span className={styles.unpaidText}>未收款</span>
     }
     if (r.kind === 'order' && !r.voided) return <span className={styles.paid}>已收款</span>
     return payText(r)
