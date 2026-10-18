@@ -296,7 +296,7 @@ export default function PurchaseList({ mode }: Props) {
               <td className={`${styles.c} ${styles.magenta}`}>&nbsp;{r.discount ?? ''}&nbsp;</td>
               <td className={`${styles.c} ${styles.teal}`}>&nbsp;{fmt(r.final)}&nbsp;</td>
               <td>&nbsp;{r.operator}&nbsp;</td>
-              <td><div className={styles.notesCell} title={r.notes}>&nbsp;{r.notes}</div></td>
+              <td className={styles.notesCell}><div title={r.notes}>&nbsp;{r.notes}</div></td>
               <td className={styles.c}>{ops(r.kind, r.id)}</td>
             </tr>
           ))}

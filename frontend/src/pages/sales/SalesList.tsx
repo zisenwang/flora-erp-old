@@ -446,7 +446,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
                   <td className={styles.c}>&nbsp;{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{payCell(r)}&nbsp;</td>
                   <td>&nbsp;{r.operator}&nbsp;</td>
-                  <td><div className={styles.notesCell} title={r.notes}>&nbsp;{r.notes}</div></td>
+                  <td className={styles.notesCell}><div>&nbsp;{r.notes}</div></td>
                   <td className={styles.c}>
                     {ops(r.kind, r.id)}
                   </td>
