@@ -327,7 +327,7 @@ function DesktopDashboard() {
               </tr>
             </tfoot>
           </table>
-          <div style={{ textAlign: 'center', padding: '2px', fontSize: '11px', color: '#999' }}>
+          <div style={{ textAlign: 'center', padding: '2px', fontSize: '12px', color: '#999' }}>
             {todayLabel}
           </div>
         </div>

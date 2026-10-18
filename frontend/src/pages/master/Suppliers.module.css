@@ -1,7 +1,7 @@
 /* ─── Page root ─────────────────────────────────────────────── */
 .page {
   min-height: 100%;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
   background: #fff;
 }
@@ -9,7 +9,7 @@
 .loading {
   padding: 20px;
   color: #666;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ── Sub-toolbar (same bar as 产品资料) ── */
@@ -43,7 +43,7 @@
   text-align: center;
   vertical-align: middle;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 宋体, SimSun, sans-serif;
   background: #6CC64B;
   border: 1px solid #0C9C20;
@@ -63,7 +63,7 @@
   border-collapse: separate;
   border-spacing: 1px;
   background: #C7FD9F;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* btbj.gif header gradient */
@@ -71,7 +71,7 @@
   height: 20px;
   padding: 0;
   font-weight: normal;
-  font-size: 12px;
+  font-size: 13px;
   color: #fff;
   text-align: left;
   white-space: nowrap;
@@ -122,7 +122,7 @@
   font-style: normal;
   font-weight: bold;
   font-family: 宋体, SimSun, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   color: #FF0099;
 }
 
@@ -141,7 +141,7 @@
 
 .opText {
   line-height: 18px;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 宋体, SimSun, sans-serif;
   color: #1004FD;
   text-align: center;
@@ -161,7 +161,7 @@
 /* ── Pager ── */
 .pager {
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .pager td {
@@ -206,7 +206,7 @@
 
 .formTable {
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .formTable td {
@@ -230,7 +230,7 @@
   box-sizing: border-box;
   height: 20px;
   padding: 1px 2px;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 宋体, SimSun, sans-serif;
   border: 1px solid #70BF0A;
   outline: none;
@@ -242,7 +242,7 @@
   width: 261px;
   height: 62px;
   padding: 1px 2px;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
   border: 1px solid #70BF0A;
   outline: none;
@@ -258,7 +258,7 @@
   width: 85px;
   height: 31px;
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-family: 宋体, SimSun, sans-serif;
   letter-spacing: 1px;
   background: linear-gradient(to bottom, #8ED673 0, #8ED673 1px, #6BC64F 1px, #2DA029 29px, #51B84B 29px, #51B84B 30px);

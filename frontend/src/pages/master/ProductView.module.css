@@ -3,7 +3,7 @@
 .page {
   min-height: 100%;
   padding: 26px 10px 0;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
   background: #fff;
 }
@@ -11,7 +11,7 @@
 .loading {
   padding: 20px;
   color: #666;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* 供 应 商:xxx — red title with edit icon */
@@ -20,7 +20,7 @@
   display: flex;
   align-items: flex-end;
   color: #FF0000;
-  font-size: 18px;
+  font-size: 19px;
   font-family: 宋体, SimSun, serif;
   white-space: pre;
 }
@@ -46,14 +46,14 @@
 .info th {
   height: 21px;
   min-width: 56px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: normal;
   color: #006600;
 }
 
 .info td {
   height: 19px;
-  font-size: 12px;
+  font-size: 13px;
   color: #FF00FF;
 }
 
@@ -62,7 +62,7 @@
   width: 110px;
   background: #00CC33;
   color: #fff;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: bold;
 }
 

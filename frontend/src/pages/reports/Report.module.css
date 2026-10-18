@@ -2,7 +2,7 @@
 
 .page {
   min-height: 100%;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
   background: #fff;
 }
@@ -10,7 +10,7 @@
 .loading {
   padding: 20px;
   color: #666;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* sub-bar: 按产品汇总 / 按供应商汇总 / 按经办人汇总 links */
@@ -68,7 +68,7 @@
 /* 从…到…采购报表 */
 .caption {
   padding-left: 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: #006600;
   line-height: 20px;
 }
@@ -78,7 +78,7 @@
   border-collapse: separate;
   border-spacing: 1px;
   background: #CCCCCC;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .grid th {
@@ -152,14 +152,14 @@
 
 /* "9合计" / "2025年合计" rows */
 .subtotalLabel {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: bold;
   text-align: right;
 }
 
 .bigRed {
   color: #FF0000;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: bold;
 }
 
@@ -185,7 +185,7 @@
 
 .invTitle {
   color: #FF0000;
-  font-size: 18px;
+  font-size: 19px;
   font-weight: bold;
   margin-right: 14px;
 }

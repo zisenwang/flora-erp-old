@@ -3,7 +3,7 @@
   height: 100%;
   overflow: auto;
   background: #f0f0f0;
-  font-size: 13px;
+  font-size: 14px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
 }
 
@@ -17,7 +17,7 @@
 .loading {
   padding: 20px;
   color: #666;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ─── Alert bar (未提交销售单) ─────────────────────────── */
@@ -29,7 +29,7 @@
 .alertInner {
   background: #99FF00;
   padding: 2px 4px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   color: #ff69b4;
 }
@@ -84,7 +84,7 @@
   padding: 2px 0;
   line-height: 2;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dot {
@@ -102,7 +102,7 @@
   margin-left: 4px;
   background: #1a7500;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 宋体, SimSun, sans-serif;
   padding: 1px 5px;
   cursor: pointer;
@@ -116,7 +116,7 @@
 
 /* ─── Section labels (style7: plain bold, NOT a green bar) ─ */
 .sectionLabel {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   color: #333;
   padding: 3px 2px 1px;
@@ -132,7 +132,7 @@
 /* ─── Supplier / Product rank tables ────────────────────────  */
 .rankTable {
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   border: 1px solid #ccc;
   background: #fff;
   flex-shrink: 0;
@@ -145,7 +145,7 @@
   padding: 3px 6px;
   text-align: center;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   color: #000;
 }
@@ -164,7 +164,7 @@
 /* ─── Yearly chart table ────────────────────────────────── */
 .yearTable {
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
   background: #fff;
   flex-shrink: 0;
   vertical-align: top;
@@ -174,7 +174,7 @@
   background: #FF0000;
   color: #fff;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 14px;
   padding: 2px 4px;
   white-space: nowrap;
 }
@@ -194,7 +194,7 @@
 .yearAmt {
   padding: 2px 6px;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .yearTotal {
@@ -237,7 +237,7 @@
 
 .dailyTable {
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dailyTable th {

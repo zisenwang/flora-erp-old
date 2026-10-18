@@ -3,7 +3,7 @@
 
 .page {
   min-height: 100%;
-  font-size: 12px;
+  font-size: 13px;
   font-family: 'Times New Roman', 宋体, SimSun, serif;
   background: #fff;
 }
@@ -92,7 +92,7 @@
 
 .formTable {
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .formTable td {
@@ -188,7 +188,7 @@ table.list td {
   width: 24px;
   height: 11px;
   line-height: 11px;
-  font-size: 9px;
+  font-size: 10px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
   color: #FF0000;
