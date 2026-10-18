@@ -61,7 +61,6 @@ const NAV_ITEMS: NavItem[] = [
       { label: '库存报表', path: '/reports/inventory' },
     ],
   },
-  { label: '销售订单', path: '/sales/bookings' },
 ]
 
 // Detail pages with ids in the path, checked before the prefix labels below
@@ -98,7 +97,6 @@ const ROUTE_LABELS: Record<string, string> = {
   '/sales/returns/new': '销售退货单录入',
   '/sales/orders/detail': '销售单据明细',
   '/sales/orders': '销售单据汇总',
-  '/sales/bookings': '销售订单',
   '/loss': '报损记录',
   '/loss/new': '新增报损',
   '/inventory': '产品库存表',

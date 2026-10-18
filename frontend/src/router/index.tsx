@@ -104,13 +104,12 @@ const router = createBrowserRouter([
       { path: 'reports/sales/year-month', element: <SalesReport key="yearMonth" mode="yearMonth" /> },
       { path: 'payment', element: <PaymentList /> },
       { path: 'payment/new', element: <PaymentNew /> },
-      // 报损管理 / 修改密码 / 产品分类 / 产品调价 / 销售订单 — not planned, placeholder only
+      // 报损管理 / 修改密码 / 产品分类 / 产品调价 — not planned, placeholder only
       { path: 'loss', element: <UnderDevelopment /> },
       { path: 'loss/new', element: <UnderDevelopment /> },
       { path: 'settings/password', element: <UnderDevelopment /> },
       { path: 'master/categories', element: <UnderDevelopment /> },
       { path: 'master/price-adjust', element: <UnderDevelopment /> },
-      { path: 'sales/bookings', element: <UnderDevelopment /> },
     ],
   },
 ])
