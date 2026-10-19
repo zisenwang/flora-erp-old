@@ -279,7 +279,7 @@ export default function ProductForm() {
                         <td>
                           {recent3.map(p => (
                             <div key={p.id} className={styles.recentLine}>
-                              &nbsp;<em className={sup.code}>{p.code}</em>&nbsp;{p.name}&nbsp;{p.spec ?? ''}&nbsp;
+                              &nbsp;<em className={sup.code}>{p.code}</em>&nbsp;{p.spec ?? ''}&nbsp;{p.name}&nbsp;
                             </div>
                           ))}
                         </td>
@@ -289,18 +289,18 @@ export default function ProductForm() {
                 </td>
               </tr>
               <tr>
-                <td className={styles.flabel}>品名&nbsp;</td>
-                <td>
-                  <input className={sup.finput} style={{ width: 252 }} type="text"
-                    value={form.name} onChange={e => setField('name', e.target.value)} />
-                  &nbsp;<span className={sup.freq}>*</span>
-                </td>
-              </tr>
-              <tr>
                 <td className={styles.flabel}>规格&nbsp;</td>
                 <td>
                   <input className={sup.finput} style={{ width: 132 }} type="text"
                     value={form.spec} onChange={e => setField('spec', e.target.value)} />
+                  &nbsp;<span className={sup.freq}>*</span>
+                </td>
+              </tr>
+              <tr>
+                <td className={styles.flabel}>品名&nbsp;</td>
+                <td>
+                  <input className={sup.finput} style={{ width: 252 }} type="text"
+                    value={form.name} onChange={e => setField('name', e.target.value)} />
                   &nbsp;<span className={sup.freq}>*</span>
                 </td>
               </tr>
@@ -396,7 +396,9 @@ export default function ProductForm() {
                 <th>序号</th>
                 <th>&nbsp;ID&nbsp;</th>
                 <th>&nbsp;供应商&nbsp;</th>
-                <th>&nbsp;编码&nbsp;产品&nbsp;规格&nbsp;</th>
+                <th>&nbsp;编码&nbsp;</th>
+                <th>&nbsp;规格&nbsp;</th>
+                <th>&nbsp;产品&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>修改</th>
@@ -413,8 +415,10 @@ export default function ProductForm() {
                     {p.id === newestId
                       ? <><span className={styles.newTag}>NEW</span><em className={sup.code}>{p.code}</em></>
                       : <span className={styles.codeSpan}>{p.code}</span>}
-                    &nbsp;{p.name}&nbsp;{p.spec ?? ''}&nbsp;
+                    &nbsp;
                   </td>
+                  <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                  <td>&nbsp;{p.name}&nbsp;</td>
                   <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                   <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                   <td>

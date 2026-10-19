@@ -85,21 +85,21 @@ export default function InventoryAdjustments() {
   function handleExport() {
     exportRows(
       `库存调整明细_${rangeName(applied.start, applied.end)}`,
-      ['类型', '日期', '编码', '产品', '包装', '供应商', '单位', '库存数量', '盘点数量', '盈亏数量', '经办人', '备注'],
+      ['类型', '日期', '编码', '规格', '产品', '包装', '供应商', '单位', '库存数量', '盘点数量', '盈亏数量', '经办人', '备注'],
       [
         ...rows.map(r => [
           '库存调整单', toSlashDate(r.createdAt.slice(0, 10)), r.productCode,
-          [r.productName, r.spec, r.grade].filter(Boolean).join(' '), r.unitsPerPiece, r.supplierCode, r.unit,
+          r.spec, [r.productName, r.grade].filter(Boolean).join(' '), r.unitsPerPiece, r.supplierCode, r.unit,
           r.qtyBefore, r.qtyAfter, r.qtyChange, r.operator, r.reason,
         ]),
-        ['总计', '', '', '', '', '', '', allSum.before, allSum.after, allSum.change, '', ''],
+        ['总计', '', '', '', '', '', '', '', allSum.before, allSum.after, allSum.change, '', ''],
       ],
     )
   }
 
   const totalRow = (label: string, t: ReturnType<typeof sum>) => (
     <tr>
-      <td colSpan={7} className={`${styles.r} ${styles.hatch}`}>{label}</td>
+      <td colSpan={8} className={`${styles.r} ${styles.hatch}`}>{label}</td>
       <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{t.before}</td>
       <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{t.after}</td>
       <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{t.change}</td>
@@ -136,6 +136,7 @@ export default function InventoryAdjustments() {
                 <th>&nbsp;类型&nbsp;</th>
                 <th>&nbsp;日期&nbsp;</th>
                 <th>&nbsp;编码&nbsp;</th>
+                <th>&nbsp;规格&nbsp;</th>
                 <th>&nbsp;产品&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;供应商&nbsp;</th>
@@ -154,7 +155,8 @@ export default function InventoryAdjustments() {
                   <td>&nbsp;库存调整单&nbsp;</td>
                   <td>&nbsp;{toSlashDate(r.createdAt.slice(0, 10))}&nbsp;</td>
                   <td>&nbsp;{r.productCode}&nbsp;</td>
-                  <td>&nbsp;{r.productName}&nbsp;{r.spec ?? ''}&nbsp;{r.grade ?? ''}&nbsp;</td>
+                  <td>&nbsp;{r.spec ?? ''}&nbsp;</td>
+                  <td>&nbsp;{r.productName}&nbsp;{r.grade ?? ''}&nbsp;</td>
                   <td>&nbsp;{r.unitsPerPiece ?? ''}&nbsp;</td>
                   <td>&nbsp;{r.supplierCode}&nbsp;</td>
                   <td>&nbsp;{r.unit}&nbsp;</td>

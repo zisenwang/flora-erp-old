@@ -63,6 +63,7 @@ export default function MobileSales() {
       <table className={styles.prodTable}>
         <colgroup>
           <col style={{ width: '17%' }} />
+          <col style={{ width: '13%' }} />
           <col />
           <col style={{ width: '10%' }} />
           <col style={{ width: '15%' }} />
@@ -72,7 +73,8 @@ export default function MobileSales() {
         <thead>
           <tr>
             <th>编码</th>
-            <th>品名 规格 等级</th>
+            <th>规格</th>
+            <th>品名 等级</th>
             <th>包装</th>
             <th>库存</th>
             <th>单价</th>
@@ -83,7 +85,8 @@ export default function MobileSales() {
           {filtered.map(p => (
             <tr key={p.id}>
               <td>{p.supplierCode}<br /><span className={styles.bold}>{p.code}</span></td>
-              <td>{p.name} <em>{p.spec ?? ''}</em> {p.grade ?? ''}</td>
+              <td><em>{p.spec ?? ''}</em></td>
+              <td>{p.name} {p.grade ?? ''}</td>
               <td>{p.unitsPerPiece ?? ''}</td>
               <td><span className={styles.bold}>{p.stock}</span>{p.unit ?? ''}</td>
               <td><em>{p.price != null ? +p.price.toFixed(2) : ''}</em></td>

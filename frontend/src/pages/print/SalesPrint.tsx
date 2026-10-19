@@ -121,6 +121,7 @@ export default function SalesPrint({ kind = 'order' }: Props) {
                   <tr>
                     <td className={styles.c} style={{ width: 60 }}>编码</td>
                     <td className={styles.c}>供货商</td>
+                    <td className={styles.c}>规格</td>
                     <td style={{ height: 18 }}>&nbsp;货品名称&nbsp;</td>
                     <td className={styles.c} style={{ width: 60 }}>单位</td>
                     <td className={styles.c} style={{ width: 60 }}>数量</td>
@@ -135,7 +136,8 @@ export default function SalesPrint({ kind = 'order' }: Props) {
                       <tr key={i.id}>
                         <td className={styles.c} style={{ height: 24 }}>{i.productCode}</td>
                         <td>{i.supplierCode}</td>
-                        <td>{i.productName}&nbsp;{p?.spec ?? ''}&nbsp;{p?.grade ?? ''}</td>
+                        <td className={styles.c}>{p?.spec ?? ''}</td>
+                        <td>{i.productName}&nbsp;{p?.grade ?? ''}</td>
                         <td className={styles.c}>{i.unit}</td>
                         <td className={styles.c}>{qty(i.qty)}</td>
                         <td className={styles.c}>{money(i.unitPrice)}</td>
@@ -146,7 +148,7 @@ export default function SalesPrint({ kind = 'order' }: Props) {
                     )
                   })}
                   <tr>
-                    <td colSpan={4} className={styles.r} style={{ height: 24 }}>小计:</td>
+                    <td colSpan={5} className={styles.r} style={{ height: 24 }}>小计:</td>
                     <td className={styles.c}>{qty(totalQty)}</td>
                     <td></td>
                     <td className={styles.c}>{money(totalAmount)}</td>
@@ -154,7 +156,7 @@ export default function SalesPrint({ kind = 'order' }: Props) {
                     <td>&nbsp;</td>
                   </tr>
                   <tr>
-                    <td colSpan={4} className={styles.r} style={{ height: 24 }}>合计:</td>
+                    <td colSpan={5} className={styles.r} style={{ height: 24 }}>合计:</td>
                     <td className={styles.c}>{qty(totalQty)}</td>
                     <td className={styles.r}>小写</td>
                     <td className={styles.c}>{money(totalAmount)}</td>

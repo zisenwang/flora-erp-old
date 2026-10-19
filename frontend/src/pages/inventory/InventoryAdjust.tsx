@@ -258,7 +258,8 @@ export default function InventoryAdjust() {
               <tr>
                 <th>&nbsp;供应商&nbsp;</th>
                 <th>&nbsp;编码&nbsp;</th>
-                <th>&nbsp;品名&nbsp;&nbsp;规格&nbsp;&nbsp;等级&nbsp;</th>
+                <th>&nbsp;规格&nbsp;</th>
+                <th>&nbsp;品名&nbsp;&nbsp;等级&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 <th>&nbsp;库存数量&nbsp;</th>
@@ -274,7 +275,8 @@ export default function InventoryAdjust() {
                   <tr key={p.id}>
                     <td>&nbsp;{p.supplierCode}&nbsp;</td>
                     <td>&nbsp;{p.code}&nbsp;</td>
-                    <td>&nbsp;{p.name}&nbsp;<em className={styles.spec}>{p.spec ?? ''}</em>&nbsp;{p.grade ?? ''}&nbsp;</td>
+                    <td>&nbsp;<em className={styles.spec}>{p.spec ?? ''}</em>&nbsp;</td>
+                    <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     <td className={styles.stock}>&nbsp;{p.stock}&nbsp;</td>
@@ -338,7 +340,8 @@ export default function InventoryAdjust() {
                   <tr>
                     <th><span className={styles.delAll} title="删除勾选的产品" onClick={handleDeleteChecked}>×</span></th>
                     <th>编码</th>
-                    <th>品名 规格 等级</th>
+                    <th>规格</th>
+                    <th>品名 等级</th>
                     <th>单位</th>
                     <th>库存数量</th>
                     <th>实际数量</th>
@@ -348,7 +351,7 @@ export default function InventoryAdjust() {
                 </thead>
                 <tbody>
                   {draft.lines.length === 0 && (
-                    <tr className={styles.noRecord}><td colSpan={8}>无记录!</td></tr>
+                    <tr className={styles.noRecord}><td colSpan={9}>无记录!</td></tr>
                   )}
                   {draft.lines.map(l => (
                     <tr key={l.key}>
@@ -356,7 +359,8 @@ export default function InventoryAdjust() {
                         <input type="checkbox" checked={l.checked} onChange={e => setLine(l.key, { checked: e.target.checked })} />
                       </td>
                       <td>{l.code}</td>
-                      <td className={styles.wrapName}>{l.name} {l.spec} {l.grade}</td>
+                      <td>{l.spec}</td>
+                      <td className={styles.wrapName}>{l.name} {l.grade}</td>
                       <td className={styles.num}>{l.unit}</td>
                       <td className={styles.num}>{l.stock}</td>
                       <td>
@@ -372,7 +376,7 @@ export default function InventoryAdjust() {
                   ))}
                   {draft.lines.length > 0 && (
                     <tr className={styles.sumRow}>
-                      <td colSpan={4} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
+                      <td colSpan={5} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
                       <td className={styles.pinkNum}>{totalStock}</td>
                       <td className={styles.num}>{totalActual}</td>
                       <td className={styles.pinkNum}>{totalDiff}</td>

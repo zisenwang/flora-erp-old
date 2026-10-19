@@ -161,9 +161,9 @@ export default function PurchaseReport({ mode }: Props) {
 
   // label column(s) depend on the mode; numeric columns are shared
   const labelHeads = mode === 'product'
-    ? <><th>&nbsp;编码&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;规格&nbsp;单位&nbsp;产地&nbsp;</th></>
+    ? <><th>&nbsp;编码&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;单位&nbsp;产地&nbsp;</th></>
     : <th>&nbsp;{mode === 'supplier' ? '供应商' : '经办人'}&nbsp;</th>
-  const labelSpan = mode === 'product' ? 2 : 1
+  const labelSpan = mode === 'product' ? 3 : 1
   const numCols = mode === 'product' ? 5 : 4
 
   // ── Render ───────────────────────────────────────────────────
@@ -231,8 +231,9 @@ export default function PurchaseReport({ mode }: Props) {
                     {mode === 'product' && (
                       <>
                         <td className={styles.c} data-t="s">&nbsp;{g.code}&nbsp;</td>
+                        <td>&nbsp;<span className={styles.teal}>{p?.spec ?? ''}</span>&nbsp;</td>
                         <td>
-                          &nbsp;{g.name}&nbsp;<span className={styles.teal}>{p?.spec ?? ''}</span>&nbsp;{p?.unit ?? ''}&nbsp;
+                          &nbsp;{g.name}&nbsp;{p?.unit ?? ''}&nbsp;
                           <span className={styles.grey}>{g.supplierCode}</span>&nbsp;
                         </td>
                       </>

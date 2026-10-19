@@ -116,8 +116,8 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                 <tbody>
                   <tr>
                     <td className={styles.c}>编码</td>
-                    <td>&nbsp;货品名称</td>
                     <td className={styles.c}>规格</td>
+                    <td>&nbsp;货品名称</td>
                     <td className={styles.c}>单位</td>
                     <td className={styles.c}>数量</td>
                     <td className={styles.c}>单价</td>
@@ -129,8 +129,8 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                   {doc.lines.map(l => (
                     <tr key={l.id}>
                       <td className={styles.c}>{l.productCode}</td>
-                      <td>&nbsp;{l.productName}</td>
                       <td className={styles.c}>{specs[l.productId] ?? ''}</td>
+                      <td>&nbsp;{l.productName}</td>
                       <td className={styles.c}>{l.unit}</td>
                       <td className={styles.c}>{fmt(l.qty)}</td>
                       <td className={styles.c}>{fmt(l.unitPrice)}</td>

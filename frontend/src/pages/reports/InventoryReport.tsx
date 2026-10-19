@@ -108,7 +108,8 @@ export default function InventoryReport() {
   const header = (repeat = false) => (
     <tr data-noexport={repeat || undefined}>
       <th>&nbsp;编码&nbsp;</th>
-      <th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;规格&nbsp;等级&nbsp;</th>
+      <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th>
+      <th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;等级&nbsp;</th>
       <th>&nbsp;当前库存&nbsp;</th>
       <th>&nbsp;件数&nbsp;</th>
       <th>&nbsp;每件数量&nbsp;</th>
@@ -174,7 +175,8 @@ export default function InventoryReport() {
                     {i > 0 && i % HEADER_EVERY === 0 && header(true)}
                     <tr className={styles.row}>
                       <td data-t="s">&nbsp;<span className={styles.boldCode}>{p.code}</span>&nbsp;</td>
-                      <td>&nbsp;{p.name}&nbsp;{p.spec ?? ''}&nbsp;{p.grade ?? ''}&nbsp;</td>
+                      <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                      <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
                       <td className={`${styles.c} ${styles.bold}`}>&nbsp;{p.stock}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{piecesOf(p)}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>

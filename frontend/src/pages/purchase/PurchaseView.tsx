@@ -94,7 +94,8 @@ export default function PurchaseView({ kind }: Props) {
               <th>单号</th>
               <th>供应商</th>
               <th>编码</th>
-              <th>产品名称&nbsp;&nbsp;规格&nbsp;&nbsp;等级</th>
+              <th>规格</th>
+              <th>产品名称&nbsp;&nbsp;等级</th>
               <th>单位</th>
               <th>数量</th>
               <th>单价</th>
@@ -115,7 +116,8 @@ export default function PurchaseView({ kind }: Props) {
                 <td>{doc.no}</td>
                 <td>{doc.supplierCode}</td>
                 <td>{l.productCode}</td>
-                <td>{l.productName} {specs[l.productId] ?? ''} {l.grade}</td>
+                <td>{specs[l.productId] ?? ''}</td>
+                <td>{l.productName} {l.grade}</td>
                 <td className={styles.c}>{l.unit}</td>
                 <td className={styles.c}>{fmt(l.qty)}</td>
                 <td className={styles.c}>{fmt(l.unitPrice)}</td>
@@ -128,7 +130,7 @@ export default function PurchaseView({ kind }: Props) {
               </tr>
             ))}
             <tr className={styles.docSumYellow}>
-              <td colSpan={7} className={styles.c}>总共{doc.lines.length}个产品</td>
+              <td colSpan={8} className={styles.c}>总共{doc.lines.length}个产品</td>
               <td className={styles.c}>合计</td>
               <td className={styles.c}>{fmt(totalQty)}</td>
               <td></td>

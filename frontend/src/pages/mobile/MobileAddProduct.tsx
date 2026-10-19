@@ -79,7 +79,7 @@ export default function MobileAddProduct() {
             <tr>
               <td className={styles.label}>产品信息：</td>
               <td className={styles.big}>
-                <span className={styles.green}>{p.name}</span>&nbsp;&nbsp;<span className={styles.teal}>{p.spec ?? ''}</span>&nbsp;{p.grade ?? ''}
+                <span className={styles.teal}>{p.spec ?? ''}</span>&nbsp;&nbsp;<span className={styles.green}>{p.name}</span>&nbsp;{p.grade ?? ''}
               </td>
             </tr>
             <tr>

@@ -106,7 +106,8 @@ export default function MobileOrder() {
           <thead>
             <tr>
               <th>&nbsp;编码&nbsp;</th>
-              <th className={styles.left}>&nbsp;品名&nbsp;规格&nbsp;等级&nbsp;</th>
+              <th className={styles.left}>&nbsp;规格&nbsp;</th>
+              <th className={styles.left}>&nbsp;品名&nbsp;等级&nbsp;</th>
               <th>&nbsp;数量&nbsp;</th>
               <th>&nbsp;单价&nbsp;</th>
               <th>&nbsp;金额&nbsp;</th>
@@ -117,7 +118,7 @@ export default function MobileOrder() {
           </thead>
           <tbody>
             {draft.lines.length === 0 && (
-              <tr><td colSpan={8} className={styles.noRecord}>无记录!</td></tr>
+              <tr><td colSpan={9} className={styles.noRecord}>无记录!</td></tr>
             )}
             {draft.lines.map(l => {
               const stock = productsById[l.productId]?.stock
@@ -125,7 +126,8 @@ export default function MobileOrder() {
               return (
                 <tr key={l.key} className={short ? styles.shortRow : ''}>
                   <td>{l.code}</td>
-                  <td className={styles.left}>&nbsp;{l.name}&nbsp;<em>{l.spec}</em>&nbsp;{l.grade}&nbsp;</td>
+                  <td className={styles.left}>&nbsp;<em>{l.spec}</em>&nbsp;</td>
+                  <td className={styles.left}>&nbsp;{l.name}&nbsp;{l.grade}&nbsp;</td>
                   <td className={styles.nowrap}>
                     <input className={styles.cellIn} type="tel" value={l.qty}
                       onChange={e => {
@@ -195,7 +197,8 @@ export default function MobileOrder() {
                 <tr>
                   <th>&nbsp;日期&nbsp;</th>
                   <th>&nbsp;编码&nbsp;</th>
-                  <th className={styles.left}>&nbsp;品名&nbsp;规格&nbsp;等级&nbsp;</th>
+                  <th className={styles.left}>&nbsp;规格&nbsp;</th>
+                  <th className={styles.left}>&nbsp;品名&nbsp;等级&nbsp;</th>
                   <th>&nbsp;单位&nbsp;</th>
                   <th>&nbsp;数量&nbsp;</th>
                   <th>&nbsp;单价&nbsp;</th>
@@ -211,7 +214,8 @@ export default function MobileOrder() {
                     <tr key={`${h.id}-${i}`}>
                       <td>&nbsp;{dayjs(h.date).format('M.D')}&nbsp;</td>
                       <td>{h.productCode}</td>
-                      <td className={styles.left}>&nbsp;{h.productName}&nbsp;{p?.spec ?? ''}&nbsp;{p?.grade ?? ''}</td>
+                      <td className={styles.left}>&nbsp;{p?.spec ?? ''}&nbsp;</td>
+                      <td className={styles.left}>&nbsp;{h.productName}&nbsp;{p?.grade ?? ''}</td>
                       <td>{h.unit}</td>
                       <td>{fmt(h.qty)}</td>
                       <td>{fmt(h.unitPrice)}</td>

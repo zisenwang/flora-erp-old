@@ -33,8 +33,8 @@ export default function ProductView() {
             <th rowSpan={2} className={styles.block}>产品信息</th>
             <th>分类</th>
             <th>编码</th>
-            <th>品名</th>
             <th>规格</th>
+            <th>品名</th>
             <th>等级</th>
             <th>包装</th>
             <th>单位</th>
@@ -43,8 +43,8 @@ export default function ProductView() {
           <tr>
             <td>{product.category ?? ''}</td>
             <td>{product.code}</td>
-            <td>{product.name}</td>
             <td>{product.spec ?? ''}</td>
+            <td>{product.name}</td>
             <td>{product.grade ?? ''}</td>
             <td>{product.unitsPerPiece ?? ''}</td>
             <td>{product.unit ?? ''}</td>

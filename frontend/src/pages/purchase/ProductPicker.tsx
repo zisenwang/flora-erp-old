@@ -56,8 +56,8 @@ export default function ProductPicker({
               <th>&nbsp;分类&nbsp;</th>
               <th>&nbsp;供应商&nbsp;</th>
               <th>&nbsp;编码&nbsp;</th>
-              <th>&nbsp;品名&nbsp;</th>
               <th>&nbsp;规格&nbsp;</th>
+              <th>&nbsp;品名&nbsp;</th>
               <th>&nbsp;等级&nbsp;</th>
               <th>&nbsp;单价&nbsp;</th>
               <th>&nbsp;包装&nbsp;</th>
@@ -73,8 +73,8 @@ export default function ProductPicker({
                 <td className={styles.c}>&nbsp;{p.category ?? ''}&nbsp;</td>
                 <td>&nbsp;{p.supplierCode}&nbsp;{p.supplierName}&nbsp;</td>
                 <td>&nbsp;{p.code}&nbsp;</td>
-                <td>&nbsp;{p.name}&nbsp;</td>
                 <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                <td>&nbsp;{p.name}&nbsp;</td>
                 <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
                 <td className={styles.pickPrice}>&nbsp;{p[priceField] != null ? +p[priceField] : ''}&nbsp;</td>
                 <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>

@@ -109,9 +109,9 @@ export default function InventoryList() {
   function handleExport() {
     exportRows(
       '产品库存',
-      ['编码', '产品名称 规格 等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
+      ['编码', '规格', '产品名称 等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
       rows.map(p => [
-        p.code, [p.name, p.spec, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
+        p.code, p.spec, [p.name, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
         +money(p.costPrice), +money(p.price), p.stock, piecesOf(p) === '' ? '' : +piecesOf(p),
       ]),
     )
@@ -187,7 +187,8 @@ export default function InventoryList() {
               <thead>
                 <tr>
                   <th className={styles.c}>&nbsp;编码&nbsp;</th>
-                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;规格&nbsp;等级&nbsp;</th>
+                  <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th>
+                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;等级&nbsp;</th>
                   <th className={styles.c}>&nbsp;单位&nbsp;</th>
                   <th className={styles.c}>&nbsp;包装&nbsp;</th>
                   <th className={styles.c}>&nbsp;供应商&nbsp;</th>
@@ -201,7 +202,8 @@ export default function InventoryList() {
                 {paged.map(p => (
                   <tr key={p.id} className={styles.row}>
                     <td className={styles.c}>&nbsp;{p.code}&nbsp;</td>
-                    <td>&nbsp;{p.name}&nbsp;{p.spec ?? ''}&nbsp;{p.grade ?? ''}&nbsp;</td>
+                    <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                    <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td className={styles.r}>&nbsp;<span className={`${styles.bold} ${styles.green}`}>{p.supplierCode}</span>&nbsp;</td>

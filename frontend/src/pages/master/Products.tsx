@@ -96,9 +96,9 @@ export default function Products() {
   function handleExport() {
     exportRows(
       '产品资料',
-      ['ID', '供应商', '分类', '编码', '品名', '规格', '等级', '单位', '包装', '进货价', '销售价'],
+      ['ID', '供应商', '分类', '编码', '规格', '品名', '等级', '单位', '包装', '进货价', '销售价'],
       filteredProducts.map(p => [
-        p.id, p.supplierName, p.category, p.code, p.name, p.spec, p.grade, p.unit,
+        p.id, p.supplierName, p.category, p.code, p.spec, p.name, p.grade, p.unit,
         p.unitsPerPiece, p.costPrice != null ? +p.costPrice.toFixed(2) : '', p.price != null ? +p.price.toFixed(2) : '',
       ]),
     )
@@ -216,8 +216,8 @@ export default function Products() {
                 <th>供应商</th>
                 <th>分类</th>
                 <th>编码</th>
-                <th>品名</th>
                 <th>规格</th>
+                <th>品名</th>
                 <th>等级</th>
                 <th>单位</th>
                 <th>包装</th>
@@ -235,8 +235,8 @@ export default function Products() {
                   <td className={styles.tnowrap}>
                     &nbsp;<em className={styles.codeCell}>{p.code}</em>&nbsp;
                   </td>
-                  <td className={styles.tnowrap}>&nbsp;{p.name}&nbsp;</td>
                   <td className={styles.tnowrap}>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                  <td className={styles.tnowrap}>&nbsp;{p.name}&nbsp;</td>
                   <td className={styles.tnowrap}>&nbsp;{p.grade ?? ''}&nbsp;</td>
                   <td className={styles.tc}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                   <td className={styles.tc}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
