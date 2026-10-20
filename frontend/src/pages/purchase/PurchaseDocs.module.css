@@ -91,6 +91,11 @@
   text-align: right;
 }
 
+/* 产品库存表: a bit wider than its content (customer request 10-18) */
+.stockWide {
+  width: 800px;
+}
+
 /* 备注 column of the 销售 / 采购 单据 lists: 430px like 收支管理, long notes cut with … (hover shows all) */
 .notesCell {
   width: 430px;

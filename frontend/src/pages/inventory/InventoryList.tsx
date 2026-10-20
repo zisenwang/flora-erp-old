@@ -105,15 +105,22 @@ export default function InventoryList() {
     setSupplierFilter(null)
   }
 
+  // 合计: 库存 / 件数 of every filtered product (prices are not summed)
+  const totalStock = +rows.reduce((s, p) => s + Number(p.stock), 0).toFixed(2)
+  const totalPieces = +rows.reduce((s, p) => s + (piecesOf(p) === '' ? 0 : +piecesOf(p)), 0).toFixed(1)
+
   // 导出EXCEL (old kc_byd_excel.asp): every filtered product, same columns as the table
   function handleExport() {
     exportRows(
       '产品库存',
       ['编码', '规格', '产品名称 等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
-      rows.map(p => [
-        p.code, p.spec, [p.name, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
-        +money(p.costPrice), +money(p.price), p.stock, piecesOf(p) === '' ? '' : +piecesOf(p),
-      ]),
+      [
+        ...rows.map(p => [
+          p.code, p.spec, [p.name, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
+          +money(p.costPrice), +money(p.price), p.stock, piecesOf(p) === '' ? '' : +piecesOf(p),
+        ]),
+        ['合计', '', '', '', '', '', '', '', totalStock, totalPieces],
+      ],
     )
   }
 
@@ -183,11 +190,11 @@ export default function InventoryList() {
         {/* ══ MAIN: stock table ══════════════════════════════════ */}
         <div style={{ marginLeft: 2 }}>
           {loading ? <div className={styles.loading}>数据加载中，请稍候...</div> : (
-            <table className={styles.grid}>
+            <table className={`${styles.grid} ${styles.stockWide}`}>
               <thead>
                 <tr>
                   <th className={styles.c}>&nbsp;编码&nbsp;</th>
-                  <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th>
+                  <th className={styles.c}>&nbsp;规格&nbsp;</th>
                   <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;等级&nbsp;</th>
                   <th className={styles.c}>&nbsp;单位&nbsp;</th>
                   <th className={styles.c}>&nbsp;包装&nbsp;</th>
@@ -202,7 +209,7 @@ export default function InventoryList() {
                 {paged.map(p => (
                   <tr key={p.id} className={styles.row}>
                     <td className={styles.c}>&nbsp;{p.code}&nbsp;</td>
-                    <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
+                    <td className={styles.c}>&nbsp;{p.spec ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
@@ -213,6 +220,11 @@ export default function InventoryList() {
                     <td className={`${styles.r} ${styles.teal}`}>&nbsp;{piecesOf(p)}&nbsp;</td>
                   </tr>
                 ))}
+                <tr>
+                  <td colSpan={8} className={styles.r}>合计&nbsp;</td>
+                  <td className={`${styles.r} ${styles.bold} ${styles.green} ${styles.hatch}`}>&nbsp;{totalStock}&nbsp;</td>
+                  <td className={`${styles.r} ${styles.teal} ${styles.hatch}`}>&nbsp;{totalPieces}&nbsp;</td>
+                </tr>
               </tbody>
             </table>
           )}

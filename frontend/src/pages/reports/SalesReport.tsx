@@ -287,6 +287,7 @@ export default function SalesReport({ mode }: Props) {
             <th>&nbsp;销售数量&nbsp;</th>
             <th>&nbsp;销售金额&nbsp;</th>
             <th>&nbsp;均价&nbsp;</th>
+            <th>&nbsp;件数&nbsp;</th>
             <th>&nbsp;退货数量&nbsp;</th>
             <th>&nbsp;退货金额&nbsp;</th>
             <th>&nbsp;毛利&nbsp;</th>
@@ -304,6 +305,7 @@ export default function SalesReport({ mode }: Props) {
                 <td className={styles.r}>&nbsp;{fmt(g.qty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.amount)}&nbsp;</td>
                 <td className={`${styles.r} ${styles.magenta}`}>&nbsp;{g.qty ? fmt(g.amount / g.qty) : 0}&nbsp;</td>
+                <td className={styles.r}>&nbsp;{fmt(g.pieces)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.retQty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.retAmount)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.profit)}&nbsp;</td>
@@ -316,12 +318,13 @@ export default function SalesReport({ mode }: Props) {
             <td className={styles.r}>&nbsp;{fmt(total.qty)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.amount)}&nbsp;</td>
             <td>&nbsp;</td>
+            <td className={styles.r}>&nbsp;{fmt(total.pieces)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retQty)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retAmount)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.profit)}&nbsp;</td>
             <td data-noexport>&nbsp;</td>
           </tr>
-          {footer(3, 3, 4)}
+          {footer(3, 4, 4)}
         </tbody>
       </table>
     )

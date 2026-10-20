@@ -21,6 +21,7 @@ interface PrintLine {
   amount: number
   discount: number
   finalAmount: number
+  pieces: number
   notes: string
 }
 
@@ -59,7 +60,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
           lines: (r.items ?? []).map(i => ({
             id: i.id, productId: i.productId, productCode: i.productCode, productName: i.productName,
             unit: i.unit, qty: i.qty, unitPrice: i.unitPrice, amount: i.amount,
-            discount: 100, finalAmount: i.amount, notes: i.notes ?? '',
+            discount: 100, finalAmount: i.amount, pieces: i.pieces, notes: i.notes ?? '',
           })),
         }))
       : getPurchaseOrder(Number(id)).then(o => ({
@@ -69,7 +70,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
           lines: (o.items ?? []).map(i => ({
             id: i.id, productId: i.productId, productCode: i.productCode, productName: i.productName,
             unit: i.unit, qty: i.qty, unitPrice: i.unitPrice, amount: i.amount,
-            discount: i.discount, finalAmount: i.finalAmount, notes: i.notes ?? '',
+            discount: i.discount, finalAmount: i.finalAmount, pieces: i.pieces, notes: i.notes ?? '',
           })),
         }))
 
@@ -85,6 +86,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
   if (!doc) return <div className={styles.loading}>数据加载中，请稍候...</div>
 
   const amount = doc.lines.reduce((s, l) => s + Number(l.amount), 0)
+  const pieces = doc.lines.reduce((s, l) => s + Number(l.pieces || 0), 0)
   // 退货单 has no discount — drop 折扣 / 折后金额 columns
   const totalsTail = isReturn
     ? <td>&nbsp;</td>
@@ -122,6 +124,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     <td className={styles.c}>数量</td>
                     <td className={styles.c}>单价</td>
                     <td className={styles.c}>金额</td>
+                    <td className={styles.c}>件数</td>
                     {!isReturn && <td className={styles.c}>折扣</td>}
                     {!isReturn && <td className={styles.c}>折后金额</td>}
                     <td className={styles.c}>备注</td>
@@ -135,6 +138,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                       <td className={styles.c}>{fmt(l.qty)}</td>
                       <td className={styles.c}>{fmt(l.unitPrice)}</td>
                       <td className={styles.c}>{fmt(l.amount)}</td>
+                      <td className={styles.c}>{l.pieces || ''}</td>
                       {!isReturn && <td className={styles.c}>{fmt(l.discount)}</td>}
                       {!isReturn && <td className={styles.c}>{fmt(l.finalAmount)}</td>}
                       <td>{l.notes}</td>
@@ -145,6 +149,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     <td className={styles.c}>{fmt(doc.totalQty)}</td>
                     <td></td>
                     <td className={styles.c}>{fmt(amount)}</td>
+                    <td className={styles.c}>{fmt(pieces)}</td>
                     {totalsTail}
                   </tr>
                   <tr>
@@ -153,6 +158,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     <td className={styles.c}>{fmt(doc.totalQty)}</td>
                     <td></td>
                     <td className={styles.c}>{fmt(amount)}</td>
+                    <td className={styles.c}>{fmt(pieces)}</td>
                     {totalsTail}
                   </tr>
                 </tbody>
