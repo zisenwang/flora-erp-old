@@ -272,7 +272,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
               <th>单号</th>
               <th>供应商</th>
               <th>编码</th>
-              <th>规格</th><th>产品名称&nbsp;&nbsp;等级</th>
+              <th>规格</th><th>产品名称</th><th>等级</th>
               <th>单位</th>
               <th>每箱数量</th>
               <th>数量</th>
@@ -300,8 +300,9 @@ export default function SalesEdit({ kind = 'order' }: Props) {
                 <td>{l.spec}</td>
                 <td>
                   <span className={styles.badgeRed} title="更换产品" onClick={() => setReplaceKey(l.key)}>更换</span>
-                  {l.name} {l.grade}
+                  {l.name}
                 </td>
+                <td>{l.grade}</td>
                 <td className={styles.c}>{l.unit}</td>
                 <td className={styles.c}>{l.unitsPerPiece ?? ''}</td>
                 <td>
@@ -339,7 +340,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
               </tr>
             ))}
             <tr className={styles.docSumGray}>
-              <td colSpan={9} className={styles.c}>总共{lines.length}个产品</td>
+              <td colSpan={10} className={styles.c}>总共{lines.length}个产品</td>
               <td className={styles.c}>合计</td>
               <td className={styles.c}>{fmt(totalQty)}</td>
               <td></td>
@@ -414,7 +415,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
               <thead>
                 <tr>
                   <th>类型</th><th>客户/供应商</th><th>日期</th><th>单号</th><th>编码</th>
-                  <th>规格</th><th>产品名称&nbsp;&nbsp;等级</th><th>单位</th><th>基本价</th><th>数量</th>
+                  <th>规格</th><th>产品名称</th><th>等级</th><th>单位</th><th>基本价</th><th>数量</th>
                   <th>单价</th><th>金额</th><th>件数</th><th>经办人</th>
                 </tr>
               </thead>
@@ -425,7 +426,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
                   <td>{toSlashDate(order.date)}</td>
                   <td>{order.no}</td>
                   <td>{replacing.code}</td>
-                  <td>{replacing.spec}</td><td>{replacing.name} {replacing.grade}</td>
+                  <td>{replacing.spec}</td><td>{replacing.name}</td><td>{replacing.grade}</td>
                   <td className={styles.c}>{replacing.unit}</td>
                   <td className={styles.c}>{replacing.costPrice || 0}</td>
                   <td className={styles.c}>{replacing.qty}</td>
@@ -435,7 +436,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
                   <td className={styles.c}>{order.operator}</td>
                 </tr>
                 <tr className={styles.docSumYellow}>
-                  <td colSpan={9} className={styles.c}>总共1个产品</td>
+                  <td colSpan={10} className={styles.c}>总共1个产品</td>
                   <td className={styles.c}>{replacing.qty}</td>
                   <td></td>
                   <td className={styles.c}>{fmt(lineAmount(replacing))}</td>

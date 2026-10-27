@@ -30,7 +30,8 @@ export default function InventoryAdjustmentView() {
               <th>供应商</th>
               <th>编码</th>
               <th>规格</th>
-              <th>产品名称&nbsp;&nbsp;等级</th>
+              <th>产品名称</th>
+              <th>等级</th>
               <th>单位</th>
               <th>库存数量</th>
               <th>盘点数量</th>
@@ -46,7 +47,8 @@ export default function InventoryAdjustmentView() {
               <td>{record.supplierCode}</td>
               <td>{record.productCode}</td>
               <td>{record.spec ?? ''}</td>
-              <td>{record.productName} {record.grade ?? ''}</td>
+              <td>{record.productName}</td>
+              <td>{record.grade ?? ''}</td>
               <td className={styles.c}>{record.unit}</td>
               <td className={styles.c}>{record.qtyBefore}</td>
               <td className={styles.c}>{record.qtyAfter}</td>
@@ -55,7 +57,7 @@ export default function InventoryAdjustmentView() {
               <td>{record.reason ?? ''}</td>
             </tr>
             <tr className={styles.docSumYellow}>
-              <td colSpan={6} className={styles.c}>总共1个产品</td>
+              <td colSpan={7} className={styles.c}>总共1个产品</td>
               <td className={styles.c}>合计</td>
               <td className={styles.c}>{record.qtyBefore}</td>
               <td className={styles.c}>{record.qtyAfter}</td>

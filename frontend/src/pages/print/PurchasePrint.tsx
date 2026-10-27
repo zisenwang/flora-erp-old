@@ -49,6 +49,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
   const isReturn = kind === 'return'
   const [doc, setDoc] = useState<PrintDoc | null>(null)
   const [specs, setSpecs] = useState<Record<number, string>>({})  // productId → 规格 (items carry no spec)
+  const [grades, setGrades] = useState<Record<number, string>>({})  // productId → 等级
 
   useEffect(() => {
     document.title = isReturn ? '云达ERP复刻版-退货单' : '云达ERP复刻版-进货单'
@@ -79,7 +80,10 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
         setDoc(d)
         return getProducts({ supplierId: d.supplierId })
       })
-      .then(prods => setSpecs(Object.fromEntries(prods.map(p => [p.id, p.spec ?? '']))))
+      .then(prods => {
+        setSpecs(Object.fromEntries(prods.map(p => [p.id, p.spec ?? ''])))
+        setGrades(Object.fromEntries(prods.map(p => [p.id, p.grade ?? ''])))
+      })
       .catch(err => alert(getErrorMessage(err)))
   }, [id, isReturn])
 
@@ -120,6 +124,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     <td className={styles.c}>编码</td>
                     <td className={styles.c}>规格</td>
                     <td>&nbsp;货品名称</td>
+                    <td className={styles.c}>等级</td>
                     <td className={styles.c}>单位</td>
                     <td className={styles.c}>数量</td>
                     <td className={styles.c}>单价</td>
@@ -134,6 +139,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                       <td className={styles.c}>{l.productCode}</td>
                       <td className={styles.c}>{specs[l.productId] ?? ''}</td>
                       <td>&nbsp;{l.productName}</td>
+                      <td className={styles.c}>{grades[l.productId] ?? ''}</td>
                       <td className={styles.c}>{l.unit}</td>
                       <td className={styles.c}>{fmt(l.qty)}</td>
                       <td className={styles.c}>{fmt(l.unitPrice)}</td>
@@ -145,7 +151,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     </tr>
                   ))}
                   <tr>
-                    <td colSpan={4} className={styles.r}>小计:</td>
+                    <td colSpan={5} className={styles.r}>小计:</td>
                     <td className={styles.c}>{fmt(doc.totalQty)}</td>
                     <td></td>
                     <td className={styles.c}>{fmt(amount)}</td>
@@ -153,7 +159,7 @@ export default function PurchasePrint({ kind = 'order' }: Props) {
                     {totalsTail}
                   </tr>
                   <tr>
-                    <td colSpan={3} className={styles.r}>人民币:{toChineseAmount(Number(doc.finalAmount))}</td>
+                    <td colSpan={4} className={styles.r}>人民币:{toChineseAmount(Number(doc.finalAmount))}</td>
                     <td className={styles.r}>合计:</td>
                     <td className={styles.c}>{fmt(doc.totalQty)}</td>
                     <td></td>

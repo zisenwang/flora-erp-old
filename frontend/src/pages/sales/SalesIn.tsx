@@ -378,7 +378,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                 <th>&nbsp;供应商&nbsp;</th>
                 <th>&nbsp;编码&nbsp;</th>
                 <th>&nbsp;规格&nbsp;</th>
-                <th>&nbsp;品名&nbsp;&nbsp;等级&nbsp;</th>
+                <th>&nbsp;品名&nbsp;</th>
+                <th>&nbsp;等级&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 {!isReturn && <th>&nbsp;库存&nbsp;</th>}
@@ -396,7 +397,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                     <td>&nbsp;{p.supplierCode}&nbsp;</td>
                     <td>&nbsp;{p.code}&nbsp;</td>
                     <td>&nbsp;<em className={styles.spec}>{p.spec ?? ''}</em>&nbsp;</td>
-                    <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
+                    <td>&nbsp;{p.name}&nbsp;</td>
+                    <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     {!isReturn && <td className={styles.stock}>&nbsp;{p.stock}&nbsp;</td>}
@@ -478,7 +480,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                     <th><span className={styles.delAll} title="删除勾选的产品" onClick={handleDeleteChecked}>×</span></th>
                     <th>编码</th>
                     <th>规格</th>
-                    <th>品名 等级</th>
+                    <th>品名</th>
+                    <th>等级</th>
                     <th>单位</th>
                     <th>数量</th>
                     <th>单价</th>
@@ -489,7 +492,7 @@ export default function SalesIn({ kind = 'order' }: Props) {
                 </thead>
                 <tbody>
                   {draft.lines.length === 0 && (
-                    <tr className={styles.noRecord}><td colSpan={isReturn ? 9 : 10}>无记录!</td></tr>
+                    <tr className={styles.noRecord}><td colSpan={isReturn ? 10 : 11}>无记录!</td></tr>
                   )}
                   {draft.lines.map(l => (
                     <tr key={l.key}>
@@ -498,7 +501,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                       </td>
                       <td>{l.code}</td>
                       <td>{l.spec}</td>
-                      <td className={styles.wrapName}>{l.name} {l.grade}</td>
+                      <td className={styles.wrapName}>{l.name}</td>
+                      <td>{l.grade}</td>
                       <td className={styles.num}>{l.unit}</td>
                       <td>
                         <input className={styles.lineQty} type="text" value={l.qty}
@@ -526,7 +530,7 @@ export default function SalesIn({ kind = 'order' }: Props) {
                   ))}
                   {draft.lines.length > 0 && (
                     <tr className={styles.sumRow}>
-                      <td colSpan={5} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
+                      <td colSpan={6} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
                       <td className={styles.pinkNum}>{fmt(totalQty)}</td>
                       <td></td>
                       <td className={styles.pinkNum}>{fmt(totalAmount)}</td>
@@ -593,7 +597,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                     <th>日期</th>
                     <th>编码</th>
                     <th>规格</th>
-                    <th>品名&nbsp;&nbsp;等级</th>
+                    <th>品名</th>
+                    <th>等级</th>
                     <th>单位</th>
                     <th>数量</th>
                     <th>单价</th>
@@ -610,7 +615,8 @@ export default function SalesIn({ kind = 'order' }: Props) {
                         <td>{dayjs(h.date).format('M.D')}</td>
                         <td>{h.productCode}</td>
                         <td className={sales.left}>{p?.spec ?? ''}</td>
-                        <td className={sales.left}>{h.productName}&nbsp;{p?.grade ?? ''}</td>
+                        <td className={sales.left}>{h.productName}</td>
+                        <td>{p?.grade ?? ''}</td>
                         <td>{h.unit}</td>
                         <td>{fmt(h.qty)}</td>
                         <td>{fmt(h.unitPrice)}</td>

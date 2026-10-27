@@ -225,7 +225,8 @@ export default function InventoryCheck() {
                   <th className={styles.c}>&nbsp;供应商&nbsp;</th>
                   <th className={styles.c}>&nbsp;编码&nbsp;</th>
                   <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th>
-                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;等级&nbsp;</th>
+                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;</th>
+                  <th style={{ textAlign: 'left' }}>&nbsp;等级&nbsp;</th>
                   <th className={styles.c}>&nbsp;单位&nbsp;</th>
                   <th className={styles.c}>&nbsp;包装&nbsp;</th>
                   <th className={styles.c}>&nbsp;原库存&nbsp;</th>
@@ -242,7 +243,8 @@ export default function InventoryCheck() {
                       <td className={`${styles.r} ${styles.magenta}`}>&nbsp;{p.supplierCode}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{p.code}&nbsp;</td>
                       <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
-                      <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}</td>
+                      <td>&nbsp;{p.name}&nbsp;</td>
+                      <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                       <td className={styles.c}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                       <td className={`${styles.r} ${check.stock}`}>&nbsp;{p.stock}&nbsp;</td>

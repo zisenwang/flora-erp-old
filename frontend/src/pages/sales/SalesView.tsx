@@ -102,7 +102,8 @@ export default function SalesView({ kind = 'order' }: Props) {
               <th>供应商</th>
               <th>编码</th>
               <th>规格</th>
-              <th>产品名称&nbsp;&nbsp;等级</th>
+              <th>产品名称</th>
+              <th>等级</th>
               <th>单位</th>
               <th>数量</th>
               <th>单价</th>
@@ -126,7 +127,8 @@ export default function SalesView({ kind = 'order' }: Props) {
                   <td>{l.supplierCode}</td>
                   <td>{l.productCode}</td>
                   <td>{p?.spec ?? ''}</td>
-                  <td>{l.productName} {p?.grade ?? ''}</td>
+                  <td>{l.productName}</td>
+                  <td>{p?.grade ?? ''}</td>
                   <td className={styles.c}>{l.unit}</td>
                   <td className={styles.c}>{fmt(l.qty)}</td>
                   <td className={styles.c}>{fmt(l.unitPrice)}</td>
@@ -140,7 +142,7 @@ export default function SalesView({ kind = 'order' }: Props) {
               )
             })}
             <tr className={styles.docSumYellow}>
-              <td colSpan={8} className={styles.c}>总共{doc.lines.length}个产品</td>
+              <td colSpan={9} className={styles.c}>总共{doc.lines.length}个产品</td>
               <td className={styles.c}>合计</td>
               <td className={styles.c}>{fmt(totalQty)}</td>
               <td></td>
@@ -151,7 +153,7 @@ export default function SalesView({ kind = 'order' }: Props) {
               <td colSpan={2}></td>
             </tr>
             <tr className={styles.docNotesRow}>
-              <td colSpan={17}>{doc.notes}</td>
+              <td colSpan={18}>{doc.notes}</td>
             </tr>
           </tbody>
         </table>

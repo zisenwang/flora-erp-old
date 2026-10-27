@@ -212,20 +212,20 @@ export default function PurchaseList({ mode }: Props) {
     const total = (list: DetailRow[], key: 'qty' | 'amount' | 'final' | 'pieces') => num(list.reduce((s, r) => s + r[key], 0))
     exportRows(
       `进货单据明细_${range}`,
-      ['类型', '供应商', '日期', '单号', '编码', '规格', '产品', '包装', '单位', '数量', '单价', '金额', '件数', '折扣', '折后金额', '退货', '金额', '经办人', '备注'],
+      ['类型', '供应商', '日期', '单号', '编码', '规格', '产品', '等级', '包装', '单位', '数量', '单价', '金额', '件数', '折扣', '折后金额', '退货', '金额', '经办人', '备注'],
       [
         ...detailRows.map(r => {
           const p = productsByCode[r.productCode]
           const isOrder = r.kind === 'order'
           return [
             TYPE_LABEL[r.kind], r.supplier, toSlashDate(r.date), r.no, r.productCode,
-            p?.spec, r.productName, p?.unitsPerPiece, r.unit,
+            p?.spec, r.productName, p?.grade, p?.unitsPerPiece, r.unit,
             isOrder ? num(r.qty) : '', num(r.unitPrice), isOrder ? num(r.amount) : '', r.pieces || '',
             isOrder ? r.discount : '', isOrder ? num(r.final) : '',
             isOrder ? '' : num(r.qty), isOrder ? '' : num(r.final), r.operator, r.notes,
           ]
         }),
-        ['总计', '', '', '', '', '', '', '', '', total(orders, 'qty'), '', total(orders, 'amount'), total(detailRows, 'pieces'),
+        ['总计', '', '', '', '', '', '', '', '', '', total(orders, 'qty'), '', total(orders, 'amount'), total(detailRows, 'pieces'),
           '', total(orders, 'final'), total(returns, 'qty'), total(returns, 'final'), '', ''],
       ],
     )
@@ -324,7 +324,7 @@ export default function PurchaseList({ mode }: Props) {
     const allSum = sum(detailRows)
     const totalRow = (label: string, t: ReturnType<typeof sum>) => (
       <tr>
-        <td colSpan={9} className={styles.r}>{label}</td>
+        <td colSpan={10} className={styles.r}>{label}</td>
         <td className={`${styles.c} ${styles.hatch}`}>{fmt(t.qty)}</td>
         <td>&nbsp;</td>
         <td className={`${styles.c} ${styles.hatch}`}>{fmt(t.amount)}</td>
@@ -347,6 +347,7 @@ export default function PurchaseList({ mode }: Props) {
             <th>&nbsp;编码&nbsp;</th>
             <th>&nbsp;规格&nbsp;</th>
             <th>&nbsp;产品&nbsp;</th>
+            <th>&nbsp;等级&nbsp;</th>
             <th>&nbsp;包装&nbsp;</th>
             <th>&nbsp;单位&nbsp;</th>
             <th>&nbsp;数量&nbsp;</th>
@@ -376,6 +377,7 @@ export default function PurchaseList({ mode }: Props) {
                 <td>&nbsp;{r.productCode}&nbsp;</td>
                 <td>&nbsp;<em className={styles.spec}>{p?.spec ?? ''}</em>&nbsp;</td>
                 <td>&nbsp;{r.productName}&nbsp;</td>
+                <td>&nbsp;{p?.grade ?? ''}&nbsp;</td>
                 <td>&nbsp;{p?.unitsPerPiece ?? ''}&nbsp;</td>
                 <td>&nbsp;{r.unit}&nbsp;</td>
                 <td className={`${styles.c} ${styles.bold}`}>{isOrder ? fmt(r.qty) : ''}</td>

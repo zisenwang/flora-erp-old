@@ -407,7 +407,8 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                 <th>&nbsp;供应商&nbsp;</th>
                 <th>&nbsp;编码&nbsp;</th>
                 <th>&nbsp;规格&nbsp;</th>
-                <th>&nbsp;品名&nbsp;&nbsp;等级&nbsp;</th>
+                <th>&nbsp;品名&nbsp;</th>
+                <th>&nbsp;等级&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 <th>&nbsp;库存&nbsp;</th>
@@ -419,7 +420,7 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
             </thead>
             <tbody>
               {supplier == null && (
-                <tr className={styles.emptyRow}><td colSpan={11}>请先在左边或点击【选择供应商】选择供应商</td></tr>
+                <tr className={styles.emptyRow}><td colSpan={13}>请先在左边或点击【选择供应商】选择供应商</td></tr>
               )}
               {paged.map(p => {
                 const input = rowInput(p)
@@ -428,7 +429,8 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                     <td>&nbsp;{p.supplierCode}&nbsp;</td>
                     <td>&nbsp;{p.code}&nbsp;</td>
                     <td>&nbsp;<em className={styles.spec}>{p.spec ?? ''}</em>&nbsp;</td>
-                    <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
+                    <td>&nbsp;{p.name}&nbsp;</td>
+                    <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     <td className={styles.stock}>&nbsp;{p.stock}&nbsp;</td>
@@ -512,7 +514,8 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                     <th><span className={styles.delAll} title="删除勾选的产品" onClick={handleDeleteChecked}>×</span></th>
                     <th>编码</th>
                     <th>规格</th>
-                    <th>品名 等级</th>
+                    <th>品名</th>
+                    <th>等级</th>
                     <th>单位</th>
                     <th>数量</th>
                     <th>单价</th>
@@ -525,7 +528,7 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                 </thead>
                 <tbody>
                   {draft.lines.length === 0 && (
-                    <tr className={styles.noRecord}><td colSpan={isReturn ? 9 : 12}>无记录!</td></tr>
+                    <tr className={styles.noRecord}><td colSpan={isReturn ? 10 : 13}>无记录!</td></tr>
                   )}
                   {draft.lines.map(l => (
                     <tr key={l.key}>
@@ -534,7 +537,8 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                       </td>
                       <td>{l.code}</td>
                       <td>{l.spec}</td>
-                      <td className={styles.wrapName}>{l.name} {l.grade}</td>
+                      <td className={styles.wrapName}>{l.name}</td>
+                      <td>{l.grade}</td>
                       <td className={styles.num}>{l.unit}</td>
                       <td>
                         <input className={styles.lineQty} type="text" value={l.qty}
@@ -564,7 +568,7 @@ export default function PurchaseIn({ kind = 'order' }: Props) {
                   ))}
                   {draft.lines.length > 0 && (
                     <tr className={styles.sumRow}>
-                      <td colSpan={5} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
+                      <td colSpan={6} style={{ textAlign: 'right' }}>合计&nbsp;&nbsp;</td>
                       <td className={styles.pinkNum}>{fmt(totalQty)}</td>
                       <td></td>
                       <td className={styles.pinkNum}>{fmt(totalAmount)}</td>

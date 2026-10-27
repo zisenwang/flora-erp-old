@@ -236,18 +236,18 @@ export default function SalesList({ mode = 'summary' }: Props) {
     const total = (key: 'qty' | 'amount' | 'profit' | 'pieces') => num(detailRows.reduce((s, r) => s + r[key], 0))
     exportRows(
       `销售单据明细_${range}`,
-      ['类型', '客户', '日期', '单号', '编码', '规格', '产品', '包装', '供应商', '单位', '数量', '单价', '金额', '进价', '毛利', '件数', '经办人', '备注'],
+      ['类型', '客户', '日期', '单号', '编码', '规格', '产品', '等级', '包装', '供应商', '单位', '数量', '单价', '金额', '进价', '毛利', '件数', '经办人', '备注'],
       [
         ...detailRows.map(r => {
           const p = productsByCode[r.productCode]
           return [
             TYPE_LABEL[r.kind], r.customer, toSlashDate(r.date), r.no, r.productCode,
-            p?.spec, [r.productName, p?.grade].filter(Boolean).join(' '), p?.unitsPerPiece, r.supplierCode, r.unit,
+            p?.spec, r.productName, p?.grade, p?.unitsPerPiece, r.supplierCode, r.unit,
             r.qty ? num(r.qty) : '', num(r.unitPrice), r.amount ? num(r.amount) : '',
             r.costPrice ? num(r.costPrice) : '', r.profit ? num(r.profit) : '', r.pieces || '', r.operator, r.notes,
           ]
         }),
-        ['总计', '', '', '', '', '', '', '', '', '', total('qty'), '', total('amount'), '', total('profit'), total('pieces'), '', ''],
+        ['总计', '', '', '', '', '', '', '', '', '', '', total('qty'), '', total('amount'), '', total('profit'), total('pieces'), '', ''],
       ],
     )
   }
@@ -291,7 +291,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
     const aSum = dsum(detailRows)
     const totalRow = (label: string, t: ReturnType<typeof dsum>) => (
       <tr>
-        <td colSpan={10} className={styles.r}>{label}</td>
+        <td colSpan={11} className={styles.r}>{label}</td>
         <td className={`${styles.c} ${styles.hatch}`}>{fmt(t.qty)}</td>
         <td>&nbsp;</td>
         <td className={`${styles.c} ${styles.hatch}`}>{fmt(t.amount)}</td>
@@ -312,6 +312,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
             <th>&nbsp;编码&nbsp;</th>
             <th>&nbsp;规格&nbsp;</th>
             <th>&nbsp;产品&nbsp;</th>
+            <th>&nbsp;等级&nbsp;</th>
             <th>&nbsp;包装&nbsp;</th>
             <th>&nbsp;供应商&nbsp;</th>
             <th>&nbsp;单位&nbsp;</th>
@@ -337,7 +338,8 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <td>&nbsp;<a onClick={() => navigate(viewPath(r.kind, r.id))}>{r.no}</a>&nbsp;</td>
                 <td>&nbsp;{r.productCode}&nbsp;</td>
                 <td>&nbsp;<em className={styles.spec}>{p?.spec ?? ''}</em>&nbsp;</td>
-                <td>&nbsp;{r.productName}&nbsp;{p?.grade ?? ''}&nbsp;</td>
+                <td>&nbsp;{r.productName}&nbsp;</td>
+                <td>&nbsp;{p?.grade ?? ''}&nbsp;</td>
                 <td>&nbsp;{p?.unitsPerPiece ?? ''}&nbsp;</td>
                 <td>&nbsp;{r.supplierCode}&nbsp;</td>
                 <td>&nbsp;{r.unit}&nbsp;</td>

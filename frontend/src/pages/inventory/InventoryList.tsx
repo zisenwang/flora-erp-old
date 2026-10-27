@@ -113,13 +113,13 @@ export default function InventoryList() {
   function handleExport() {
     exportRows(
       '产品库存',
-      ['编码', '规格', '产品名称 等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
+      ['编码', '规格', '产品名称', '等级', '单位', '包装', '供应商', '基本价', '销售价', '库存', '件数'],
       [
         ...rows.map(p => [
-          p.code, p.spec, [p.name, p.grade].filter(Boolean).join(' '), p.unit, p.unitsPerPiece, p.supplierCode,
+          p.code, p.spec, p.name, p.grade, p.unit, p.unitsPerPiece, p.supplierCode,
           +money(p.costPrice), +money(p.price), p.stock, piecesOf(p) === '' ? '' : +piecesOf(p),
         ]),
-        ['合计', '', '', '', '', '', '', '', totalStock, totalPieces],
+        ['合计', '', '', '', '', '', '', '', '', totalStock, totalPieces],
       ],
     )
   }
@@ -195,7 +195,8 @@ export default function InventoryList() {
                 <tr>
                   <th className={styles.c}>&nbsp;编码&nbsp;</th>
                   <th className={styles.c}>&nbsp;规格&nbsp;</th>
-                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;等级&nbsp;</th>
+                  <th style={{ textAlign: 'left' }}>&nbsp;产品名称&nbsp;</th>
+                  <th className={styles.c}>&nbsp;等级&nbsp;</th>
                   <th className={styles.c}>&nbsp;单位&nbsp;</th>
                   <th className={styles.c}>&nbsp;包装&nbsp;</th>
                   <th className={styles.c}>&nbsp;供应商&nbsp;</th>
@@ -210,7 +211,8 @@ export default function InventoryList() {
                   <tr key={p.id} className={styles.row}>
                     <td className={styles.c}>&nbsp;{p.code}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.spec ?? ''}&nbsp;</td>
-                    <td>&nbsp;{p.name}&nbsp;{p.grade ?? ''}&nbsp;</td>
+                    <td>&nbsp;{p.name}&nbsp;</td>
+                    <td className={styles.c}>&nbsp;{p.grade ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unit ?? ''}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                     <td className={styles.r}>&nbsp;<span className={`${styles.bold} ${styles.green}`}>{p.supplierCode}</span>&nbsp;</td>
@@ -221,7 +223,7 @@ export default function InventoryList() {
                   </tr>
                 ))}
                 <tr>
-                  <td colSpan={8} className={styles.r}>合计&nbsp;</td>
+                  <td colSpan={9} className={styles.r}>合计&nbsp;</td>
                   <td className={`${styles.r} ${styles.bold} ${styles.green} ${styles.hatch}`}>&nbsp;{totalStock}&nbsp;</td>
                   <td className={`${styles.r} ${styles.teal} ${styles.hatch}`}>&nbsp;{totalPieces}&nbsp;</td>
                 </tr>
