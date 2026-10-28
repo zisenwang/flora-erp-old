@@ -1,0 +1,32 @@
+/* 产品调价 (old prods_update_price.asp) — extras on top of PurchaseDocs / PurchaseIn sidebar styles */
+
+/* class=wbk 销售价 / class=xwbk 成本价 — green-bordered inputs, size=6 */
+.priceInput,
+.costInput {
+  box-sizing: border-box;
+  width: 60px;
+  height: 20px;
+  padding: 0 2px;
+  border: 2px solid #33CC33;
+  font-size: 13px;
+}
+
+.priceInput {
+  color: #FF0000;
+}
+
+.costInput {
+  color: #000;
+}
+
+/* edited but not saved yet */
+.changed {
+  background: #FFFF99;
+}
+
+/* bjx.gif footer row with the save button */
+.saveRow td {
+  height: 22px;
+  text-align: right;
+  background: #F0F0F0;
+}
