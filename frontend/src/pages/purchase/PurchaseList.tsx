@@ -10,6 +10,7 @@ import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './PurchaseDocs.module.css'
 import { codeEquals } from '@/utils/codeMatch'
+import { specCodes } from '@/utils/specMatch'
 
 type Kind = 'order' | 'return'
 type TypeFilter = 'all' | Kind
@@ -63,6 +64,7 @@ const SEARCH_FIELDS = [
   { value: 'supplierName', label: '供应商名称' },
   { value: 'orderNo', label: '单号' },
   { value: 'operator', label: '开单人' },
+  { value: 'spec', label: '产品规格' },
 ]
 
 const PAGE_SIZE = 50
@@ -102,12 +104,16 @@ export default function PurchaseList({ mode }: Props) {
   }, [mode])
 
   useEffect(() => {
+    // the backend can't search by 规格 — that filter is applied to the rows below
+    const bySpec = applied.field === 'spec'
     const params = {
       startDate: parseSlashDate(applied.start) ?? undefined,
       endDate: parseSlashDate(applied.end) ?? undefined,
-      search: applied.keyword || undefined,
-      searchField: applied.keyword ? applied.field : undefined,
+      search: applied.keyword && !bySpec ? applied.keyword : undefined,
+      searchField: applied.keyword && !bySpec ? applied.field : undefined,
     }
+    // 规格: product codes whose spec matches (null = no 规格 filter)
+    const specP = bySpec && applied.keyword ? specCodes(applied.keyword) : Promise.resolve(null)
     // the backend matches 供应商编码 with LIKE — keep only the exact code
     const codeOk = (code: string) =>
       applied.field !== 'supplierCode' || !applied.keyword || codeEquals(code, applied.keyword)
@@ -118,8 +124,11 @@ export default function PurchaseList({ mode }: Props) {
       Promise.all([
         applied.type !== 'return' ? getPurchaseOrders(params) : Promise.resolve([]),
         applied.type !== 'order' ? getPurchaseReturns(params) : Promise.resolve([]),
+        // 规格 → the documents having a line with a matching product (from the 明细 rows)
+        specP.then(codes => codes && getPurchaseOrdersDetail(params)
+          .then(rows => new Set(rows.filter(r => codes.has(r.productCode)).map(r => `${r.rowType}-${r.id}`)))),
       ])
-        .then(([orders, returns]) => setSumRows([
+        .then(([orders, returns, docs]) => setSumRows([
           ...orders.filter(o => codeOk(o.supplierCode)).map((o): SumRow => ({
             kind: 'order', id: o.id, no: o.orderNo,
             supplier: `${o.supplierCode} ${o.supplierName}`,
@@ -136,13 +145,14 @@ export default function PurchaseList({ mode }: Props) {
             discount: null, final: r.totalAmount,
             operator: r.operator ?? '', notes: r.notes ?? '',
           })),
-        ].sort(byDateDesc)))
+        ].filter(r => !docs || docs.has(`${r.kind}-${r.id}`)).sort(byDateDesc)))
         .catch(err => alert(getErrorMessage(err)))
         .finally(() => setLoading(false))
     } else {
-      getPurchaseOrdersDetail(params)
-        .then(rows => setDetailRows(rows
+      Promise.all([getPurchaseOrdersDetail(params), specP])
+        .then(([rows, codes]) => setDetailRows(rows
           .filter(r => applied.type === 'all' || r.rowType === applied.type)
+          .filter(r => !codes || codes.has(r.productCode))
           .filter(r => codeOk(r.supplierCode))
           .map((r): DetailRow => {
             const amount = +(r.qty * r.unitPrice).toFixed(2)

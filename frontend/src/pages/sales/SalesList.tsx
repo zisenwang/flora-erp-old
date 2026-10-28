@@ -10,6 +10,7 @@ import { EditIcon, SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
 import { codeEquals } from '@/utils/codeMatch'
+import { specCodes } from '@/utils/specMatch'
 import { isPaid, isVoided } from '@/utils/payment'
 import { can } from '@/utils/permissions'
 
@@ -31,6 +32,7 @@ const SEARCH_FIELDS = [
   { value: 'orderNo', label: '单号' },
   { value: 'operator', label: '开单人' },
   { value: 'notes', label: '备注' },
+  { value: 'spec', label: '产品规格' },
 ]
 
 // 明细表 can also search by product / supplier (target of the 销售报表 查询明细 magnifiers)
@@ -131,14 +133,18 @@ export default function SalesList({ mode = 'summary' }: Props) {
   }, [mode])
 
   useEffect(() => {
-    // the backend can't search by supplier — that filter is applied to the rows below
+    // the backend can't search by supplier or 规格 — those filters are applied to the rows below
     const bySupplier = applied.field === 'supplierCode'
+    const bySpec = applied.field === 'spec'
+    const local = bySupplier || bySpec
     const params = {
       startDate: parseSlashDate(applied.start) ?? undefined,
       endDate: parseSlashDate(applied.end) ?? undefined,
-      search: applied.keyword && !bySupplier ? applied.keyword : undefined,
-      searchField: applied.keyword && !bySupplier ? applied.field : undefined,
+      search: applied.keyword && !local ? applied.keyword : undefined,
+      searchField: applied.keyword && !local ? applied.field : undefined,
     }
+    // 规格: product codes whose spec matches (null = no 规格 filter)
+    const specP = bySpec && applied.keyword ? specCodes(applied.keyword) : Promise.resolve(null)
     // the backend matches 客户编码 with LIKE — keep only the exact code
     const codeOk = (code: string) =>
       applied.field !== 'customerCode' || !applied.keyword || codeEquals(code, applied.keyword)
@@ -147,8 +153,11 @@ export default function SalesList({ mode = 'summary' }: Props) {
       Promise.all([
         applied.type !== 'return' ? getSalesOrders(params) : Promise.resolve([]),
         applied.type !== 'order' ? getSalesReturns(params) : Promise.resolve([]),
+        // 规格 → the documents having a line with a matching product (from the 明细 rows)
+        specP.then(codes => codes && getSalesOrdersDetail(params)
+          .then(rows => new Set(rows.filter(r => codes.has(r.productCode)).map(r => `${r.rowType}-${r.id}`)))),
       ])
-        .then(([orders, returns]) => setSumRows([
+        .then(([orders, returns, docs]) => setSumRows([
           ...orders.filter(o => codeOk(o.customerCode)).map((o): SumRow => ({
             kind: 'order', id: o.id, no: o.orderNo,
             customer: `${o.customerCode}.${o.customerName}`,
@@ -165,13 +174,16 @@ export default function SalesList({ mode = 'summary' }: Props) {
             paid: false, voided: false,
             operator: r.operator ?? '', notes: r.notes ?? '',
           })),
-        ].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)))
+        ]
+          .filter(r => !docs || docs.has(`${r.kind}-${r.id}`))
+          .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)))
         .catch(err => alert(getErrorMessage(err)))
         .finally(() => setLoading(false))
     } else {
-      getSalesOrdersDetail(params)
-        .then(rows => setDetailRows(rows
+      Promise.all([getSalesOrdersDetail(params), specP])
+        .then(([rows, codes]) => setDetailRows(rows
           .filter(r => applied.type === 'all' || r.rowType === applied.type)
+          .filter(r => !codes || codes.has(r.productCode))
           .filter(r => codeOk(r.customerCode))
           .filter(r => !bySupplier || !applied.keyword || codeEquals(r.supplierCode, applied.keyword))
           .map((r): DetailRow => {
