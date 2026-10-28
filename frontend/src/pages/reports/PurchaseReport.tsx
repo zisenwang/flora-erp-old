@@ -49,6 +49,7 @@ interface SumRow {
   supplierCode: string
   qty: number
   amount: number
+  pieces: number      // 采购 件数 (returns not counted)
   retQty: number
   retAmount: number
 }
@@ -119,11 +120,11 @@ export default function PurchaseReport({ mode }: Props) {
         code: mode === 'product' ? r.productCode : mode === 'supplier' ? r.supplierCode : '',
         name: mode === 'product' ? r.productName : mode === 'supplier' ? r.supplierName : (r.operator ?? ''),
         supplierCode: r.supplierCode,
-        qty: 0, amount: 0, retQty: 0, retAmount: 0,
+        qty: 0, amount: 0, pieces: 0, retQty: 0, retAmount: 0,
       }
       groups.set(key, g)
     }
-    if (r.rowType === 'order') { g.qty += r.qty; g.amount += r.amount }
+    if (r.rowType === 'order') { g.qty += r.qty; g.amount += r.amount; g.pieces += Number(r.pieces) || 0 }
     else { g.retQty += r.qty; g.retAmount += r.amount }
   }
 
@@ -135,8 +136,9 @@ export default function PurchaseReport({ mode }: Props) {
   })
 
   const total = list.reduce((t, g) => ({
-    qty: t.qty + g.qty, amount: t.amount + g.amount, retQty: t.retQty + g.retQty, retAmount: t.retAmount + g.retAmount,
-  }), { qty: 0, amount: 0, retQty: 0, retAmount: 0 })
+    qty: t.qty + g.qty, amount: t.amount + g.amount, pieces: t.pieces + g.pieces,
+    retQty: t.retQty + g.retQty, retAmount: t.retAmount + g.retAmount,
+  }), { qty: 0, amount: 0, pieces: 0, retQty: 0, retAmount: 0 })
 
   // ── Actions ──────────────────────────────────────────────────
   function setField<K extends keyof Filters>(key: K, value: Filters[K]) {
@@ -164,7 +166,7 @@ export default function PurchaseReport({ mode }: Props) {
     ? <><th>&nbsp;编码&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;单位&nbsp;产地&nbsp;</th><th>&nbsp;等级&nbsp;</th></>
     : <th>&nbsp;{mode === 'supplier' ? '供应商' : '经办人'}&nbsp;</th>
   const labelSpan = mode === 'product' ? 4 : 1
-  const numCols = mode === 'product' ? 5 : 4
+  const numCols = mode === 'product' ? 6 : 4
 
   // ── Render ───────────────────────────────────────────────────
   return (
@@ -218,6 +220,7 @@ export default function PurchaseReport({ mode }: Props) {
                 {labelHeads}
                 <th>&nbsp;采购数量&nbsp;</th>
                 <th>&nbsp;采购金额&nbsp;</th>
+                {mode === 'product' && <th>&nbsp;件数&nbsp;</th>}
                 {mode === 'product' && <th>&nbsp;均价&nbsp;</th>}
                 <th>&nbsp;退货数量&nbsp;</th>
                 <th>&nbsp;退货金额&nbsp;</th>
@@ -245,6 +248,7 @@ export default function PurchaseReport({ mode }: Props) {
                     {mode === 'operator' && <td>&nbsp;{g.name}&nbsp;</td>}
                     <td className={styles.r}>&nbsp;{fmt(g.qty)}&nbsp;</td>
                     <td className={styles.r}>&nbsp;{fmt(g.amount)}&nbsp;</td>
+                    {mode === 'product' && <td className={styles.r}>&nbsp;{fmt(g.pieces)}&nbsp;</td>}
                     {mode === 'product' && (
                       <td className={`${styles.r} ${styles.magenta}`}>&nbsp;{g.qty ? fmt(g.amount / g.qty) : 0}&nbsp;</td>
                     )}
@@ -257,6 +261,7 @@ export default function PurchaseReport({ mode }: Props) {
                 <td colSpan={labelSpan} className={styles.r}>合计</td>
                 <td className={styles.r}>&nbsp;{fmt(total.qty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(total.amount)}&nbsp;</td>
+                {mode === 'product' && <td className={styles.r}>&nbsp;{fmt(total.pieces)}&nbsp;</td>}
                 {mode === 'product' && <td>&nbsp;</td>}
                 <td className={styles.r}>&nbsp;{fmt(total.retQty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(total.retAmount)}&nbsp;</td>

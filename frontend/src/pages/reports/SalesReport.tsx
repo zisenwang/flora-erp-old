@@ -392,6 +392,7 @@ export default function SalesReport({ mode }: Props) {
             <th style={{ textAlign: 'left' }}>&nbsp;产品&nbsp;</th>
             <th>&nbsp;等级&nbsp;</th>
             <th>&nbsp;销售数量&nbsp;</th>
+            <th>&nbsp;件数&nbsp;</th>
             <th>&nbsp;销售金额&nbsp;</th>
             <th>&nbsp;退货数量&nbsp;</th>
             <th>&nbsp;退货金额&nbsp;</th>
@@ -408,6 +409,7 @@ export default function SalesReport({ mode }: Props) {
                 <td>&nbsp;{g.line.productCode}&nbsp;{g.line.productName}&nbsp;</td>
                 <td className={styles.c}>&nbsp;<span className={styles.bold}>{p?.grade ?? ''}</span>&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.qty)}&nbsp;</td>
+                <td className={styles.r}>&nbsp;{fmt(g.pieces)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.amount)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.retQty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.retAmount)}&nbsp;</td>
@@ -417,11 +419,12 @@ export default function SalesReport({ mode }: Props) {
           <tr>
             <td colSpan={5} className={styles.r}>合计</td>
             <td className={styles.r}>&nbsp;{fmt(total.qty)}&nbsp;</td>
+            <td className={styles.r}>&nbsp;{fmt(total.pieces)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.amount)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retQty)}&nbsp;</td>
             <td className={styles.r}>&nbsp;{fmt(total.retAmount)}&nbsp;</td>
           </tr>
-          {footer(5, 2, 2)}
+          {footer(5, 3, 2)}
         </tbody>
       </table>
     )
