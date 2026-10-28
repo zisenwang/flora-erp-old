@@ -2,6 +2,10 @@ import type { Response } from 'express'
 import type { AuthRequest } from '@/middleware/auth'
 import * as service from '@/services/product.service'
 
+// products.category stores the product_categories id as text
+const categoryValue = (categoryId: unknown) =>
+  categoryId != null && categoryId !== '' ? String(categoryId) : undefined
+
 export async function list(req: AuthRequest, res: Response): Promise<void> {
   const { supplierId, search } = req.query as Record<string, string | undefined>
   const data = await service.listProducts({
@@ -17,13 +21,13 @@ export async function get(req: AuthRequest, res: Response): Promise<void> {
 }
 
 export async function create(req: AuthRequest, res: Response): Promise<void> {
-  const { code, name, supplierId, category, grade, spec, unit, costPrice, price, unitsPerPiece } =
+  const { code, name, supplierId, categoryId, grade, spec, unit, costPrice, price, unitsPerPiece } =
     req.body
   const data = await service.createProduct({
     code,
     name,
     supplierId,
-    category,
+    category: categoryValue(categoryId),
     grade,
     spec,
     unit,
@@ -39,7 +43,7 @@ export async function update(req: AuthRequest, res: Response): Promise<void> {
     code,
     name,
     supplierId,
-    category,
+    categoryId,
     grade,
     spec,
     unit,
@@ -52,7 +56,7 @@ export async function update(req: AuthRequest, res: Response): Promise<void> {
     code,
     name,
     supplierId,
-    category,
+    category: categoryValue(categoryId),
     grade,
     spec,
     unit,

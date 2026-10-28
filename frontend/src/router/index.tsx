@@ -5,6 +5,8 @@ import Dashboard from '@/pages/dashboard/Dashboard'
 import Products from '@/pages/master/Products'
 import ProductForm from '@/pages/master/ProductForm'
 import ProductView from '@/pages/master/ProductView'
+import Categories from '@/pages/master/Categories'
+import CategoryForm from '@/pages/master/CategoryForm'
 import PurchaseIn from '@/pages/purchase/PurchaseIn'
 import PurchaseList from '@/pages/purchase/PurchaseList'
 import PurchaseView from '@/pages/purchase/PurchaseView'
@@ -122,10 +124,12 @@ const router = createBrowserRouter([
       { path: 'settings/operators/:id/edit', element: <RequireAdmin><OperatorForm key="edit" mode="edit" /></RequireAdmin> },
       { path: 'settings/operators/:id/password', element: <RequireAdmin><OperatorForm key="password" mode="password" /></RequireAdmin> },
       { path: 'settings/operators/:id/permissions', element: <RequireAdmin><OperatorForm key="permissions" mode="permissions" /></RequireAdmin> },
-      // 报损管理 / 产品分类 / 产品调价 — not planned, placeholder only
+      // 报损管理 / 产品调价 — placeholder only
       { path: 'loss', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
       { path: 'loss/new', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
-      { path: 'master/categories', element: <RequirePermission permission="product_category"><UnderDevelopment /></RequirePermission> },
+      { path: 'master/categories', element: <RequirePermission permission="product_category"><Categories /></RequirePermission> },
+      { path: 'master/categories/new', element: <RequirePermission permission="product_category"><CategoryForm key="new" /></RequirePermission> },
+      { path: 'master/categories/edit/:id', element: <RequirePermission permission="product_category"><CategoryForm key="edit" /></RequirePermission> },
       { path: 'master/price-adjust', element: <RequirePermission permission="price_adjust"><UnderDevelopment /></RequirePermission> },
     ],
   },

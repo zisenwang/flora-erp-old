@@ -14,11 +14,12 @@ const ORDER_SELECT = `
 
 const ITEM_SELECT = `
   SELECT poi.id, poi.product_id, CONCAT(s.code, '.', p.code) AS product_code, p.name AS product_name,
-         p.category, p.grade, p.unit, poi.qty, poi.pieces, poi.unit_price, poi.amount,
+         pc.name AS category, p.grade, p.unit, poi.qty, poi.pieces, poi.unit_price, poi.amount,
          poi.discount, poi.final_amount, poi.notes
   FROM purchase_order_items poi
   JOIN products p ON p.id = poi.product_id
   JOIN suppliers s ON s.id = p.supplier_id
+  LEFT JOIN product_categories pc ON pc.id = p.category
   WHERE poi.order_id = ?
   ORDER BY poi.id ASC`
 

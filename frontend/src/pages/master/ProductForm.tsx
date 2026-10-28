@@ -3,13 +3,13 @@ import { useNavigate, useParams, useSearchParams, useLocation } from 'react-rout
 import {
   getProducts,
   getProduct,
-  getProductCategories,
   createProduct,
   updateProduct,
   getNextProductCode,
   type Product,
   type ProductPayload,
 } from '@/api/products'
+import { listProductCategories, type ProductCategory } from '@/api/productCategories'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getErrorMessage } from '@/utils/error'
 import { EditIcon, SearchIcon } from './SupplierIcons'
@@ -19,7 +19,7 @@ import { codeEquals } from '@/utils/codeMatch'
 
 // ─── Form state ──────────────────────────────────────────────
 interface FormState {
-  category: string
+  category: string        // 分类 id ('' = none)
   name: string
   spec: string
   grade: string
@@ -52,7 +52,7 @@ export default function ProductForm() {
 
   // ── Data state ───────────────────────────────────────────────
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<ProductCategory[]>([])
   const [suppProducts, setSuppProducts] = useState<Product[]>([])  // selected supplier's products, newest first
   const [editSupplierId, setEditSupplierId] = useState<number | null>(null)
   const [editStatus, setEditStatus] = useState(1)
@@ -75,11 +75,11 @@ export default function ProductForm() {
 
   // ── Load data ────────────────────────────────────────────────
   useEffect(() => {
-    Promise.all([getSuppliers(), getProductCategories()])
+    Promise.all([getSuppliers(), listProductCategories()])
       .then(([supps, cats]) => {
         setSuppliers(supps)
         setCategories(cats)
-        setForm(f => (f.category ? f : { ...f, category: cats[0] ?? '' }))
+        setForm(f => (f.category ? f : { ...f, category: cats[0] ? String(cats[0].id) : '' }))
       })
       .catch(err => alert(getErrorMessage(err)))
   }, [])
@@ -92,7 +92,7 @@ export default function ProductForm() {
         setEditStatus(p.status ?? 1)
         setCodeSeq(p.code.split('.').slice(1).join('.'))
         setForm({
-          category: p.category ?? '',
+          category: p.categoryId != null ? String(p.categoryId) : '',
           name: p.name ?? '',
           spec: p.spec ?? '',
           grade: p.grade ?? '',
@@ -135,10 +135,6 @@ export default function ProductForm() {
     return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q)
   })
 
-  const categoryOptions = form.category && !categories.includes(form.category)
-    ? [form.category, ...categories]
-    : categories
-
   // ── Helpers ──────────────────────────────────────────────────
   function setField(key: keyof FormState, value: string) {
     setForm(f => ({ ...f, [key]: value }))
@@ -159,7 +155,7 @@ export default function ProductForm() {
       code: codeSeq,
       name: form.name.trim(),
       supplierId,
-      category: form.category || undefined,
+      categoryId: form.category ? Number(form.category) : undefined,
       spec: form.spec.trim() || undefined,
       grade: form.grade.trim() || undefined,
       unit: form.unit.trim(),
@@ -253,7 +249,7 @@ export default function ProductForm() {
                 <td className={styles.flabel}>分类&nbsp;</td>
                 <td>
                   <select value={form.category} onChange={e => setField('category', e.target.value)}>
-                    {categoryOptions.map(c => <option key={c} value={c}>{c}&nbsp;</option>)}
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}&nbsp;</option>)}
                   </select>
                 </td>
               </tr>

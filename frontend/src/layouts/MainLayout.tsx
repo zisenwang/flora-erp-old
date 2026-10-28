@@ -90,6 +90,8 @@ const ROUTE_PATTERNS: [RegExp, string][] = [
 
 const ROUTE_LABELS: Record<string, string> = {
   '/': '进销存系统首页',
+  '/master/categories/new': '新增产品分类',
+  '/master/categories/edit': '修改产品分类',
   '/master/categories': '产品分类',
   '/master/products/new': '新增供应商产品',
   '/master/products/edit': '修改产品资料',

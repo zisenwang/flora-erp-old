@@ -14,11 +14,12 @@ export async function findAll(
   let sql = `
     SELECT i.product_id, CONCAT(s.code, '.', p.code) AS product_code, p.name AS product_name,
            s.name AS supplier_name, s.code AS supplier_code,
-           p.category, p.unit, p.units_per_piece, i.quantity AS stock,
+           pc.name AS category, p.unit, p.units_per_piece, i.quantity AS stock,
            DATE_FORMAT(i.updated_at, '%Y-%m-%d') AS last_updated
     FROM inventory i
     JOIN products p ON p.id = i.product_id
     JOIN suppliers s ON s.id = p.supplier_id
+    LEFT JOIN product_categories pc ON pc.id = p.category
     WHERE p.status = 1`
   const params: unknown[] = []
   if (filters.supplierId) {
@@ -26,7 +27,7 @@ export async function findAll(
     params.push(filters.supplierId)
   }
   if (filters.category) {
-    sql += ' AND p.category = ?'
+    sql += ' AND pc.name = ?'
     params.push(filters.category)
   }
   if (filters.search) {

@@ -10,6 +10,7 @@ import dashboardRouter from './routes/dashboard'
 import suppliersRouter from './routes/suppliers'
 import customersRouter from './routes/customers'
 import productsRouter from './routes/products'
+import productCategoriesRouter from './routes/product-categories'
 import purchaseRouter from './routes/purchase'
 import salesRouter from './routes/sales'
 import inventoryRouter from './routes/inventory'
@@ -29,6 +30,7 @@ app.use('/api/dashboard', dashboardRouter)
 app.use('/api/suppliers', suppliersRouter)
 app.use('/api/customers', customersRouter)
 app.use('/api/products', productsRouter)
+app.use('/api/product-categories', productCategoriesRouter)
 app.use('/api/purchase', purchaseRouter)
 app.use('/api/sales', salesRouter)
 app.use('/api/inventory', inventoryRouter)

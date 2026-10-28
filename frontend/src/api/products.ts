@@ -7,7 +7,8 @@ export interface Product {
   supplierId: number
   supplierName: string
   supplierCode: string
-  category: string
+  category: string          // 分类名称
+  categoryId: number | null
   grade: string
   spec: string
   unit: string
@@ -22,7 +23,7 @@ export interface ProductPayload {
   code: string
   name: string
   supplierId: number
-  category?: string
+  categoryId?: number       // product_categories.id
   grade?: string
   spec?: string
   unit?: string

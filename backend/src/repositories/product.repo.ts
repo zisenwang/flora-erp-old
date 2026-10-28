@@ -8,11 +8,12 @@ import { AppError } from '@/services/supplier.service'
 const SELECT = `
   SELECT p.id, CONCAT(s.code, '.', p.code) AS code, p.name, p.supplier_id,
          s.name AS supplier_name, s.code AS supplier_code,
-         p.category, p.grade, p.spec, p.unit, p.cost_price, p.price, p.units_per_piece,
-         p.status, COALESCE(i.quantity, 0) AS stock
+         pc.name AS category, pc.id AS category_id, p.grade, p.spec, p.unit, p.cost_price, p.price,
+         p.units_per_piece, p.status, COALESCE(i.quantity, 0) AS stock
   FROM products p
   JOIN suppliers s ON s.id = p.supplier_id
-  LEFT JOIN inventory i ON i.product_id = p.id`
+  LEFT JOIN inventory i ON i.product_id = p.id
+  LEFT JOIN product_categories pc ON pc.id = p.category`
 
 export async function findAll(
   filters: { supplierId?: number; search?: string } = {},
@@ -123,7 +124,7 @@ export async function remove(id: number): Promise<boolean> {
 
 export async function findCategories(): Promise<string[]> {
   const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT DISTINCT category FROM products WHERE status = 1 AND category IS NOT NULL AND category != '' ORDER BY category",
+    'SELECT name FROM product_categories ORDER BY id ASC',
   )
-  return (rows as RowDataPacket[]).map(r => r.category as string)
+  return (rows as RowDataPacket[]).map(r => r.name as string)
 }

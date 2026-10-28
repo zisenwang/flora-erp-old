@@ -1,0 +1,21 @@
+/* 产品分类 (old cpfl.asp) — extras on top of Suppliers.module.css */
+
+/* class=pwwbk 序号 — big red bold */
+.seq {
+  color: #FF0000;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: 'Times New Roman', serif;
+}
+
+/* 新增 / 修改 产品分类 page */
+.formWrap {
+  padding: 17px 0 0 10px;
+}
+
+.title {
+  height: 28px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #FF0000;
+}

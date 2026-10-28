@@ -5,7 +5,8 @@ export interface Product {
   supplierId: number
   supplierName: string
   supplierCode: string
-  category: string | null
+  category: string | null    // 分类名称 (from product_categories)
+  categoryId: number | null
   grade: string | null
   spec: string | null
   unit: string
@@ -20,7 +21,7 @@ export interface CreateProductDto {
   code: string
   name: string
   supplierId: number
-  category?: string
+  category?: string   // stored value = product_categories.id as text
   grade?: string
   spec?: string
   unit?: string
