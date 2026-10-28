@@ -94,3 +94,46 @@
 .histTable td.left {
   text-align: left;
 }
+
+/* ── 开单时收款 (old xs_in.asp): checkbox beside 保存单据, then a peach block ── */
+.payCheck {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.payArea {
+  background: #FFCC99;
+  padding: 4px 0;
+}
+
+.payRow {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  padding-left: 2px;
+}
+
+.payMethod {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* green-bordered inputs like the old 收款金额 / 收款备注 */
+.payAmount,
+.payNotes {
+  box-sizing: border-box;
+  height: 20px;
+  border: 1px solid #33CC33;
+}
+
+.payAmount {
+  width: 76px;
+}
+
+.payNotes {
+  width: 270px;
+}

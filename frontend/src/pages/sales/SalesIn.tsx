@@ -4,6 +4,9 @@ import { getProducts, getProductCategories, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getCustomers, type Customer } from '@/api/customers'
 import { createSalesOrder, createSalesReturn, getSalesOrdersDetail, type SalesDetailRow } from '@/api/sales'
+import { createPayment } from '@/api/payments'
+import { PAY_METHODS } from '@/utils/payment'
+import { can } from '@/utils/permissions'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { parseSlashDate } from '@/utils/slashDate'
@@ -83,6 +86,12 @@ export default function SalesIn({ kind = 'order' }: Props) {
   const [draft, setDraftState] = useState<Draft>(() => loadDraft(T.draftKey))
   const [saved, setSaved] = useState<{ id: number; no: string } | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // ── 开单时收款 (销售单 only): a 收款 record saved right after the order ──
+  const [payNow, setPayNow] = useState(false)
+  const [payMethod, setPayMethod] = useState('')
+  const [payAmount, setPayAmount] = useState<string | null>(null)   // null = follow the order total
+  const [payNotes, setPayNotes] = useState('')
 
   // ── Filter state ─────────────────────────────────────────────
   const [sideSearch, setSideSearch] = useState('')
@@ -257,6 +266,10 @@ export default function SalesIn({ kind = 'order' }: Props) {
     if (draft.lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
     const date = parseSlashDate(draft.orderDate)
     if (!date) { alert('开单日期格式不正确，例如 2026/10/1'); return }
+    const collect = !isReturn && payNow
+    const collectAmount = num(payAmount ?? fmt(totalAmount))
+    if (collect && !payMethod) { alert('请选择收款方式'); return }
+    if (collect && !(collectAmount > 0)) { alert('请输入收款金额'); return }
 
     const notes = draft.notes.trim() || undefined
     setSaving(true)
@@ -292,6 +305,23 @@ export default function SalesIn({ kind = 'order' }: Props) {
           })),
         })
         setSaved({ id: order.id, no: order.orderNo })
+        if (collect) {
+          try {
+            await createPayment({
+              salesOrderId: order.id,
+              amount: collectAmount,
+              paymentDate: date,
+              method: payMethod,
+              notes: payNotes.trim() || undefined,
+            })
+          } catch (err) {
+            alert(`销售单${order.orderNo}已保存，但收款记录保存失败：${getErrorMessage(err)}，请到收支管理补录收款。`)
+          }
+        }
+        setPayNow(false)
+        setPayMethod('')
+        setPayAmount(null)
+        setPayNotes('')
       }
       setDraft(d => newDraft(d.customer))
       resetFilters()
@@ -579,8 +609,32 @@ export default function SalesIn({ kind = 'order' }: Props) {
                       <span className={styles.imgBtn} aria-disabled={saving} onClick={handleSave}>
                         {saving ? '保存中...' : '保存单据'}
                       </span>
+                      {!isReturn && can('payment') && (
+                        <label className={sales.payCheck}>
+                          <input type="checkbox" checked={payNow} onChange={e => setPayNow(e.target.checked)} />开单时收款
+                        </label>
+                      )}
                     </div>
                   </div>
+                  {/* 开单时收款: 收款方式 / 收款金额 (defaults to the order total) / 收款备注 */}
+                  {!isReturn && payNow && (
+                    <div className={sales.payArea}>
+                      <div className={sales.payRow}>
+                        {PAY_METHODS.map(m => (
+                          <label key={m} className={sales.payMethod}>
+                            <input type="radio" name="payMethod" checked={payMethod === m} onChange={() => setPayMethod(m)} />{m}
+                          </label>
+                        ))}
+                      </div>
+                      <div className={sales.payRow}>
+                        收款金额:
+                        <input className={sales.payAmount} type="text" value={payAmount ?? fmt(totalAmount)}
+                          onChange={e => setPayAmount(e.target.value.replace(/[^\d.]/g, ''))} />
+                        &nbsp;&nbsp;收款备注:
+                        <input className={sales.payNotes} type="text" value={payNotes} onChange={e => setPayNotes(e.target.value)} />
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </>
