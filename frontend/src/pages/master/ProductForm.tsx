@@ -152,7 +152,6 @@ export default function ProductForm() {
   async function handleSubmit() {
     if (supplierId == null) { alert('请选择供应商'); return }
     if (!form.name.trim()) { alert('请输入品名'); return }
-    if (!form.spec.trim()) { alert('请输入规格'); return }
     if (!form.unit.trim()) { alert('请输入单位'); return }
     if (!codeSeq) { alert('编码获取失败，请刷新页面'); return }
 
@@ -161,7 +160,7 @@ export default function ProductForm() {
       name: form.name.trim(),
       supplierId,
       category: form.category || undefined,
-      spec: form.spec.trim(),
+      spec: form.spec.trim() || undefined,
       grade: form.grade.trim() || undefined,
       unit: form.unit.trim(),
       unitsPerPiece: form.unitsPerPiece !== '' ? parseFloat(form.unitsPerPiece) : undefined,
@@ -293,7 +292,6 @@ export default function ProductForm() {
                 <td>
                   <input className={sup.finput} style={{ width: 132 }} type="text"
                     value={form.spec} onChange={e => setField('spec', e.target.value)} />
-                  &nbsp;<span className={sup.freq}>*</span>
                 </td>
               </tr>
               <tr>
