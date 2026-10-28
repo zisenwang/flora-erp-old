@@ -62,7 +62,7 @@ export const toDraftCustomer = (c: Customer): DraftCustomer => ({
 
 // 件数 = ceil(数量 / 包装), same rule as 进货单录入
 export const calcPieces = (qty: string, unitsPerPiece: number | null) =>
-  unitsPerPiece && Number(qty) > 0 ? String(Math.ceil(Number(qty) / unitsPerPiece)) : '0'
+  unitsPerPiece && Number(qty) > 0 ? String(Math.floor(Number(qty) / unitsPerPiece)) : '0'
 
 /** Customer name of the unsubmitted 销售单, or null when there is none (no lines yet). */
 export function peekSalesDraftCustomer(): string | null {

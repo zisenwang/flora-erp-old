@@ -99,7 +99,7 @@ const lineAmount = (l: DraftLine) => num(l.qty) * num(l.unitPrice)
 const lineFinal = (l: DraftLine) => (lineAmount(l) * l.discount) / 100
 // 件数 = ceil(数量 / 包装), same as new system; 0 when product has no 包装
 const calcPieces = (qty: string, unitsPerPiece: number | null) =>
-  unitsPerPiece && num(qty) > 0 ? String(Math.ceil(num(qty) / unitsPerPiece)) : '0'
+  unitsPerPiece && num(qty) > 0 ? String(Math.floor(num(qty) / unitsPerPiece)) : '0'
 
 const DAY_OPTIONS = [
   { days: 1, label: '今天' },

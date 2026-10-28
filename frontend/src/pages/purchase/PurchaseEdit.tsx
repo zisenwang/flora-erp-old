@@ -46,7 +46,7 @@ const fmt = (n: number) => String(+n.toFixed(2))
 const lineAmount = (l: EditLine) => num(l.qty) * num(l.unitPrice)
 const lineFinal = (l: EditLine) => (lineAmount(l) * l.discount) / 100
 const calcPieces = (qty: string, unitsPerPiece: number | null) =>
-  unitsPerPiece && num(qty) > 0 ? String(Math.ceil(num(qty) / unitsPerPiece)) : '0'
+  unitsPerPiece && num(qty) > 0 ? String(Math.floor(num(qty) / unitsPerPiece)) : '0'
 const rateOf = (text: string) => {
   const r = Number(text)
   return text === '' || isNaN(r) || r < 0 || r > 100 ? 100 : r

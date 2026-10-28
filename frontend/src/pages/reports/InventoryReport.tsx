@@ -29,7 +29,7 @@ const HEADER_EVERY = 25
 
 const money = (n: number | null) => (n != null ? Number(n).toFixed(2) : '')
 // 件数 = ceil(库存 / 每件数量), same rule as the rest of the system; blank without 每件数量
-const piecesOf = (p: Product) => (p.unitsPerPiece ? Math.ceil(p.stock / p.unitsPerPiece) : '')
+const piecesOf = (p: Product) => (p.unitsPerPiece ? Math.floor(p.stock / p.unitsPerPiece) : '')
 
 // 产品库存报表 — old bb_hzb_byd.asp layout with the new system's columns plus
 // 本期售出数 / 本期进货数 / 本期售退数 / 本期进退数 for the date range

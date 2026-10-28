@@ -53,7 +53,7 @@ const lineAmount = (l: EditLine) => (num(l.qty) * num(l.unitPrice) * l.discount)
 const lineCost = (l: EditLine) => num(l.qty) * num(l.costPrice)
 // 件数 = ceil(数量 / 每箱数量), same rule as 进货单录入
 const calcPieces = (qty: string, unitsPerPiece: number | null) =>
-  unitsPerPiece && num(qty) > 0 ? String(Math.ceil(num(qty) / unitsPerPiece)) : '0'
+  unitsPerPiece && num(qty) > 0 ? String(Math.floor(num(qty) / unitsPerPiece)) : '0'
 
 let keySeq = 0
 const nextKey = () => `s${++keySeq}`
