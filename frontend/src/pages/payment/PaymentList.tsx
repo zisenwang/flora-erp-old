@@ -91,6 +91,8 @@ export default function PaymentList() {
   const paymentsByOrder: Record<number, Payment[]> = {}
   payments.forEach(p => { (paymentsByOrder[p.salesOrderId] ??= []).push(p) })
   const paidAmount = (id: number) => (paymentsByOrder[id] ?? []).reduce((s, p) => s + p.amount, 0)
+  // 备注 = the 收款 notes of the order (not the order's own notes); blank when nothing was collected
+  const paymentNotes = (id: number) => (paymentsByOrder[id] ?? []).map(p => p.notes).filter(Boolean).join(' ')
 
   const liveOrders = orders.filter(o => !isVoided(o.status) && matches(applied, o))
   const unpaidOrders = liveOrders.filter(o => !isPaid(o.paymentStatus))
@@ -153,7 +155,7 @@ export default function PaymentList() {
       [
         ...rows.map(o => [
           `${o.customerCode}.${o.customerName}`, toSlashDate(o.orderDate), o.orderNo, num(o.totalAmount),
-          num(paidAmount(o.id)), isPaid(o.paymentStatus) ? '已收款' : '未收款', o.operator, o.notes,
+          num(paidAmount(o.id)), isPaid(o.paymentStatus) ? '已收款' : '未收款', o.operator, paymentNotes(o.id),
         ]),
         ['总计', '', '', num(rows.reduce((s, o) => s + o.totalAmount, 0)),
           num(rows.reduce((s, o) => s + paidAmount(o.id), 0)), '', '', ''],
@@ -255,7 +257,7 @@ export default function PaymentList() {
                       &nbsp;<span className={paid ? styles.paid : pay.unpaidText}>{paid ? '已收款' : '未收款'}</span>&nbsp;
                     </td>
                     <td className={styles.c}>&nbsp;{o.operator ?? ''}&nbsp;</td>
-                    <td className={pay.notesCell} title={o.notes ?? ''}>&nbsp;{o.notes ?? ''}</td>
+                    <td className={pay.notesCell} title={paymentNotes(o.id)}>&nbsp;{paymentNotes(o.id)}</td>
                     <td className={styles.c}>
                       {paid
                         ? <a className={pay.deleteLink} onClick={() => handleDelete(o)}>删除</a>
