@@ -39,6 +39,18 @@
   text-align: center;
 }
 
+/* column widths (customer request: wider, especially 备注) */
+.colName { min-width: 150px; }
+.colPhone { min-width: 130px; }
+.colAddr { width: 150px; }
+.colCycle { min-width: 90px; }
+.colNotes { width: 200px; }
+
+/* 详细地址 / 备注 — long text wraps inside the column instead of widening the table */
+.grid td.wrap {
+  white-space: normal;
+}
+
 /* class=style3 <strong> code */
 .code {
   color: #006600;

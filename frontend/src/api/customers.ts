@@ -7,8 +7,12 @@ export interface Customer {
   phone: string;
   address: string;
   notes: string;
+  paymentCycle: string | null; // 付款周期
   status: number;
 }
+
+// 付款周期 options (stored as text in customers.payment_cycle)
+export const PAYMENT_CYCLES = ["按日结款", "按月结款"];
 
 export type CustomerPayload = Omit<Customer, "id">;
 

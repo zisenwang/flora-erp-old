@@ -8,6 +8,7 @@ import {
   getNextCustomerCode,
   type Customer,
   type CustomerPayload,
+  PAYMENT_CYCLES,
 } from '@/api/customers'
 import { getErrorMessage } from '@/utils/error'
 import { EditIcon } from './SupplierIcons'
@@ -20,10 +21,11 @@ interface FormState {
   name: string
   address: string
   phone: string
+  paymentCycle: string   // '' = not set
   notes: string
 }
 
-const EMPTY_FORM: FormState = { code: '', name: '', address: '', phone: '', notes: '' }
+const EMPTY_FORM: FormState = { code: '', name: '', address: '', phone: '', paymentCycle: '', notes: '' }
 
 const RECENT_COUNT = 20
 
@@ -54,6 +56,7 @@ export default function CustomerForm() {
             name: s.name ?? '',
             address: s.address ?? '',
             phone: s.phone ?? '',
+            paymentCycle: s.paymentCycle ?? '',
             notes: s.notes ?? '',
           })
           setStatus(s.status ?? 1)
@@ -84,6 +87,7 @@ export default function CustomerForm() {
       name: form.name.trim(),
       address: form.address.trim(),
       phone: form.phone.trim(),
+      paymentCycle: form.paymentCycle || null,
       notes: form.notes.trim(),
       status,
     }
@@ -164,6 +168,15 @@ export default function CustomerForm() {
                     value={form.phone}
                     onChange={e => setField('phone', e.target.value)}
                   />
+                </td>
+              </tr>
+              <tr>
+                <td className={styles.flabel}>付款周期</td>
+                <td>
+                  <select value={form.paymentCycle} onChange={e => setField('paymentCycle', e.target.value)}>
+                    <option value="">请选择</option>
+                    {PAYMENT_CYCLES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </td>
               </tr>
               <tr>

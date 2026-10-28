@@ -79,8 +79,8 @@ export default function Customers() {
   function handleExport() {
     exportRows(
       '客户资料',
-      ['客户名称', '电话', '详细地址'],
-      filtered.map(c => [`${c.code} ${c.name}`, c.phone, c.address]),
+      ['客户名称', '电话', '详细地址', '付款周期', '备注'],
+      filtered.map(c => [`${c.code} ${c.name}`, c.phone, c.address, c.paymentCycle, c.notes]),
     )
   }
 
@@ -127,9 +127,11 @@ export default function Customers() {
         <table className={styles.grid}>
           <thead>
             <tr>
-              <th>&nbsp;<a className={sup.plk} onClick={() => setSortKey('code')}>客户名称</a>&nbsp;</th>
-              <th>&nbsp;<a className={sup.plk} onClick={() => setSortKey('phone')}>电话</a>&nbsp;</th>
-              <th>&nbsp;详细地址&nbsp;</th>
+              <th className={styles.colName}>&nbsp;<a className={sup.plk} onClick={() => setSortKey('code')}>客户名称</a>&nbsp;</th>
+              <th className={styles.colPhone}>&nbsp;<a className={sup.plk} onClick={() => setSortKey('phone')}>电话</a>&nbsp;</th>
+              <th className={styles.colAddr}>&nbsp;详细地址&nbsp;</th>
+              <th className={`${styles.center} ${styles.colCycle}`}>&nbsp;付款周期&nbsp;</th>
+              <th className={styles.colNotes}>&nbsp;备注&nbsp;</th>
               <th className={styles.center}>&nbsp;操作&nbsp;</th>
             </tr>
           </thead>
@@ -138,7 +140,9 @@ export default function Customers() {
               <tr key={c.id}>
                 <td>&nbsp;<strong className={styles.code}>{c.code}</strong>&nbsp;<span className={styles.pink}>{c.name}</span>&nbsp;</td>
                 <td>&nbsp;&nbsp;<span className={styles.pink}>{c.phone ?? ''}</span>&nbsp;</td>
-                <td>&nbsp;{c.address ?? ''}&nbsp;</td>
+                <td className={styles.wrap}>&nbsp;{c.address ?? ''}&nbsp;</td>
+                <td className={styles.center}>&nbsp;{c.paymentCycle ?? ''}&nbsp;</td>
+                <td className={styles.wrap}>&nbsp;{c.notes ?? ''}&nbsp;</td>
                 <td className={styles.center}>
                   <EditIcon onClick={() => navigate(`/master/customers/edit/${c.id}`)} />
                   <DeleteIcon onClick={() => handleDelete(c)} />

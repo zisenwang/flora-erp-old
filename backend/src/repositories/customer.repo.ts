@@ -5,7 +5,11 @@ import type { Customer, CreateCustomerDto, UpdateCustomerDto } from '@/dto/custo
 import type { RowDataPacket, ResultSetHeader } from 'mysql2'
 import { AppError } from '@/services/supplier.service'
 
-const SELECT = `SELECT id, code, name, phone, address, notes, status FROM customers`
+const SELECT = `SELECT id, code, name, phone, address, notes, payment_cycle, status FROM customers`
+
+// 付款周期 — anything else is stored as NULL
+const PAYMENT_CYCLES = ['按日结款', '按月结款']
+const cycleOf = (v: unknown) => (typeof v === 'string' && PAYMENT_CYCLES.includes(v) ? v : null)
 
 export async function findAll(search?: string): Promise<Customer[]> {
   let sql = SELECT
@@ -27,8 +31,8 @@ export async function findById(id: number): Promise<Customer | null> {
 export async function create(dto: CreateCustomerDto): Promise<Customer> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      'INSERT INTO customers (code, name, phone, address, notes) VALUES (?, ?, ?, ?, ?)',
-      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null],
+      'INSERT INTO customers (code, name, phone, address, notes, payment_cycle) VALUES (?, ?, ?, ?, ?, ?)',
+      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null, cycleOf(dto.paymentCycle)],
     )
     return findById(result.insertId) as Promise<Customer>
   } catch (err: any) {
@@ -40,8 +44,8 @@ export async function create(dto: CreateCustomerDto): Promise<Customer> {
 export async function update(id: number, dto: UpdateCustomerDto): Promise<Customer | null> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      'UPDATE customers SET code=?, name=?, phone=?, address=?, notes=?, status=? WHERE id=?',
-      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null, dto.status ?? 1, id],
+      'UPDATE customers SET code=?, name=?, phone=?, address=?, notes=?, payment_cycle=?, status=? WHERE id=?',
+      [dto.code, dto.name, dto.phone ?? null, dto.address ?? null, dto.notes ?? null, cycleOf(dto.paymentCycle), dto.status ?? 1, id],
     )
     if (result.affectedRows === 0) return null
     return findById(id)

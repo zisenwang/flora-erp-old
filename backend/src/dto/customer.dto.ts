@@ -5,6 +5,7 @@ export interface Customer {
   phone: string | null
   address: string | null
   notes: string | null
+  paymentCycle: string | null   // 付款周期: 按日结款 / 按月结款
   status: number
 }
 
@@ -14,6 +15,7 @@ export interface CreateCustomerDto {
   phone?: string
   address?: string
   notes?: string
+  paymentCycle?: string
 }
 
 export interface UpdateCustomerDto extends Partial<CreateCustomerDto> {

@@ -22,3 +22,5 @@ CLAUDE.md
 # Environment files (secrets)
 .env
 .env.*
+
+/sql
