@@ -71,7 +71,7 @@ export default function OperatorList() {
         )}
 
         <div className={styles.legend}>
-          管理员拥有全部权限；操作员只能使用勾选的模块。修改角色或权限后，该操作员需重新登录才生效。
+          管理员拥有全部权限；操作员只能打开勾选的页面。修改角色或权限后，该操作员需重新登录才生效。
         </div>
       </div>
     </div>

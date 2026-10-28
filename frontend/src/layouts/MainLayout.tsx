@@ -23,28 +23,28 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: '基础资料',
     children: [
-      { label: '产品分类', path: '/master/categories' },
-      { label: '产品资料', path: '/master/products' },
-      { label: '产品调价', path: '/master/price-adjust' },
-      { label: '客户资料', path: '/master/customers' },
-      { label: '供应商资料', path: '/master/suppliers' },
+      { label: '产品分类', path: '/master/categories', permission: 'product_category' },
+      { label: '产品资料', path: '/master/products', permission: 'product' },
+      { label: '产品调价', path: '/master/price-adjust', permission: 'price_adjust' },
+      { label: '客户资料', path: '/master/customers', permission: 'customer' },
+      { label: '供应商资料', path: '/master/suppliers', permission: 'supplier' },
       { label: '操作员表', path: '/settings/operators', adminOnly: true },
     ],
   },
   {
     label: '采购管理',
     children: [
-      { label: '采购入库', path: '/purchase/orders/new' },
-      { label: '采购退货', path: '/purchase/returns/new' },
-      { label: '采购单据', path: '/purchase/orders' },
+      { label: '采购入库', path: '/purchase/orders/new', permission: 'purchase_in' },
+      { label: '采购退货', path: '/purchase/returns/new', permission: 'purchase_return' },
+      { label: '采购单据', path: '/purchase/orders', permission: 'purchase_list' },
     ],
   },
   {
     label: '销售管理',
     children: [
-      { label: '销售出库', path: '/sales/orders/new' },
-      { label: '销售退货', path: '/sales/returns/new' },
-      { label: '销售单据', path: '/sales/orders' },
+      { label: '销售出库', path: '/sales/orders/new', permission: 'sales_in' },
+      { label: '销售退货', path: '/sales/returns/new', permission: 'sales_return' },
+      { label: '销售单据', path: '/sales/orders', permission: 'sales_list' },
     ],
   },
   {
@@ -58,18 +58,18 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: '库存管理',
     children: [
-      { label: '产品库存', path: '/inventory' },
+      { label: '产品库存', path: '/inventory', permission: 'inventory' },
       { label: '库存调整', path: '/inventory/adjust', permission: 'inventory_adjust' },
       { label: '库存盘点', path: '/inventory/check', permission: 'inventory_check' },
-      { label: '调整单据', path: '/inventory/adjustments' },
+      { label: '调整单据', path: '/inventory/adjustments', permission: 'inventory_adjustments' },
     ],
   },
   {
     label: '报表中心',
     children: [
-      { label: '采购报表', path: '/reports/purchase' },
-      { label: '销售报表', path: '/reports/sales' },
-      { label: '库存报表', path: '/reports/inventory' },
+      { label: '采购报表', path: '/reports/purchase', permission: 'report_purchase' },
+      { label: '销售报表', path: '/reports/sales', permission: 'report_sales' },
+      { label: '库存报表', path: '/reports/inventory', permission: 'report_inventory' },
     ],
   },
 ]
@@ -145,6 +145,7 @@ export default function MainLayout() {
   const navItems = NAV_ITEMS
     .filter(allowed)
     .map(item => ({ ...item, children: item.children?.filter(allowed) }))
+    .filter(item => !item.children || item.children.length > 0)   // a menu with nothing allowed is hidden
   const navRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

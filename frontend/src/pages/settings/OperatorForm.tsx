@@ -5,7 +5,7 @@ import {
 } from '@/api/auth'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
-import { PERMISSIONS, ROLES, roleLabel } from '@/utils/permissions'
+import { PERMISSION_GROUPS, ROLES, roleLabel } from '@/utils/permissions'
 import sup from '@/pages/master/Suppliers.module.css'
 import op from './Operator.module.css'
 
@@ -161,15 +161,29 @@ export default function OperatorForm({ mode }: { mode: Mode }) {
                 <tr><td colSpan={2}>{roleLabel('admin')}拥有全部权限，无需设置。</td></tr>
               ) : (
                 <>
-                  <tr><td colSpan={2} className={op.hint}>勾选后该操作员可访问对应模块：</td></tr>
-                  {PERMISSIONS.map(p => (
-                    <tr key={p.key}>
-                      <td className={`${sup.flabel} ${op.flabel}`}>
-                        <input type="checkbox" checked={perms.includes(p.key)} onChange={() => togglePerm(p.key)} />
-                      </td>
-                      <td><label onClick={() => togglePerm(p.key)}>{p.label}</label></td>
-                    </tr>
-                  ))}
+                  <tr><td colSpan={2} className={op.hint}>勾选后该操作员可打开对应页面（首页始终可进）：</td></tr>
+                  <tr>
+                    <td colSpan={2}>
+                      {/* one block per nav menu: heading + a checkbox per page (old system's 权限 grid) */}
+                      <div className={op.permGroups}>
+                        {PERMISSION_GROUPS.map(g => (
+                          <table key={g.title} className={op.permGroup}>
+                            <tbody>
+                              <tr><td colSpan={2} className={op.permTitle}>{g.title}</td></tr>
+                              {g.items.map(p => (
+                                <tr key={p.key}>
+                                  <td className={op.permLabel} onClick={() => togglePerm(p.key)}>{p.label}</td>
+                                  <td>
+                                    <input type="checkbox" checked={perms.includes(p.key)} onChange={() => togglePerm(p.key)} />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
                 </>
               )
             )}

@@ -7,6 +7,7 @@ import { getSalesGroup, type ReportGroupRow } from '@/api/reports'
 import { useAuth } from '@/store/AuthContext'
 import { getErrorMessage } from '@/utils/error'
 import { preferDesktop } from '@/utils/device'
+import { can } from '@/utils/permissions'
 import { MobileHeader, MOBILE_SALES } from './MobileShell'
 import styles from './Mobile.module.css'
 
@@ -74,9 +75,11 @@ export default function MobileHome() {
     <div className={styles.page}>
       <MobileHeader />
 
-      <div className={styles.homeBtnRow}>
-        <span className={styles.homeBtn} onClick={() => navigate(MOBILE_SALES)}>手机开单</span>
-      </div>
+      {can('mobile') && (
+        <div className={styles.homeBtnRow}>
+          <span className={styles.homeBtn} onClick={() => navigate(MOBILE_SALES)}>手机开单</span>
+        </div>
+      )}
 
       {/* ── 销售汇总 / 采购汇总 (red frame) ── */}
       <div className={styles.redBox}>

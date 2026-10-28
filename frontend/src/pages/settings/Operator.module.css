@@ -41,3 +41,33 @@
 .hint {
   color: #999;
 }
+
+/* ── 权限 page: a heading + checkboxes per nav menu, laid out like the old 权限 grid ── */
+.permGroups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 6px 0 10px;
+}
+
+.permGroup {
+  border-collapse: collapse;
+}
+
+.permTitle {
+  height: 22px;
+  padding: 0 6px;
+  background: #CCCCCC;
+  font-weight: bold;
+  text-align: center;
+}
+
+.permLabel {
+  height: 20px;
+  padding: 0 4px 0 10px;
+  text-align: right;
+  color: #006600;
+  cursor: pointer;
+  white-space: nowrap;
+}

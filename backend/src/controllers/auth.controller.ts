@@ -91,7 +91,15 @@ export async function setPermissions(req: AuthRequest, res: Response): Promise<v
   const { permissions } = req.body as { permissions: string[] }
   const grantedBy = req.user!.id
 
-  const VALID = new Set(['inventory_adjust', 'inventory_check', 'payment', 'loss'])
+  // one key per page (frontend utils/permissions.ts PERMISSION_GROUPS)
+  const VALID = new Set([
+    'product_category', 'product', 'price_adjust', 'customer', 'supplier',
+    'purchase_in', 'purchase_return', 'purchase_list',
+    'sales_in', 'sales_return', 'sales_list',
+    'inventory', 'inventory_adjust', 'inventory_check', 'inventory_adjustments',
+    'report_purchase', 'report_sales', 'report_inventory',
+    'payment', 'mobile', 'loss',
+  ])
   const filtered = (permissions ?? []).filter(p => VALID.has(p))
 
   const conn = await pool.getConnection()

@@ -8,6 +8,7 @@ import { getCustomers } from '@/api/customers'
 import { getSuppliers } from '@/api/suppliers'
 import { peekSalesDraftCustomer } from '@/utils/salesDraft'
 import { shouldUseMobile } from '@/utils/device'
+import { can } from '@/utils/permissions'
 import styles from './Dashboard.module.css'
 
 // Phones opening the computer 首页 go to 手机版 instead (unless 切换到电脑版 was chosen)
@@ -104,7 +105,9 @@ function DesktopDashboard() {
           &nbsp;未提交销售单:
           {draftCustomer == null
             ? '（暂无）'
-            : <span className={styles.alertLink} onClick={() => navigate('/sales/orders/new')}>{draftCustomer || '（未选客户）'}</span>}
+            : can('sales_in')
+              ? <span className={styles.alertLink} onClick={() => navigate('/sales/orders/new')}>{draftCustomer || '（未选客户）'}</span>
+              : (draftCustomer || '（未选客户）')}
         </div>
       </div>
 
@@ -123,7 +126,7 @@ function DesktopDashboard() {
                   <span className={styles.dot}>○</span>
                   今日销售:<em className={styles.hi}>{fmt(todayRow?.salesQty ?? 0)}</em>盆,共
                   <em className={styles.hi}>{fmt(data.todaySales)}</em>元(<em className={styles.hi}>0</em>)
-                  &nbsp;<span className={styles.btnInline} onClick={() => navigate('/sales/orders/new')}>销售开单</span>
+                  {can('sales_in') && <>&nbsp;<span className={styles.btnInline} onClick={() => navigate('/sales/orders/new')}>销售开单</span></>}
                 </div>
                 <div className={styles.sRow}>
                   <span className={styles.dot}>○</span>
@@ -154,18 +157,18 @@ function DesktopDashboard() {
                 <div className={styles.sRow}>
                   <span className={styles.dot}>○</span>
                   产品数量<em className={styles.hi}>{productCount}+</em>个
-                  &nbsp;<span className={styles.btnInline} onClick={() => navigate('/inventory')}>查询库存</span>
-                  &nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/products')}>手工刷新库存</span>
+                  {can('inventory') && <>&nbsp;<span className={styles.btnInline} onClick={() => navigate('/inventory')}>查询库存</span></>}
+                  {can('product') && <>&nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/products')}>手工刷新库存</span></>}
                 </div>
                 <div className={styles.sRow}>
                   <span className={styles.dot}>○</span>
                   客户数量<em className={styles.hi}>{customerCount}+</em>个
-                  &nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/customers')}>客户资料</span>
+                  {can('customer') && <>&nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/customers')}>客户资料</span></>}
                 </div>
                 <div className={styles.sRow}>
                   <span className={styles.dot}>○</span>
                   供应商数量<em className={styles.hi}>{supplierCount}+</em>个
-                  &nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/suppliers')}>供应商</span>
+                  {can('supplier') && <>&nbsp;<span className={styles.btnInline} onClick={() => navigate('/master/suppliers')}>供应商</span></>}
                 </div>
               </div>
             </div>
