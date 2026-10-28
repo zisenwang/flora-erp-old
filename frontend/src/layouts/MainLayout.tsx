@@ -216,7 +216,7 @@ export default function MainLayout() {
         <div className={styles.navRight}>
           <span className={styles.navLink} onClick={() => navigate('/')}>首页</span>
           <span className={styles.pipe}>│</span>
-          <span className={styles.version}>云达ERP复刻版</span>
+          <span className={styles.version}>广阔卉ERP</span>
           <span className={styles.pipe}>│</span>
           <span className={styles.navUser}>👤 {user?.name ?? '用户'}</span>
           <span className={styles.pipe}>│</span>

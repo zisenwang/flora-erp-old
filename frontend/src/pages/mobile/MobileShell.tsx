@@ -39,7 +39,7 @@ export function useSalesDraft() {
   return { draft, setDraft, selectCustomer }
 }
 
-// ── Top bar: back / home / 云达ERP复刻版【user】 ──────────────────
+// ── Top bar: back / home / 广阔卉ERP【user】 ──────────────────
 export function MobileHeader() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -56,7 +56,7 @@ export function MobileHeader() {
         </svg>
       </span>
       <span className={styles.headerTitle}>
-        云达ERP复刻版&nbsp;<span className={styles.headerUser}>【<span className={styles.userIcon}>👤</span>&nbsp;{user?.name ?? ''}】</span>
+        广阔卉ERP&nbsp;<span className={styles.headerUser}>【<span className={styles.userIcon}>👤</span>&nbsp;{user?.name ?? ''}】</span>
       </span>
     </div>
   )
