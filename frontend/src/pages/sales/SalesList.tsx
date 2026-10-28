@@ -331,7 +331,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
           {pagedDetail.map((r, i) => {
             const p = productsByCode[r.productCode]
             return (
-              <tr key={`${r.kind}-${r.id}-${i}`} className={styles.row}>
+              <tr key={`${r.kind}-${r.id}-${i}`} className={r.kind === 'return' ? `${styles.row} ${styles.returnRow}` : styles.row}>
                 <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                 <td>&nbsp;{r.customer}&nbsp;</td>
                 <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
@@ -440,7 +440,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
             </thead>
             <tbody>
               {paged.map(r => (
-                <tr key={`${r.kind}-${r.id}`} className={styles.row}>
+                <tr key={`${r.kind}-${r.id}`} className={r.kind === 'return' ? `${styles.row} ${styles.returnRow}` : styles.row}>
                   <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                   <td>&nbsp;{r.customer}&nbsp;</td>
                   <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>

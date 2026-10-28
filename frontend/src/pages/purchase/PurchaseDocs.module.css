@@ -83,6 +83,11 @@
   background: #FFFF00;
 }
 
+/* 退货单 rows in 单据汇总 + 明细 — red background (customer request 10-20); hover still turns yellow */
+.grid tbody tr.returnRow:not(:hover) td {
+  background: #FF9999;
+}
+
 .c {
   text-align: center;
 }

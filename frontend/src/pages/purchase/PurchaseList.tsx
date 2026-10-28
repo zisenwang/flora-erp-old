@@ -285,7 +285,7 @@ export default function PurchaseList({ mode }: Props) {
         </thead>
         <tbody>
           {pagedSum.map(r => (
-            <tr key={`${r.kind}-${r.id}`} className={styles.row}>
+            <tr key={`${r.kind}-${r.id}`} className={r.kind === 'return' ? `${styles.row} ${styles.returnRow}` : styles.row}>
               <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
               <td>&nbsp;{r.supplier}&nbsp;</td>
               <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
@@ -369,7 +369,7 @@ export default function PurchaseList({ mode }: Props) {
             const isOrder = r.kind === 'order'
             const off = isOrder && r.discount !== 100 ? styles.discounted : ''
             return (
-              <tr key={`${r.kind}-${r.id}-${i}`} className={styles.row}>
+              <tr key={`${r.kind}-${r.id}-${i}`} className={r.kind === 'return' ? `${styles.row} ${styles.returnRow}` : styles.row}>
                 <td>&nbsp;{TYPE_LABEL[r.kind]}&nbsp;</td>
                 <td>&nbsp;{r.supplier}&nbsp;</td>
                 <td className={isToday(r.date) ? styles.dateCell : undefined}>&nbsp;{toSlashDate(r.date)}&nbsp;</td>
