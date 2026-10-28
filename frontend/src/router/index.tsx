@@ -8,6 +8,8 @@ import ProductView from '@/pages/master/ProductView'
 import Categories from '@/pages/master/Categories'
 import CategoryForm from '@/pages/master/CategoryForm'
 import PriceAdjust from '@/pages/master/PriceAdjust'
+import LossList from '@/pages/loss/LossList'
+import LossNew from '@/pages/loss/LossNew'
 import PurchaseIn from '@/pages/purchase/PurchaseIn'
 import PurchaseList from '@/pages/purchase/PurchaseList'
 import PurchaseView from '@/pages/purchase/PurchaseView'
@@ -125,9 +127,9 @@ const router = createBrowserRouter([
       { path: 'settings/operators/:id/edit', element: <RequireAdmin><OperatorForm key="edit" mode="edit" /></RequireAdmin> },
       { path: 'settings/operators/:id/password', element: <RequireAdmin><OperatorForm key="password" mode="password" /></RequireAdmin> },
       { path: 'settings/operators/:id/permissions', element: <RequireAdmin><OperatorForm key="permissions" mode="permissions" /></RequireAdmin> },
-      // 报损管理 — placeholder only
-      { path: 'loss', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
-      { path: 'loss/new', element: <RequirePermission permission="loss"><UnderDevelopment /></RequirePermission> },
+      // 报损管理: 报损记录 (like 调整单据) / 新增报损 (like 库存调整)
+      { path: 'loss', element: <RequirePermission permission="loss"><LossList /></RequirePermission> },
+      { path: 'loss/new', element: <RequirePermission permission="loss"><LossNew /></RequirePermission> },
       { path: 'master/categories', element: <RequirePermission permission="product_category"><Categories /></RequirePermission> },
       { path: 'master/categories/new', element: <RequirePermission permission="product_category"><CategoryForm key="new" /></RequirePermission> },
       { path: 'master/categories/edit/:id', element: <RequirePermission permission="product_category"><CategoryForm key="edit" /></RequirePermission> },
