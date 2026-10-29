@@ -33,7 +33,7 @@ export default function PaymentNew() {
   // form
   const [amountText, setAmountText] = useState<string | null>(null)   // null = the order total
   const [date, setDate] = useState(toSlashDate())
-  const [method, setMethod] = useState('微信')
+  const [method, setMethod] = useState(PAY_METHODS[0])
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
