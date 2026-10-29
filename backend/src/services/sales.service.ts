@@ -1,7 +1,6 @@
 import pool from '@/db/pool'
 import * as salesRepo from '@/repositories/sales.repo'
 import * as invRepo from '@/repositories/inventory.repo'
-import * as productRepo from '@/repositories/product.repo'
 import { genSalesNo } from '@/utils/orderNo'
 import { AppError } from '@/services/supplier.service'
 import type { SalesOrder, CreateSalesOrderDto, UpdateSalesOrderDto, SalesDetailRow } from '@/dto/sales.dto'
@@ -82,7 +81,6 @@ export async function createOrder(
         },
         conn,
       )
-      await productRepo.updatePrice(line.productId, line.unitPrice, conn)
 
       const qtyBefore = await invRepo.getQuantity(line.productId, conn)
       await invRepo.incrementQuantity(line.productId, -line.qty, conn)
@@ -198,7 +196,6 @@ export async function updateOrder(id: number, dto: UpdateSalesOrderDto): Promise
         },
         conn,
       )
-      await productRepo.updatePrice(line.productId, line.unitPrice, conn)
       await invRepo.incrementQuantity(line.productId, -line.qty, conn)
     }
 
