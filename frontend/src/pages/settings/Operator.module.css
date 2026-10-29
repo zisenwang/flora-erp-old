@@ -17,6 +17,14 @@
   color: #FF0000;
 }
 
+/* 权限 column: one line, cut with … (full list in the hover title) */
+.permCell {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sep {
   color: #999;
   margin: 0 6px;

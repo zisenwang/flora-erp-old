@@ -57,7 +57,7 @@ export const PERMISSION_GROUPS = [
   },
 ] as const
 
-export const PERMISSIONS = PERMISSION_GROUPS.flatMap(g => g.items)
+export const PERMISSIONS = PERMISSION_GROUPS.flatMap<{ key: Permission; label: string }>(g => g.items)
 
 export type Permission = (typeof PERMISSION_GROUPS)[number]['items'][number]['key']
 

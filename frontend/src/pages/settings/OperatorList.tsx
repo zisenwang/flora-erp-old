@@ -52,7 +52,7 @@ export default function OperatorList() {
                   <td className={styles.c}>&nbsp;{u.name}&nbsp;</td>
                   <td className={`${styles.c} ${u.role === 'admin' ? op.admin : ''}`}>&nbsp;{roleLabel(u.role)}&nbsp;</td>
                   <td className={`${styles.c} ${u.status === 1 ? op.on : op.off}`}>&nbsp;{u.status === 1 ? '启用' : '停用'}&nbsp;</td>
-                  <td>&nbsp;{permText(u)}&nbsp;</td>
+                  <td><div className={op.permCell} title={permText(u)}>&nbsp;{permText(u)}&nbsp;</div></td>
                   <td className={styles.c}>
                     <a onClick={() => go(u.id, 'edit')}>编辑</a>
                     <span className={op.sep}>|</span>
