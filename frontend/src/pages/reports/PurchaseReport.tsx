@@ -46,7 +46,6 @@ interface SumRow {
   key: string
   code: string
   name: string
-  supplierCode: string
   qty: number
   amount: number
   pieces: number      // 采购 件数 (returns not counted)
@@ -119,7 +118,6 @@ export default function PurchaseReport({ mode }: Props) {
         key,
         code: mode === 'product' ? r.productCode : mode === 'supplier' ? r.supplierCode : '',
         name: mode === 'product' ? r.productName : mode === 'supplier' ? r.supplierName : (r.operator ?? ''),
-        supplierCode: r.supplierCode,
         qty: 0, amount: 0, pieces: 0, retQty: 0, retAmount: 0,
       }
       groups.set(key, g)
@@ -163,7 +161,7 @@ export default function PurchaseReport({ mode }: Props) {
 
   // label column(s) depend on the mode; numeric columns are shared
   const labelHeads = mode === 'product'
-    ? <><th>&nbsp;编码&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;单位&nbsp;产地&nbsp;</th><th>&nbsp;等级&nbsp;</th></>
+    ? <><th>&nbsp;编码&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;</th><th>&nbsp;等级&nbsp;</th></>
     : <th>&nbsp;{mode === 'supplier' ? '供应商' : '经办人'}&nbsp;</th>
   const labelSpan = mode === 'product' ? 4 : 1
   const numCols = mode === 'product' ? 6 : 4
@@ -235,10 +233,7 @@ export default function PurchaseReport({ mode }: Props) {
                       <>
                         <td className={styles.c} data-t="s">&nbsp;{g.code}&nbsp;</td>
                         <td>&nbsp;<span className={styles.teal}>{p?.spec ?? ''}</span>&nbsp;</td>
-                        <td>
-                          &nbsp;{g.name}&nbsp;{p?.unit ?? ''}&nbsp;
-                          <span className={styles.grey}>{g.supplierCode}</span>&nbsp;
-                        </td>
+                        <td>&nbsp;{g.name}&nbsp;</td>
                         <td className={styles.c}>&nbsp;{p?.grade ?? ''}&nbsp;</td>
                       </>
                     )}

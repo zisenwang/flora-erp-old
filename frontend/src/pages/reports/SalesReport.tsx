@@ -72,7 +72,6 @@ interface Line {
   productName: string
   supplierCode: string
   supplierName: string
-  unit: string
   isReturn: boolean
   qty: number
   amount: number
@@ -107,7 +106,6 @@ function toLine(r: ReportOrderRow): Line {
     customerCode, customerName,
     productCode: r.productCode ?? '', productName: r.productName ?? '',
     supplierCode: r.supplierCode ?? '', supplierName,
-    unit: r.unit ?? '',
     isReturn: Boolean(r.isReturn),
     qty: Math.abs(r.qty), amount: Math.abs(r.finalAmount), pieces: Math.abs(r.pieces),
     profit: r.profit ?? 0,
@@ -283,7 +281,7 @@ export default function SalesReport({ mode }: Props) {
         <thead>
           <tr>
             <th>&nbsp;编码&nbsp;</th>
-            <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;单位&nbsp;产地&nbsp;</th>
+            <th style={{ textAlign: 'left' }}>&nbsp;规格&nbsp;</th><th style={{ textAlign: 'left' }}>&nbsp;品名&nbsp;</th>
             <th>&nbsp;等级&nbsp;</th>
             <th>&nbsp;销售数量&nbsp;</th>
             <th>&nbsp;销售金额&nbsp;</th>
@@ -302,7 +300,7 @@ export default function SalesReport({ mode }: Props) {
               <tr key={g.key} className={styles.row}>
                 <td className={styles.c} data-t="s">&nbsp;{g.line.productCode}&nbsp;</td>
                 <td>&nbsp;{p?.spec ?? ''}&nbsp;</td>
-                <td>&nbsp;{g.line.productName}&nbsp;{g.line.unit}&nbsp;{g.line.supplierCode}&nbsp;</td>
+                <td>&nbsp;{g.line.productName}&nbsp;</td>
                 <td className={styles.c}>&nbsp;{p?.grade ?? ''}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.qty)}&nbsp;</td>
                 <td className={styles.r}>&nbsp;{fmt(g.amount)}&nbsp;</td>
