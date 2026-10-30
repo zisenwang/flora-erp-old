@@ -10,9 +10,10 @@
 .wDate { width: 110px; }
 .wNo { width: 150px; }
 .wAmount { width: 110px; }
+.wMethod { width: 100px; }
 .wStatus { width: 100px; }
 .wOperator { width: 100px; }
-.wNotes { width: 430px; }
+.wNotes { width: 330px; }
 .wOps { width: 80px; }
 
 .list td {

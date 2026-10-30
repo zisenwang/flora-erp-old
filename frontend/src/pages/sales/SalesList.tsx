@@ -13,7 +13,6 @@ import { codeEquals } from '@/utils/codeMatch'
 import { specCodes } from '@/utils/specMatch'
 import { isPaid, isVoided } from '@/utils/payment'
 import { can } from '@/utils/permissions'
-import { getPayments } from '@/api/payments'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
@@ -124,7 +123,6 @@ export default function SalesList({ mode = 'summary' }: Props) {
   const [sumRows, setSumRows] = useState<SumRow[]>([])
   const [detailRows, setDetailRows] = useState<DetailRow[]>([])
   const [productsByCode, setProductsByCode] = useState<Record<string, Product>>({})
-  const [payMethods, setPayMethods] = useState<Record<number, string>>({})   // 销售单 id → 收款方式
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -236,13 +234,13 @@ export default function SalesList({ mode = 'summary' }: Props) {
     if (mode === 'summary') {
       exportRows(
         `销售单据汇总_${range}`,
-        ['类型', '客户', '日期', '单号', '数量', '金额', '件数', '收款状态', '收款方式', '经办人', '备注'],
+        ['类型', '客户', '日期', '单号', '数量', '金额', '件数', '收款状态', '经办人', '备注'],
         [
           ...rows.map(r => [
             TYPE_LABEL[r.kind], r.customer, toSlashDate(r.date), r.no, num(r.qty), num(r.amount),
-            r.pieces || '', payText(r), payMethodText(r), r.operator, r.notes,
+            r.pieces || '', payText(r), r.operator, r.notes,
           ]),
-          ['总计', '', '', '', num(allSum.qty), num(allSum.amount), num(allSum.pieces), '', '', '', ''],
+          ['总计', '', '', '', num(allSum.qty), num(allSum.amount), num(allSum.pieces), '', '', ''],
         ],
       )
       return
@@ -265,23 +263,6 @@ export default function SalesList({ mode = 'summary' }: Props) {
       ],
     )
   }
-
-  // 收款方式 column (汇总表): the methods of the order's 收款 records; refreshed with each search
-  useEffect(() => {
-    if (mode !== 'summary') return
-    getPayments()
-      .then(list => {
-        const byOrder: Record<number, string[]> = {}
-        list.forEach(p => {
-          const ms = (byOrder[p.salesOrderId] ??= [])
-          if (p.method && !ms.includes(p.method)) ms.push(p.method)
-        })
-        setPayMethods(Object.fromEntries(Object.entries(byOrder).map(([id, ms]) => [id, ms.join('、')])))
-      })
-      .catch(() => {})
-  }, [mode, applied])
-
-  const payMethodText = (r: SumRow) => (r.kind === 'order' ? payMethods[r.id] ?? '' : '')
 
   // 收款状态 column: blank for 退货单
   const payText = (r: SumRow) =>
@@ -464,7 +445,6 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <th>&nbsp;金额&nbsp;</th>
                 <th>件数</th>
                 <th>&nbsp;收款状态&nbsp;</th>
-                <th>&nbsp;收款方式&nbsp;</th>
                 <th>&nbsp;经办人&nbsp;</th>
                 <th>&nbsp;备注&nbsp;</th>
                 <th>&nbsp;操作&nbsp;</th>
@@ -481,7 +461,6 @@ export default function SalesList({ mode = 'summary' }: Props) {
                   <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(r.amount)}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{r.pieces ? <em className={styles.qty}>{r.pieces}</em> : ''}&nbsp;</td>
                   <td className={styles.c}>&nbsp;{payCell(r)}&nbsp;</td>
-                  <td className={styles.c}>&nbsp;{payMethodText(r)}&nbsp;</td>
                   <td>&nbsp;{r.operator}&nbsp;</td>
                   <td className={styles.notesCell}><div>&nbsp;{r.notes}</div></td>
                   <td className={styles.c}>
@@ -494,14 +473,14 @@ export default function SalesList({ mode = 'summary' }: Props) {
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.qty)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.amount)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(pageSum.pieces)}</td>
-                <td colSpan={5}>核对数量:<em className={styles.qty}>{fmt(allSum.qty)}</em></td>
+                <td colSpan={4}>核对数量:<em className={styles.qty}>{fmt(allSum.qty)}</em></td>
               </tr>
               <tr>
                 <td colSpan={4} className={styles.r}>总计</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.qty)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.amount)}</td>
                 <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(allSum.pieces)}</td>
-                <td colSpan={5}>核对金额:<em className={styles.qty}>{fmt(allSum.amount)}</em></td>
+                <td colSpan={4}>核对金额:<em className={styles.qty}>{fmt(allSum.amount)}</em></td>
               </tr>
             </tbody>
           </table>

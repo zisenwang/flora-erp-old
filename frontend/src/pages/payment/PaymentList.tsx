@@ -26,6 +26,7 @@ const SEARCH_FIELDS = [
   { value: 'customerCode', label: '客户编码' },
   { value: 'customerName', label: '客户名称' },
   { value: 'orderNo', label: '单号' },
+  { value: 'method', label: '收款方式' },
 ]
 
 const VIEW_NAME: Record<View, string> = { all: '全部销售单', paid: '已收款销售单', unpaid: '未收款销售单' }
@@ -36,13 +37,15 @@ const PAGE_WINDOW = 10
 const fmt = (n: number) => Number(n).toFixed(2)
 const num = (n: number) => +Number(n).toFixed(2)
 
-function matches(f: Filters, r: { customerCode: string; customerName: string; orderNo: string }) {
+// method = the 收款方式 text of the row (an order: the methods of its 收款 records)
+function matches(f: Filters, r: { customerCode: string; customerName: string; orderNo: string }, method: string) {
   if (!f.keyword) return true
   const q = f.keyword.toLowerCase()
   switch (f.field) {
     case 'customerCode': return codeEquals(r.customerCode, f.keyword)
     case 'customerName': return (r.customerName ?? '').toLowerCase().includes(q)
     case 'orderNo': return r.orderNo.toLowerCase().includes(q)
+    case 'method': return method.toLowerCase().includes(q)
     default: return true
   }
 }
@@ -93,8 +96,11 @@ export default function PaymentList() {
   const paidAmount = (id: number) => (paymentsByOrder[id] ?? []).reduce((s, p) => s + p.amount, 0)
   // 备注 = the 收款 notes of the order (not the order's own notes); blank when nothing was collected
   const paymentNotes = (id: number) => (paymentsByOrder[id] ?? []).map(p => p.notes).filter(Boolean).join(' ')
+  // 收款方式 = the distinct methods of the order's 收款 records
+  const paymentMethods = (id: number) =>
+    [...new Set((paymentsByOrder[id] ?? []).map(p => p.method).filter(Boolean))].join('、')
 
-  const liveOrders = orders.filter(o => !isVoided(o.status) && matches(applied, o))
+  const liveOrders = orders.filter(o => !isVoided(o.status) && matches(applied, o, paymentMethods(o.id)))
   const unpaidOrders = liveOrders.filter(o => !isPaid(o.paymentStatus))
   const rows = view === 'all' ? liveOrders
     : view === 'paid' ? liveOrders.filter(o => isPaid(o.paymentStatus))
@@ -104,12 +110,12 @@ export default function PaymentList() {
   const from = parseSlashDate(applied.start)
   const to = parseSlashDate(applied.end)
   const collected = payments
-    .filter(p => (!from || p.paymentDate >= from) && (!to || p.paymentDate <= to) && matches(applied, p))
+    .filter(p => (!from || p.paymentDate >= from) && (!to || p.paymentDate <= to) && matches(applied, p, p.method ?? ''))
     .reduce((s, p) => s + p.amount, 0)
   const receivable = unpaidOrders.reduce((s, o) => s + o.totalAmount, 0)
   // 未收款总额 = every 未收款 order regardless of the date range (still follows the search)
   const unpaidTotal = allUnpaid
-    .filter(o => !isVoided(o.status) && matches(applied, o))
+    .filter(o => !isVoided(o.status) && matches(applied, o, paymentMethods(o.id)))
     .reduce((s, o) => s + o.totalAmount, 0)
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
@@ -151,14 +157,14 @@ export default function PaymentList() {
   function handleExport() {
     exportRows(
       `${VIEW_NAME[view]}_${rangeName(applied.start, applied.end)}`,
-      ['客户', '日期', '单号', '金额', '已收金额', '收款状态', '经办人', '备注'],
+      ['客户', '日期', '单号', '金额', '已收金额', '收款方式', '收款状态', '经办人', '备注'],
       [
         ...rows.map(o => [
           `${o.customerCode}.${o.customerName}`, toSlashDate(o.orderDate), o.orderNo, num(o.totalAmount),
-          num(paidAmount(o.id)), isPaid(o.paymentStatus) ? '已收款' : '未收款', o.operator, paymentNotes(o.id),
+          num(paidAmount(o.id)), paymentMethods(o.id), isPaid(o.paymentStatus) ? '已收款' : '未收款', o.operator, paymentNotes(o.id),
         ]),
         ['总计', '', '', num(rows.reduce((s, o) => s + o.totalAmount, 0)),
-          num(rows.reduce((s, o) => s + paidAmount(o.id), 0)), '', '', ''],
+          num(rows.reduce((s, o) => s + paidAmount(o.id), 0)), '', '', '', ''],
       ],
     )
   }
@@ -171,7 +177,7 @@ export default function PaymentList() {
       <td colSpan={3} className={styles.r}>{label}</td>
       <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(amountOf(list))}</td>
       <td className={`${styles.c} ${styles.hatch}`}>&nbsp;{fmt(paidOf(list))}</td>
-      <td colSpan={4}>&nbsp;</td>
+      <td colSpan={5}>&nbsp;</td>
     </tr>
   )
 
@@ -224,6 +230,7 @@ export default function PaymentList() {
               <col className={pay.wNo} />
               <col className={pay.wAmount} />
               <col className={pay.wAmount} />
+              <col className={pay.wMethod} />
               <col className={pay.wStatus} />
               <col className={pay.wOperator} />
               <col className={pay.wNotes} />
@@ -236,6 +243,7 @@ export default function PaymentList() {
                 <th>&nbsp;单号&nbsp;</th>
                 <th>&nbsp;金额&nbsp;</th>
                 <th>&nbsp;已收金额&nbsp;</th>
+                <th>&nbsp;收款方式&nbsp;</th>
                 <th>&nbsp;收款状态&nbsp;</th>
                 <th>&nbsp;经办人&nbsp;</th>
                 <th>&nbsp;备注&nbsp;</th>
@@ -253,6 +261,7 @@ export default function PaymentList() {
                     <td>&nbsp;<a onClick={() => navigate(`/sales/orders/${o.id}`)}>{o.orderNo}</a>&nbsp;</td>
                     <td className={`${styles.c} ${styles.bold}`}>&nbsp;{fmt(o.totalAmount)}&nbsp;</td>
                     <td className={styles.c}>&nbsp;{received ? fmt(received) : ''}&nbsp;</td>
+                    <td className={styles.c}>&nbsp;{paymentMethods(o.id)}&nbsp;</td>
                     <td className={styles.c}>
                       &nbsp;<span className={paid ? styles.paid : pay.unpaidText}>{paid ? '已收款' : '未收款'}</span>&nbsp;
                     </td>
