@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { getPurchaseOrder, getPurchaseReturn, updatePurchaseOrder, updatePurchaseReturn } from '@/api/purchase'
+import {
+  getPurchaseOrder, getPurchaseReturn, updatePurchaseOrder, updatePurchaseReturn, voidPurchaseOrder, voidPurchaseReturn,
+} from '@/api/purchase'
 import { getProducts, type Product } from '@/api/products'
 import { getSuppliers, type Supplier } from '@/api/suppliers'
 import { getErrorMessage } from '@/utils/error'
@@ -32,6 +34,7 @@ interface DocMeta {
   date: string
   operator: string
   discount: number  // order-level discount (采购单 only, kept as-is)
+  voided: boolean
 }
 
 interface EditSupplier {
@@ -104,12 +107,12 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
     // normalize 采购单 / 采退单 into one shape
     const load = isReturn
       ? getPurchaseReturn(docId).then(r => ({
-          meta: { id: r.id, no: r.returnNo, date: r.returnDate, operator: r.operator ?? '', discount: 100 },
+          meta: { id: r.id, no: r.returnNo, date: r.returnDate, operator: r.operator ?? '', discount: 100, voided: (r.notes ?? '').startsWith('作废') },
           supplierId: r.supplierId, supplierCode: r.supplierCode, supplierName: r.supplierName, notes: r.notes,
           items: (r.items ?? []).map(i => ({ ...i, discount: 100 })),
         }))
       : getPurchaseOrder(docId).then(o => ({
-          meta: { id: o.id, no: o.orderNo, date: o.orderDate, operator: o.operator ?? '', discount: o.discount },
+          meta: { id: o.id, no: o.orderNo, date: o.orderDate, operator: o.operator ?? '', discount: o.discount, voided: o.status === '作废' },
           supplierId: o.supplierId, supplierCode: o.supplierCode, supplierName: o.supplierName, notes: o.notes,
           items: o.items ?? [],
         }))
@@ -198,8 +201,10 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
   async function handleSave() {
     if (saving || !order || !supplier) return
     if (lines.length === 0) { alert('单据中没有产品，请点击【向此单追加产品】重新选择产品'); return }
-    if (lines.some(l => num(l.qty) <= 0)) { alert('数量必须大于0'); return }
-    if (lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
+    // 数量 0 (or blank) = take that product out of the 单据
+    const kept = lines.filter(l => num(l.qty) > 0)
+    if (kept.length === 0) { alert('所有产品数量都为0，如需取消此单请点击【作废此单】'); return }
+    if (kept.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
     const r = Number(rate)
     if (!isReturn && (rate === '' || isNaN(r) || r < 0 || r > 100)) { alert('请输入0-100之间的折扣率'); return }
     const date = parseSlashDate(orderDate)
@@ -207,7 +212,7 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
 
     setSaving(true)
     try {
-      const items = lines.map(l => ({
+      const items = kept.map(l => ({
         productId: l.productId,
         qty: num(l.qty),
         pieces: num(l.pieces),
@@ -227,7 +232,7 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
           orderDate: date,
           discount: order.discount,
           notes: notes.trim() || undefined,
-          items: items.map((it, i) => ({ ...it, discount: lines[i].discount })),
+          items: items.map((it, i) => ({ ...it, discount: kept[i].discount })),
         })
       }
       alert('修改成功')
@@ -236,6 +241,19 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
       alert(getErrorMessage(err))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleVoid() {
+    if (!order) return
+    if (!window.confirm('作废后数量归零，单据保留，确定作废此单吗？')) return
+    try {
+      if (isReturn) await voidPurchaseReturn(order.id)
+      else await voidPurchaseOrder(order.id)
+      alert('已作废')
+      goBack()
+    } catch (err) {
+      alert(getErrorMessage(err))
     }
   }
 
@@ -256,6 +274,8 @@ export default function PurchaseEdit({ kind = 'order' }: Props) {
       <div className={styles.subbar}>
         <span className={styles.blueBtn} onClick={() => setPickAdd(true)}>向此单追加产品</span>
         <span className={styles.blueBtn} onClick={goBack}>点这里返回上页</span>
+        <span className={styles.btnGap} />
+        {!order.voided && <span className={styles.greenBtn} onClick={handleVoid}>作废此单</span>}
       </div>
 
       <div className={styles.body}>

@@ -274,7 +274,7 @@ export default function ProductForm() {
                         <td>
                           {recent3.map(p => (
                             <div key={p.id} className={styles.recentLine}>
-                              &nbsp;<em className={sup.code}>{p.code}</em>&nbsp;{p.spec ?? ''}&nbsp;{p.name}&nbsp;
+                              &nbsp;<em className={sup.code}>{p.code}</em>&nbsp;{p.spec ?? ''}&nbsp;{p.name}&nbsp;{p.grade ?? ''}
                             </div>
                           ))}
                         </td>
@@ -393,6 +393,7 @@ export default function ProductForm() {
                 <th>&nbsp;编码&nbsp;</th>
                 <th>&nbsp;规格&nbsp;</th>
                 <th>&nbsp;产品&nbsp;</th>
+                <th>&nbsp;等级&nbsp;</th>
                 <th>&nbsp;单位&nbsp;</th>
                 <th>&nbsp;包装&nbsp;</th>
                 <th>修改</th>
@@ -413,6 +414,7 @@ export default function ProductForm() {
                   </td>
                   <td>&nbsp;{p.spec ?? ''}&nbsp;</td>
                   <td>&nbsp;{p.name}&nbsp;</td>
+                  <td>&nbsp;{p.grade ?? ''}&nbsp;</td>
                   <td>&nbsp;{p.unit ?? ''}&nbsp;</td>
                   <td>&nbsp;{p.unitsPerPiece ?? ''}&nbsp;</td>
                   <td>

@@ -179,10 +179,12 @@ export default function SalesEdit({ kind = 'order' }: Props) {
 
   async function handleSave() {
     if (saving || !order || !customer) return
+    // 数量 0 (or blank) = take that product out of the 单据
+    const kept = lines.filter(l => num(l.qty) > 0)
     if (lines.length === 0) { alert('单据中没有产品'); return }
-    if (lines.some(l => num(l.qty) <= 0)) { alert('数量必须大于0'); return }
-    if (lines.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
-    if (lines.some(l => l.costPrice !== '' && isNaN(Number(l.costPrice)))) { alert('进价格式不正确'); return }
+    if (kept.length === 0) { alert('所有产品数量都为0，如需取消此单请点击【作废此单】'); return }
+    if (kept.some(l => l.unitPrice === '' || isNaN(Number(l.unitPrice)))) { alert('请输入单价'); return }
+    if (kept.some(l => l.costPrice !== '' && isNaN(Number(l.costPrice)))) { alert('进价格式不正确'); return }
     const date = parseSlashDate(orderDate)
     if (!date) { alert('开单日期格式不正确，例如 2026/10/1'); return }
 
@@ -193,7 +195,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
           customerId: customer.id,
           returnDate: date,
           notes: notes.trim() || undefined,
-          items: lines.map(l => ({
+          items: kept.map(l => ({
             productId: l.productId,
             qty: num(l.qty),
             pieces: num(l.pieces),
@@ -206,7 +208,7 @@ export default function SalesEdit({ kind = 'order' }: Props) {
           customerId: customer.id,
           orderDate: date,
           notes: notes.trim() || undefined,
-          items: lines.map(l => ({
+          items: kept.map(l => ({
             productId: l.productId,
             supplierId: l.supplierId,
             qty: num(l.qty),
