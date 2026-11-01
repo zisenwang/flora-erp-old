@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCustomers, deleteCustomer, type Customer } from '@/api/customers'
+import { getCustomers, deleteCustomer, updateCustomer, PAYMENT_CYCLES, type Customer } from '@/api/customers'
 import { getErrorMessage } from '@/utils/error'
 import { exportRows } from '@/utils/exportExcel'
 import ExcelButton from '@/pages/common/ExcelButton'
@@ -84,6 +84,19 @@ export default function Customers() {
     )
   }
 
+  // 付款周期 dropdown in the table: saves right away (same PUT as 修改客户)
+  async function handleCycleChange(c: Customer, value: string) {
+    const paymentCycle = value || null
+    setCustomers(list => list.map(x => (x.id === c.id ? { ...x, paymentCycle } : x)))
+    try {
+      const { id, ...rest } = c
+      await updateCustomer(id, { ...rest, paymentCycle })
+    } catch (err) {
+      setCustomers(list => list.map(x => (x.id === c.id ? { ...x, paymentCycle: c.paymentCycle } : x)))
+      alert(getErrorMessage(err))
+    }
+  }
+
   async function handleDelete(c: Customer) {
     if (!window.confirm('此操作将直接把客户资料删除掉,并且不可恢复,真的要进行吗?')) return
     try {
@@ -141,7 +154,12 @@ export default function Customers() {
                 <td>&nbsp;<strong className={styles.code}>{c.code}</strong>&nbsp;<span className={styles.pink}>{c.name}</span>&nbsp;</td>
                 <td>&nbsp;&nbsp;<span className={styles.pink}>{c.phone ?? ''}</span>&nbsp;</td>
                 <td className={styles.wrap}>&nbsp;{c.address ?? ''}&nbsp;</td>
-                <td className={styles.center}>&nbsp;{c.paymentCycle ?? ''}&nbsp;</td>
+                <td className={styles.center}>
+                  <select value={c.paymentCycle ?? ''} onChange={e => handleCycleChange(c, e.target.value)}>
+                    <option value="">请选择</option>
+                    {PAYMENT_CYCLES.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </td>
                 <td className={styles.wrap}>&nbsp;{c.notes ?? ''}&nbsp;</td>
                 <td className={styles.center}>
                   <EditIcon onClick={() => navigate(`/master/customers/edit/${c.id}`)} />
