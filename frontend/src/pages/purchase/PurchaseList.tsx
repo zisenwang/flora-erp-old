@@ -65,6 +65,7 @@ const SEARCH_FIELDS = [
   { value: 'supplierName', label: '供应商名称' },
   { value: 'orderNo', label: '单号' },
   { value: 'operator', label: '开单人' },
+  { value: 'productName', label: '产品名称' },
   { value: 'spec', label: '产品规格' },
 ]
 
@@ -131,12 +132,18 @@ export default function PurchaseList({ mode }: Props) {
     setLoading(true)
 
     if (mode === 'summary') {
+      // the 汇总 endpoints can't search by 产品名称 (only the 明细 one can): list the
+      // documents unfiltered and keep those having a matching line in the 明细 rows
+      const byName = applied.field === 'productName' && !!applied.keyword
+      const listParams = byName ? { ...params, search: undefined, searchField: undefined } : params
       Promise.all([
-        applied.type !== 'return' ? getPurchaseOrders(params) : Promise.resolve([]),
-        applied.type !== 'order' ? getPurchaseReturns(params) : Promise.resolve([]),
-        // 规格 → the documents having a line with a matching product (from the 明细 rows)
-        specP.then(codes => codes && getPurchaseOrdersDetail(params)
-          .then(rows => new Set(rows.filter(r => codes.has(r.productCode)).map(r => `${r.rowType}-${r.id}`)))),
+        applied.type !== 'return' ? getPurchaseOrders(listParams) : Promise.resolve([]),
+        applied.type !== 'order' ? getPurchaseReturns(listParams) : Promise.resolve([]),
+        // 规格 / 产品名称 → the documents having a line with a matching product (from the 明细 rows)
+        byName
+          ? getPurchaseOrdersDetail(params).then(rows => new Set(rows.map(r => `${r.rowType}-${r.id}`)))
+          : specP.then(codes => codes && getPurchaseOrdersDetail(params)
+            .then(rows => new Set(rows.filter(r => codes.has(r.productCode)).map(r => `${r.rowType}-${r.id}`)))),
       ])
         .then(([orders, returns, docs]) => setSumRows([
           ...orders.filter(o => codeOk(o.supplierCode)).map((o): SumRow => ({
