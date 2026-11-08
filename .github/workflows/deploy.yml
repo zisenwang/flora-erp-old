@@ -15,39 +15,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # plain ssh from the runner — appleboy/ssh-action downloaded drone-ssh from GitHub
+      # releases on every run and failed whenever that download timed out (504)
+      - name: Set up SSH key
+        env:
+          SSH_KEY: ${{ secrets.ALIYUN_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
       - name: Deploy to Aliyun
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.ALIYUN_HOST }}
-          username: ${{ secrets.ALIYUN_USER }}
-          key: ${{ secrets.ALIYUN_SSH_KEY }}
-          port: ${{ secrets.ALIYUN_PORT }}
-          command_timeout: 20m
+        timeout-minutes: 20
+        env:
+          HOST: ${{ secrets.ALIYUN_HOST }}
+          USER: ${{ secrets.ALIYUN_USER }}
+          PORT: ${{ secrets.ALIYUN_PORT || '22' }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "$PORT" \
+            -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 \
+            "$USER@$HOST" 'bash -s' <<'SCRIPT'
+          set -e
 
-          script: |
-            set -e
+          cd /www/FloraERP-old
 
-            cd /www/FloraERP-old
+          git fetch origin main
+          git reset --hard origin/main
 
-            git fetch origin main
-            git reset --hard origin/main
+          echo "Backend"
+          cd backend
+          npm ci
+          npm run build
 
-            echo "Backend"
-            cd backend
-            npm ci
-            npm run build
+          # plain restart keeps the saved PORT=8001 (do not add --update-env)
+          pm2 restart flora-erp-old-api || PORT=8001 pm2 start dist/server.js --name flora-erp-old-api
+          pm2 save
 
-            # plain restart keeps the saved PORT=8001 (do not add --update-env)
-            pm2 restart flora-erp-old-api || PORT=8001 pm2 start dist/server.js --name flora-erp-old-api
-            pm2 save
+          echo "Frontend"
+          cd ../frontend
+          npm ci
+          npx vite build
 
-            echo "Frontend"
-            cd ../frontend
-            npm ci
-            npx vite build
+          sleep 2
+          # fails the job if the API is not listening (expects 401 未授权)
+          curl -s -o /dev/null -w "api status %{http_code}\n" http://127.0.0.1:8001/api/suppliers
 
-            sleep 2
-            # fails the job if the API is not listening (expects 401 未授权)
-            curl -s -o /dev/null -w "api status %{http_code}\n" http://127.0.0.1:8001/api/suppliers
-
-            echo "Done"
+          echo "Done"
+          SCRIPT
