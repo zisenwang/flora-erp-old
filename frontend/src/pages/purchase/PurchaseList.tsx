@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getPurchaseOrders, getPurchaseReturns, getPurchaseOrdersDetail } from '@/api/purchase'
@@ -11,6 +11,7 @@ import ExcelButton from '@/pages/common/ExcelButton'
 import styles from './PurchaseDocs.module.css'
 import { codeEquals } from '@/utils/codeMatch'
 import { specCodes } from '@/utils/specMatch'
+import { useQueryFilters, pageOf } from '@/utils/queryFilters'
 
 type Kind = 'order' | 'return'
 type TypeFilter = 'all' | Kind
@@ -82,13 +83,23 @@ interface Props {
 // 进货单据汇总 (buy_djhz_list.asp) / 进货单据明细 (buy_djmx_list.asp)
 export default function PurchaseList({ mode }: Props) {
   const navigate = useNavigate()
-  const today = toSlashDate()
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  // default range: current month (1st → today)
-  const [form, setForm] = useState<Filters>({ type: 'all', start: monthStart(), end: today, field: 'supplierCode', keyword: '' })
-  const [applied, setApplied] = useState<Filters>(form)
-  const [page, setPage] = useState(1)
+  // applied filters + page live in the URL (?type=&start=&end=&field=&keyword=&page=),
+  // so 修改单据 → back shows the same list. default range: current month (1st → today)
+  const [query, setQuery] = useQueryFilters({
+    type: 'all' as TypeFilter, start: monthStart(), end: toSlashDate(), field: 'supplierCode', keyword: '', page: '1',
+  })
+  const applied = useMemo<Filters>(() => ({
+    type: query.type,
+    start: query.start,
+    end: query.end,
+    field: SEARCH_FIELDS.some(f => f.value === query.field) ? query.field : 'supplierCode',
+    keyword: query.keyword,
+  }), [query.type, query.start, query.end, query.field, query.keyword])
+  const [form, setForm] = useState<Filters>(applied)
+  useEffect(() => { setForm(applied) }, [applied])
+  const [reload, setReload] = useState(0)   // 查找 with unchanged filters still reloads
 
   // ── Data ─────────────────────────────────────────────────────
   const [sumRows, setSumRows] = useState<SumRow[]>([])
@@ -118,7 +129,6 @@ export default function PurchaseList({ mode }: Props) {
     const codeOk = (code: string) =>
       applied.field !== 'supplierCode' || !applied.keyword || codeEquals(code, applied.keyword)
     setLoading(true)
-    setPage(1)
 
     if (mode === 'summary') {
       Promise.all([
@@ -169,11 +179,13 @@ export default function PurchaseList({ mode }: Props) {
         .catch(err => alert(getErrorMessage(err)))
         .finally(() => setLoading(false))
     }
-  }, [mode, applied])
+  }, [mode, applied, reload])
 
   // ── Derived ──────────────────────────────────────────────────
   const total = mode === 'summary' ? sumRows.length : detailRows.length
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const page = pageOf(query.page, totalPages)
+  const setPage = (n: number) => setQuery({ page: String(n) })
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
   const windowEnd = Math.min(windowStart + PAGE_WINDOW - 1, totalPages)
   const pagedSum = sumRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -187,13 +199,12 @@ export default function PurchaseList({ mode }: Props) {
   function handleSearch() {
     if (form.start && !parseSlashDate(form.start)) { alert('开始日期格式不正确，例如 2026/10/1'); return }
     if (form.end && !parseSlashDate(form.end)) { alert('结束日期格式不正确，例如 2026/10/1'); return }
-    setApplied({ ...form, keyword: form.keyword.trim() })
+    setQuery({ ...form, keyword: form.keyword.trim() })
+    setReload(n => n + 1)
   }
 
   function handleShowAll() {
-    const all: Filters = { type: 'all', start: '', end: '', field: form.field, keyword: '' }
-    setForm(all)
-    setApplied(all)
+    setQuery({ type: 'all', start: '', end: '', field: form.field, keyword: '' })
   }
 
   // 导出EXCEL (old buy_djhz_list_excel.asp): every row of the current filter, same columns as the table + 总计

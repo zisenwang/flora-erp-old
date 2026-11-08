@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { getPayments, deletePayment, type Payment } from '@/api/payments'
 import { getSalesOrders, type SalesOrder } from '@/api/sales'
 import { getErrorMessage } from '@/utils/error'
@@ -7,6 +7,7 @@ import { monthStart, parseSlashDate, toSlashDate } from '@/utils/slashDate'
 import { exportRows, rangeName } from '@/utils/exportExcel'
 import { codeEquals } from '@/utils/codeMatch'
 import { isPaid, isVoided } from '@/utils/payment'
+import { useQueryFilters, pageOf } from '@/utils/queryFilters'
 import { SearchIcon } from '@/pages/master/SupplierIcons'
 import ExcelButton from '@/pages/common/ExcelButton'
 import styles from '@/pages/purchase/PurchaseDocs.module.css'
@@ -54,14 +55,23 @@ function matches(f: Filters, r: { customerCode: string; customerName: string; or
 // old-style 销售单 list: 未收款 orders link to 新增收款, 已收款 ones can have their 收款 deleted
 export default function PaymentList() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  const [form, setForm] = useState<Filters>(() => ({
-    start: monthStart(), end: toSlashDate(), field: 'customerCode', keyword: '',
-  }))
-  const [applied, setApplied] = useState<Filters>(form)
-  const [view, setView] = useState<View>('all')
-  const [page, setPage] = useState(1)
+  // applied filters + view + page live in the URL (?start=&end=&field=&keyword=&view=&page=),
+  // so 收款 → back shows the same list
+  const [query, setQuery] = useQueryFilters({
+    start: monthStart(), end: toSlashDate(), field: 'customerCode', keyword: '', view: 'all' as View, page: '1',
+  })
+  const applied = useMemo<Filters>(() => ({
+    start: query.start,
+    end: query.end,
+    field: SEARCH_FIELDS.some(f => f.value === query.field) ? query.field : 'customerCode',
+    keyword: query.keyword,
+  }), [query.start, query.end, query.field, query.keyword])
+  const view: View = query.view === 'paid' || query.view === 'unpaid' ? query.view : 'all'
+  const [form, setForm] = useState<Filters>(applied)
+  useEffect(() => { setForm(applied) }, [applied])
 
   // ── Data ─────────────────────────────────────────────────────
   // every 收款记录 (gives 已收金额 per order and 本期收款); 销售单 within the date range;
@@ -86,9 +96,6 @@ export default function PaymentList() {
       .catch(err => alert(getErrorMessage(err)))
       .finally(() => setLoading(false))
   }, [applied.start, applied.end, reloadKey])
-
-  // Reset to page 1 whenever filters change
-  useEffect(() => { setPage(1) }, [applied, view])
 
   // ── Derived ──────────────────────────────────────────────────
   const paymentsByOrder: Record<number, Payment[]> = {}
@@ -119,11 +126,15 @@ export default function PaymentList() {
     .reduce((s, o) => s + o.totalAmount, 0)
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const page = pageOf(query.page, totalPages)
   const paged = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
   const windowEnd = Math.min(windowStart + PAGE_WINDOW - 1, totalPages)
 
   // ── Actions ──────────────────────────────────────────────────
+  const setPage = (n: number) => setQuery({ page: String(n) })
+  const setView = (v: View) => setQuery({ view: v })
+
   function setField<K extends keyof Filters>(key: K, value: Filters[K]) {
     setForm(f => ({ ...f, [key]: value }))
   }
@@ -131,14 +142,16 @@ export default function PaymentList() {
   function handleSearch() {
     if (form.start && !parseSlashDate(form.start)) { alert('开始日期格式不正确，例如 2026/10/1'); return }
     if (form.end && !parseSlashDate(form.end)) { alert('结束日期格式不正确，例如 2026/10/1'); return }
-    setApplied({ ...form, keyword: form.keyword.trim() })
+    setQuery({ ...form, keyword: form.keyword.trim() })
+    setReloadKey(k => k + 1)
   }
 
   function handleShowAll() {
-    const all: Filters = { start: '', end: '', field: form.field, keyword: '' }
-    setForm(all)
-    setApplied(all)
+    setQuery({ start: '', end: '', field: form.field, keyword: '' })
   }
+
+  // 新增收款 / 收款 come back here with the same search (PaymentNew goes back to `from`)
+  const openPaymentNew = (path: string) => navigate(path, { state: { from: location.pathname + location.search } })
 
   // 删除: every 收款 of this order → it goes back to 未收款
   async function handleDelete(o: SalesOrder) {
@@ -201,7 +214,7 @@ export default function PaymentList() {
         />
         <input type="submit" value="查找" />
         <input type="button" value="显示全部" onClick={handleShowAll} />
-        <input type="button" value="新增收款" onClick={() => navigate('/payment/new')} />
+        <input type="button" value="新增收款" onClick={() => openPaymentNew('/payment/new')} />
         &nbsp;&nbsp;
         <input type="button" value="已收款" onClick={() => setView('paid')} />
         <input type="button" value="未收款" onClick={() => setView('unpaid')} />
@@ -270,7 +283,7 @@ export default function PaymentList() {
                     <td className={styles.c}>
                       {paid
                         ? <a className={pay.deleteLink} onClick={() => handleDelete(o)}>删除</a>
-                        : <a onClick={() => navigate(`/payment/new?order=${o.id}`)}>收款</a>}
+                        : <a onClick={() => openPaymentNew(`/payment/new?order=${o.id}`)}>收款</a>}
                     </td>
                   </tr>
                 )

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   getCustomers,
   getCustomer,
@@ -32,6 +32,7 @@ const RECENT_COUNT = 20
 // 新增 / 修改客户 — members_.asp / members_edit.asp, same layout as 新增供应商 (form left, latest customers right)
 export default function CustomerForm() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { id } = useParams()
   const editingId = id ? Number(id) : null
 
@@ -97,7 +98,8 @@ export default function CustomerForm() {
       if (editingId != null) {
         await updateCustomer(editingId, payload)
         alert('修改成功')
-        navigate('/master/customers')
+        // back to the 客户资料 list with its search (passed by Customers as state.from)
+        navigate((location.state as { from?: string } | null)?.from ?? '/master/customers')
       } else {
         await createCustomer(payload)
         alert('添加成功')

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { getCustomers, deleteCustomer, updateCustomer, PAYMENT_CYCLES, type Customer } from '@/api/customers'
 import { getErrorMessage } from '@/utils/error'
 import { exportRows } from '@/utils/exportExcel'
@@ -8,6 +8,7 @@ import { EditIcon, DeleteIcon, SearchIcon } from './SupplierIcons'
 import sup from './Suppliers.module.css'
 import styles from './Customers.module.css'
 import { codeEquals } from '@/utils/codeMatch'
+import { useQueryFilters, pageOf } from '@/utils/queryFilters'
 
 type SortKey = 'code' | 'phone'
 
@@ -17,18 +18,22 @@ const PAGE_WINDOW = 10
 // 客户资料(会员) — replicates old members.asp
 export default function Customers() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   // ── Data state ───────────────────────────────────────────────
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
 
   // ── Filter / search / sort state ─────────────────────────────
-  const [searchBy, setSearchBy] = useState('mc')         // field selector
-  const [searchText, setSearchText] = useState('')       // search text input
-  const [appliedSearch, setAppliedSearch] = useState('') // committed search value
-  const [appliedBy, setAppliedBy] = useState('mc')
-  const [sortKey, setSortKey] = useState<SortKey>('code')
-  const [page, setPage] = useState(1)
+  // the committed search, sort and page live in the URL (?field=&keyword=&sort=&page=),
+  // so 修改客户 → back shows the same list
+  const [query, setQuery] = useQueryFilters({ field: 'mc', keyword: '', sort: 'code' as SortKey, page: '1' })
+  const appliedBy = query.field
+  const appliedSearch = query.keyword
+  const sortKey: SortKey = query.sort === 'phone' ? 'phone' : 'code'
+  const [searchBy, setSearchBy] = useState(appliedBy)          // field selector
+  const [searchText, setSearchText] = useState(appliedSearch)  // search text input
+  useEffect(() => { setSearchBy(appliedBy); setSearchText(appliedSearch) }, [appliedBy, appliedSearch])
 
   // ── Load data ────────────────────────────────────────────────
   const loadAll = useCallback(() => {
@@ -56,24 +61,26 @@ export default function Customers() {
     .sort((a, b) => (a[sortKey] ?? '').localeCompare(b[sortKey] ?? '', 'zh-CN'))
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const page = pageOf(query.page, totalPages)
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
   const windowEnd = Math.min(windowStart + PAGE_WINDOW - 1, totalPages)
 
-  // Reset to page 1 whenever filters change
-  useEffect(() => { setPage(1) }, [appliedSearch, appliedBy, sortKey])
-
   // ── Actions ──────────────────────────────────────────────────
+  const setPage = (n: number) => setQuery({ page: String(n) })
+  const setSortKey = (sort: SortKey) => setQuery({ sort })
+
   function handleSearch() {
-    setAppliedSearch(searchText.trim())
-    setAppliedBy(searchBy)
+    setQuery({ field: searchBy, keyword: searchText.trim() })
   }
 
   function handleShowAll() {
-    setSearchText('')
-    setAppliedSearch('')
-    setSortKey('code')
+    setQuery({ field: searchBy, keyword: '', sort: 'code' })
   }
+
+  // 修改 returns here with the same search (CustomerForm goes back to `from`)
+  const editCustomer = (c: Customer) =>
+    navigate(`/master/customers/edit/${c.id}`, { state: { from: location.pathname + location.search } })
 
   // 导出EXCEL (old members_excel.asp): every filtered customer, same columns as the table
   function handleExport() {
@@ -162,7 +169,7 @@ export default function Customers() {
                 </td>
                 <td className={styles.wrap}>&nbsp;{c.notes ?? ''}&nbsp;</td>
                 <td className={styles.center}>
-                  <EditIcon onClick={() => navigate(`/master/customers/edit/${c.id}`)} />
+                  <EditIcon onClick={() => editCustomer(c)} />
                   <DeleteIcon onClick={() => handleDelete(c)} />
                 </td>
               </tr>

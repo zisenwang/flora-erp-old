@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getSalesOrders, getSalesReturns, getSalesOrdersDetail } from '@/api/sales'
 import { getProducts, type Product } from '@/api/products'
@@ -13,6 +13,7 @@ import { codeEquals } from '@/utils/codeMatch'
 import { specCodes } from '@/utils/specMatch'
 import { isPaid, isVoided } from '@/utils/payment'
 import { can } from '@/utils/permissions'
+import { useQueryFilters, pageOf } from '@/utils/queryFilters'
 
 type PayFilter = 'all' | 'paid' | 'unpaid'
 
@@ -99,25 +100,27 @@ interface Props {
 // (来源 / 状态 / 收款备注 / 打印标签 dropped)
 export default function SalesList({ mode = 'summary' }: Props) {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const fields = mode === 'detail' ? DETAIL_FIELDS : SEARCH_FIELDS
 
   // ── Toolbar inputs and applied filters ───────────────────────
-  // default range: current month (1st → today); the 销售报表 magnifiers pass
-  // ?field=&keyword=&start=&end= to open this list already filtered
-  const [form, setForm] = useState<Filters>(() => {
-    const field = searchParams.get('field')
-    return {
-      type: 'all',
-      start: searchParams.get('start') ?? monthStart(),
-      end: searchParams.get('end') ?? toSlashDate(),
-      field: field && fields.some(f => f.value === field) ? field : 'customerCode',
-      keyword: searchParams.get('keyword') ?? '',
-    }
+  // applied filters + 收款 view + page live in the URL (?type=&start=&end=&field=&keyword=&pay=&page=),
+  // so 修改单据 → back shows the same list; the 销售报表 magnifiers open it the same way.
+  // default range: current month (1st → today)
+  const [query, setQuery] = useQueryFilters({
+    type: 'all' as TypeFilter, start: monthStart(), end: toSlashDate(), field: 'customerCode', keyword: '',
+    pay: 'all' as PayFilter, page: '1',
   })
-  const [applied, setApplied] = useState<Filters>(form)
-  const [pay, setPay] = useState<PayFilter>('all')
-  const [page, setPage] = useState(1)
+  const applied = useMemo<Filters>(() => ({
+    type: query.type,
+    start: query.start,
+    end: query.end,
+    field: fields.some(f => f.value === query.field) ? query.field : 'customerCode',
+    keyword: query.keyword,
+  }), [query.type, query.start, query.end, query.field, query.keyword, fields])
+  const pay = query.pay
+  const [form, setForm] = useState<Filters>(applied)
+  useEffect(() => { setForm(applied) }, [applied])
+  const [reload, setReload] = useState(0)   // 查找 with unchanged filters still reloads
 
   // ── Data ─────────────────────────────────────────────────────
   const [sumRows, setSumRows] = useState<SumRow[]>([])
@@ -203,10 +206,7 @@ export default function SalesList({ mode = 'summary' }: Props) {
         .catch(err => alert(getErrorMessage(err)))
         .finally(() => setLoading(false))
     }
-  }, [mode, applied])
-
-  // Reset to page 1 whenever filters change
-  useEffect(() => { setPage(1) }, [applied, pay])
+  }, [mode, applied, reload])
 
   // ── Derived ──────────────────────────────────────────────────
   // 已收款 / 未收款 only list 销售单; 作废 orders are in neither
@@ -214,6 +214,9 @@ export default function SalesList({ mode = 'summary' }: Props) {
     pay === 'all' || (r.kind === 'order' && !r.voided && (pay === 'paid' ? r.paid : !r.paid)))
   const total = mode === 'summary' ? rows.length : detailRows.length
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const page = pageOf(query.page, totalPages)
+  const setPage = (n: number) => setQuery({ page: String(n) })
+  const setPay = (p: PayFilter) => setQuery({ pay: p })
   const paged = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const pagedDetail = detailRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const windowStart = Math.floor((page - 1) / PAGE_WINDOW) * PAGE_WINDOW + 1
@@ -382,15 +385,13 @@ export default function SalesList({ mode = 'summary' }: Props) {
   function handleSearch() {
     if (form.start && !parseSlashDate(form.start)) { alert('开始日期格式不正确，例如 2026/10/1'); return }
     if (form.end && !parseSlashDate(form.end)) { alert('结束日期格式不正确，例如 2026/10/1'); return }
-    setApplied({ ...form, keyword: form.keyword.trim() })
+    setQuery({ ...form, keyword: form.keyword.trim() })
+    setReload(n => n + 1)
   }
 
   // first 显示全部: drop every filter
   function handleShowAll() {
-    const all: Filters = { type: 'all', start: '', end: '', field: form.field, keyword: '' }
-    setForm(all)
-    setApplied(all)
-    setPay('all')
+    setQuery({ type: 'all', start: '', end: '', field: form.field, keyword: '', pay: 'all' })
   }
 
   // ── Render ───────────────────────────────────────────────────

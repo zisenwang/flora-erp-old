@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { getSalesOrders, type SalesOrder } from '@/api/sales'
 import { createPayment } from '@/api/payments'
 import { getErrorMessage } from '@/utils/error'
@@ -20,7 +20,10 @@ const fmt = (n: number) => Number(n).toFixed(2)
 // several (each paid in full). ?order=ID comes ticked from the 销售单据 收款状态 column.
 export default function PaymentNew() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
+  // 收支管理 with its search (passed by PaymentList as state.from)
+  const backTo = (location.state as { from?: string } | null)?.from ?? '/payment'
   const preselect = Number(searchParams.get('order')) || null
 
   const [orders, setOrders] = useState<SalesOrder[]>([])
@@ -115,7 +118,7 @@ export default function PaymentNew() {
         })
       }
       alert(single ? '收款成功' : `已对 ${chosen.length} 笔销售单完成收款`)
-      navigate('/payment')
+      navigate(backTo)
     } catch (err) {
       alert(getErrorMessage(err))
     } finally {
@@ -134,7 +137,7 @@ export default function PaymentNew() {
         <input className={pay.searchInput} type="text" value={keyword} onChange={e => setKeyword(e.target.value)} />
         <input type="submit" value="查找" />
         <input type="button" value="显示全部" onClick={() => search('')} />
-        <input type="button" value="返回收支管理" onClick={() => navigate('/payment')} />
+        <input type="button" value="返回收支管理" onClick={() => navigate(backTo)} />
       </form>
 
       <div className={styles.body}>
@@ -244,7 +247,7 @@ export default function PaymentNew() {
         <div className={styles.editFoot}>
           <input type="button" value={submitting ? '提交中...' : '确认收款'} disabled={submitting} onClick={handleSubmit} />
           &nbsp;
-          <input type="button" value="取消" onClick={() => navigate('/payment')} />
+          <input type="button" value="取消" onClick={() => navigate(backTo)} />
         </div>
 
         <div className={styles.legend}>
